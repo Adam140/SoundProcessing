@@ -10,7 +10,7 @@ public class Spectrum {
 	private WavFile wf = null;
 
 	//NumSamples = NumBytes / (NumChannels * BitsPerSample / 8)
-	
+	//huh
 	
 	Spectrum(File f)
 	{
