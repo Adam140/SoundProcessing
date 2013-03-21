@@ -345,7 +345,7 @@ public class WavFile
 		}
 	}
 
-	private long readSample() throws IOException, WavFileException
+	public long readSample() throws IOException, WavFileException
 	{
 		long val = 0;
 
