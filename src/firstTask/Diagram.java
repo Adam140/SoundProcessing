@@ -49,7 +49,7 @@ public void paintComponent(Graphics g) {
   }
   
   public void generateWaves()
-  {
+  {	
 		try{
 		// Open the wav file specified as the first argument
       WavFile wavFile = WavFile.openWavFile(file);
