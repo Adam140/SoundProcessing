@@ -31,7 +31,14 @@ public class MainWindow extends JFrame {
 	private JTextField textFieldInputFile;
 	private Diagram diagram;
 	private JFileChooser fc = new JFileChooser();
-	private JButton btnGenerateWave;;
+	private JButton btnGenerateWave;
+	private JLabel lblMainFrequency;
+	private JTextField textFieldMainFreq;
+	private JButton btnPlay;
+	private JLabel lblOutputFile;
+	private JTextField textFieldOutputFile;
+	private JButton btnSave;
+	private WaveGenerator wave;
 
 	/**
 	 * Launch the application.
@@ -119,17 +126,18 @@ public class MainWindow extends JFrame {
 		gbc_panelBottom.gridy = 1;
 		contentPane.add(panelBottom, gbc_panelBottom);
 		GridBagLayout gbl_panelBottom = new GridBagLayout();
-		gbl_panelBottom.columnWidths = new int[] { 100, 232, 0, 0, 0 };
-		gbl_panelBottom.rowHeights = new int[] { 20, 0 };
-		gbl_panelBottom.columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0,
+		gbl_panelBottom.columnWidths = new int[] { 96, 232, 0, 0 };
+		gbl_panelBottom.rowHeights = new int[] { 20, 0, 0, 0 };
+		gbl_panelBottom.columnWeights = new double[] { 0.0, 1.0, 0.0,
 				Double.MIN_VALUE };
-		gbl_panelBottom.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
+		gbl_panelBottom.rowWeights = new double[] { 0.0, 0.0, 0.0,
+				Double.MIN_VALUE };
 		panelBottom.setLayout(gbl_panelBottom);
 
 		JLabel labelInputFile = new JLabel("Input file:");
 		GridBagConstraints gbc_labelInputFile = new GridBagConstraints();
-		gbc_labelInputFile.anchor = GridBagConstraints.WEST;
-		gbc_labelInputFile.insets = new Insets(0, 0, 0, 5);
+		gbc_labelInputFile.anchor = GridBagConstraints.EAST;
+		gbc_labelInputFile.insets = new Insets(0, 0, 5, 5);
 		gbc_labelInputFile.gridx = 0;
 		gbc_labelInputFile.gridy = 0;
 		panelBottom.add(labelInputFile, gbc_labelInputFile);
@@ -155,14 +163,14 @@ public class MainWindow extends JFrame {
 		textFieldInputFile.setEnabled(false);
 		textFieldInputFile.setEditable(false);
 		GridBagConstraints gbc_textFieldInputFile = new GridBagConstraints();
-		gbc_textFieldInputFile.insets = new Insets(0, 0, 0, 5);
+		gbc_textFieldInputFile.insets = new Insets(0, 0, 5, 5);
 		gbc_textFieldInputFile.fill = GridBagConstraints.HORIZONTAL;
 		gbc_textFieldInputFile.anchor = GridBagConstraints.NORTH;
 		gbc_textFieldInputFile.gridx = 1;
 		gbc_textFieldInputFile.gridy = 0;
 		panelBottom.add(textFieldInputFile, gbc_textFieldInputFile);
 		textFieldInputFile.setColumns(10);
-		
+
 		btnGenerateWave = new JButton("GENERATE WAVE");
 		btnGenerateWave.addMouseListener(new MouseAdapter() {
 			@Override
@@ -171,10 +179,84 @@ public class MainWindow extends JFrame {
 			}
 		});
 		GridBagConstraints gbc_btnGenerateWave = new GridBagConstraints();
-		gbc_btnGenerateWave.insets = new Insets(0, 0, 0, 5);
+		gbc_btnGenerateWave.anchor = GridBagConstraints.WEST;
+		gbc_btnGenerateWave.insets = new Insets(0, 0, 5, 0);
 		gbc_btnGenerateWave.gridx = 2;
 		gbc_btnGenerateWave.gridy = 0;
 		panelBottom.add(btnGenerateWave, gbc_btnGenerateWave);
+
+		lblMainFrequency = new JLabel("Main frequency:");
+		GridBagConstraints gbc_lblMainFrequency = new GridBagConstraints();
+		gbc_lblMainFrequency.anchor = GridBagConstraints.EAST;
+		gbc_lblMainFrequency.insets = new Insets(0, 0, 5, 5);
+		gbc_lblMainFrequency.gridx = 0;
+		gbc_lblMainFrequency.gridy = 1;
+		panelBottom.add(lblMainFrequency, gbc_lblMainFrequency);
+
+		textFieldMainFreq = new JTextField();
+		GridBagConstraints gbc_textFieldMainFreq = new GridBagConstraints();
+		gbc_textFieldMainFreq.insets = new Insets(0, 0, 5, 5);
+		gbc_textFieldMainFreq.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textFieldMainFreq.gridx = 1;
+		gbc_textFieldMainFreq.gridy = 1;
+		panelBottom.add(textFieldMainFreq, gbc_textFieldMainFreq);
+		textFieldMainFreq.setColumns(10);
+
+		btnPlay = new JButton("PLAY");
+		btnPlay.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if ("Stop".equalsIgnoreCase(btnPlay.getText())) {
+					btnPlay.setText("Play");
+					wave.exit();
+				}
+				else if(!textFieldMainFreq.getText().isEmpty())
+				{
+					try{
+						Double freq = Double.parseDouble(textFieldMainFreq.getText());
+						btnPlay.setText("Stop");
+						wave = new WaveGenerator(freq);
+						wave.start();
+					}
+					catch(Exception e1)
+					{
+						textFieldMainFreq.setText("ERROR");
+						System.out.println(e1);
+					}
+					
+				}
+			}
+		});
+		GridBagConstraints gbc_btnPlay = new GridBagConstraints();
+		gbc_btnPlay.anchor = GridBagConstraints.WEST;
+		gbc_btnPlay.insets = new Insets(0, 0, 5, 0);
+		gbc_btnPlay.gridx = 2;
+		gbc_btnPlay.gridy = 1;
+		panelBottom.add(btnPlay, gbc_btnPlay);
+
+		lblOutputFile = new JLabel("Output file:");
+		GridBagConstraints gbc_lblOutputFile = new GridBagConstraints();
+		gbc_lblOutputFile.anchor = GridBagConstraints.EAST;
+		gbc_lblOutputFile.insets = new Insets(0, 0, 0, 5);
+		gbc_lblOutputFile.gridx = 0;
+		gbc_lblOutputFile.gridy = 2;
+		panelBottom.add(lblOutputFile, gbc_lblOutputFile);
+
+		textFieldOutputFile = new JTextField();
+		GridBagConstraints gbc_textFieldOutputFile = new GridBagConstraints();
+		gbc_textFieldOutputFile.insets = new Insets(0, 0, 0, 5);
+		gbc_textFieldOutputFile.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textFieldOutputFile.gridx = 1;
+		gbc_textFieldOutputFile.gridy = 2;
+		panelBottom.add(textFieldOutputFile, gbc_textFieldOutputFile);
+		textFieldOutputFile.setColumns(10);
+
+		btnSave = new JButton("Save");
+		GridBagConstraints gbc_btnSave = new GridBagConstraints();
+		gbc_btnSave.anchor = GridBagConstraints.WEST;
+		gbc_btnSave.gridx = 2;
+		gbc_btnSave.gridy = 2;
+		panelBottom.add(btnSave, gbc_btnSave);
 
 		panel = new JPanel();
 		panel.setMaximumSize(new Dimension(32767, 50));
