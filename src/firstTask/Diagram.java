@@ -21,6 +21,8 @@ class Diagram extends JPanel {
 	super();
 	this.maxHeight = maxHeight;
 	this.width = width;
+	this.file = new File("./wav/artificial/easy/225Hz.wav");
+
 }
 
 public void paintComponent(Graphics g) {

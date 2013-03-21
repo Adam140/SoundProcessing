@@ -73,7 +73,7 @@ public class MainWindow extends JFrame {
 				int h = diagram.getHeight();
 				if (notches > 0) {
 					// diagram.hstep+=9.5;
-					diagram.setSize(diagram.getWidth(), h + 10);
+					diagram.setSize(diagram.getWidth(), h + 100);
 					diagram.setPreferredSize(new Dimension(diagram.getWidth(),
 							h));
 					diagram.revalidate();
@@ -82,7 +82,7 @@ public class MainWindow extends JFrame {
 					scrollPane.revalidate();
 
 				} else if (notches < 0) {
-					diagram.setSize(diagram.getWidth(), h - 10);
+					diagram.setSize(diagram.getWidth(), h - 100);
 					// diagram.hstep-=h*0.95;
 					diagram.setPreferredSize(new Dimension(diagram.getWidth(),
 							h));
@@ -97,8 +97,6 @@ public class MainWindow extends JFrame {
 		diagram.setPreferredSize(new Dimension(3000, 100));
 		diagram.setBackground(Color.pink);
 
-		diagram.file = new File("./wav/artificial/easy/225Hz.wav");
-		
 		scrollPane = new JScrollPane(diagram);
 		scrollPane.setPreferredSize(new Dimension(3002, 100));
 		scrollPane.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
@@ -146,6 +144,7 @@ public class MainWindow extends JFrame {
 					File file = fc.getSelectedFile();
 					diagram.file = file;
 					textFieldInputFile.setText(file.getAbsolutePath());
+					diagram.once = false;
 				} else
 					textFieldInputFile.setText("");
 			}
