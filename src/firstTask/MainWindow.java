@@ -267,6 +267,10 @@ public class MainWindow extends JFrame {
 		// scrollPane.setRowHeaderView(panel);
 		// scrollPane.add(panel);
 		panel.setLayout(null);
+		
+		
+		Spectrum s = new Spectrum(diagram.file);
+		s.GetFFT();
 
 		// scrollPane.add(diagram);
 		// contentPane.add(diagram);
