@@ -11,7 +11,7 @@ class Diagram extends JPanel {
    int xLenght;
    int[] y;
    int maxHeight;
-   int width;
+   int wid;
    double hstep = 1.0;
    File file;
    
@@ -20,7 +20,7 @@ class Diagram extends JPanel {
   public Diagram(int maxHeight, int width) {
 	super();
 	this.maxHeight = maxHeight;
-	this.width = width;
+	this.wid = width;
 	this.file = new File("./wav/artificial/easy/225Hz.wav");
 
 }
@@ -62,8 +62,10 @@ public void paintComponent(Graphics g) {
       xLenght = (int)wavFile.getNumFrames();
 //      xLenght = 100;
       y = new int[xLenght];
-      System.out.println(getHeight());
+//      System.out.println(getHeight());
       this.setSize(y.length, getHeight());
+      this.wid = y.length;
+      this.setPreferredSize(new Dimension(wid, getHeight()));
       // Create a buffer of 100 frames
       double[] buffer = new double[100 * numChannels];
 

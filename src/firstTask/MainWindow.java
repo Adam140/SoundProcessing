@@ -17,11 +17,15 @@ import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JButton;
+import javax.swing.JTextArea;
+import java.awt.Font;
+import javax.swing.JComboBox;
 
 public class MainWindow extends JFrame {
 
@@ -39,6 +43,10 @@ public class MainWindow extends JFrame {
 	private JTextField textFieldOutputFile;
 	private JButton btnSave;
 	private WaveGenerator wave;
+	private JTextArea console;
+	private JScrollPane scrollPane2;
+	private JButton btnCalculate;
+	private JComboBox comboBox;
 
 	/**
 	 * Launch the application.
@@ -62,15 +70,15 @@ public class MainWindow extends JFrame {
 	public MainWindow() {
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 472, 400);
+		setBounds(100, 100, 518, 534);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
 		gbl_contentPane.columnWidths = new int[] { 424, 0 };
-		gbl_contentPane.rowHeights = new int[] { 200, 109, 0 };
+		gbl_contentPane.rowHeights = new int[] { 200, 131, 0, 0 };
 		gbl_contentPane.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-		gbl_contentPane.rowWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
+		gbl_contentPane.rowWeights = new double[] { 0.0, 0.0, 1.0, Double.MIN_VALUE };
 		contentPane.setLayout(gbl_contentPane);
 
 		diagram = new Diagram(100, getWidth());
@@ -118,19 +126,20 @@ public class MainWindow extends JFrame {
 		JPanel panelBottom = new JPanel();
 		panelBottom.setPreferredSize(new Dimension(10, 100));
 		panelBottom.setSize(new Dimension(0, 100));
-		panelBottom.setMinimumSize(new Dimension(10, 200));
+		panelBottom.setMinimumSize(new Dimension(10, 100));
 		panelBottom.setBackground(Color.LIGHT_GRAY);
 		GridBagConstraints gbc_panelBottom = new GridBagConstraints();
+		gbc_panelBottom.insets = new Insets(0, 0, 5, 0);
 		gbc_panelBottom.fill = GridBagConstraints.BOTH;
 		gbc_panelBottom.gridx = 0;
 		gbc_panelBottom.gridy = 1;
 		contentPane.add(panelBottom, gbc_panelBottom);
 		GridBagLayout gbl_panelBottom = new GridBagLayout();
 		gbl_panelBottom.columnWidths = new int[] { 96, 232, 0, 0 };
-		gbl_panelBottom.rowHeights = new int[] { 20, 0, 0, 0 };
+		gbl_panelBottom.rowHeights = new int[] { 20, 0, 0, 0, 0 };
 		gbl_panelBottom.columnWeights = new double[] { 0.0, 1.0, 0.0,
 				Double.MIN_VALUE };
-		gbl_panelBottom.rowWeights = new double[] { 0.0, 0.0, 0.0,
+		gbl_panelBottom.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0,
 				Double.MIN_VALUE };
 		panelBottom.setLayout(gbl_panelBottom);
 
@@ -144,6 +153,10 @@ public class MainWindow extends JFrame {
 
 		textFieldInputFile = new JTextField();
 		textFieldInputFile.addMouseListener(new MouseAdapter() {
+			/* 
+			 * Controler dla pola tekstowe gdzie wskazujemy plik dzwiekowy
+			 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
+			 */
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				int returnVal = fc.showOpenDialog(MainWindow.this);
@@ -153,6 +166,9 @@ public class MainWindow extends JFrame {
 					diagram.file = file;
 					textFieldInputFile.setText(file.getAbsolutePath());
 					diagram.once = false;
+					diagram.revalidate();
+					diagram.repaint();
+					System.out.println(diagram.getWidth());
 				} else
 					textFieldInputFile.setText("");
 			}
@@ -175,7 +191,14 @@ public class MainWindow extends JFrame {
 		btnGenerateWave.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
+				File file = fc.getSelectedFile();
+				diagram.file = file;
+				textFieldInputFile.setText(file.getAbsolutePath());
+				diagram.once = false;
+				diagram.revalidate();
 				diagram.repaint();
+				scrollPane.revalidate();
+				System.out.println(diagram.getWidth());
 			}
 		});
 		GridBagConstraints gbc_btnGenerateWave = new GridBagConstraints();
@@ -204,6 +227,10 @@ public class MainWindow extends JFrame {
 
 		btnPlay = new JButton("PLAY");
 		btnPlay.addMouseListener(new MouseAdapter() {
+			/* 
+			 * Kontroler dla przycisu PLAY czyli generowanie dzwieku
+			 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
+			 */
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if ("Stop".equalsIgnoreCase(btnPlay.getText())) {
@@ -237,14 +264,14 @@ public class MainWindow extends JFrame {
 		lblOutputFile = new JLabel("Output file:");
 		GridBagConstraints gbc_lblOutputFile = new GridBagConstraints();
 		gbc_lblOutputFile.anchor = GridBagConstraints.EAST;
-		gbc_lblOutputFile.insets = new Insets(0, 0, 0, 5);
+		gbc_lblOutputFile.insets = new Insets(0, 0, 5, 5);
 		gbc_lblOutputFile.gridx = 0;
 		gbc_lblOutputFile.gridy = 2;
 		panelBottom.add(lblOutputFile, gbc_lblOutputFile);
 
 		textFieldOutputFile = new JTextField();
 		GridBagConstraints gbc_textFieldOutputFile = new GridBagConstraints();
-		gbc_textFieldOutputFile.insets = new Insets(0, 0, 0, 5);
+		gbc_textFieldOutputFile.insets = new Insets(0, 0, 5, 5);
 		gbc_textFieldOutputFile.fill = GridBagConstraints.HORIZONTAL;
 		gbc_textFieldOutputFile.gridx = 1;
 		gbc_textFieldOutputFile.gridy = 2;
@@ -252,11 +279,48 @@ public class MainWindow extends JFrame {
 		textFieldOutputFile.setColumns(10);
 
 		btnSave = new JButton("Save");
+		btnSave.addMouseListener(new MouseAdapter() {
+			/*
+			 * Plik dzwiekowy wyjsciowy na podstawie rzeczy w konsoli
+			 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
+			 */
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if(console.getText().isEmpty() && textFieldOutputFile.getText().isEmpty())
+				{
+					JOptionPane.showMessageDialog(MainWindow.this,"Enter parameter below or complet output file");
+				}
+				else
+				{
+					WavFileGenerator output = new WavFileGenerator(new File(textFieldOutputFile.getText())
+					, ConsoleUtil.convertText(console.getText()));
+					output.write();
+					JOptionPane.showMessageDialog(MainWindow.this,"OK");
+				}
+			}
+		});
 		GridBagConstraints gbc_btnSave = new GridBagConstraints();
+		gbc_btnSave.insets = new Insets(0, 0, 5, 0);
 		gbc_btnSave.anchor = GridBagConstraints.WEST;
 		gbc_btnSave.gridx = 2;
 		gbc_btnSave.gridy = 2;
 		panelBottom.add(btnSave, gbc_btnSave);
+		
+		comboBox = new JComboBox();
+		comboBox.setToolTipText("Choose algorithm");
+		GridBagConstraints gbc_comboBox = new GridBagConstraints();
+		gbc_comboBox.insets = new Insets(0, 0, 0, 5);
+		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_comboBox.gridx = 1;
+		gbc_comboBox.gridy = 3;
+		panelBottom.add(comboBox, gbc_comboBox);
+		
+		btnCalculate = new JButton("Calculate");
+		GridBagConstraints gbc_btnCalculate = new GridBagConstraints();
+		gbc_btnCalculate.anchor = GridBagConstraints.WEST;
+		gbc_btnCalculate.gridx = 2;
+		gbc_btnCalculate.gridy = 3;
+		panelBottom.add(btnCalculate, gbc_btnCalculate);
 
 		panel = new JPanel();
 		panel.setMaximumSize(new Dimension(32767, 50));
@@ -270,6 +334,19 @@ public class MainWindow extends JFrame {
 		
 		
 		Spectrum s = new Spectrum(diagram.file);
+		
+		scrollPane2 = new JScrollPane();
+		GridBagConstraints gbc_scrollPane2 = new GridBagConstraints();
+		gbc_scrollPane2.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane2.gridx = 0;
+		gbc_scrollPane2.gridy = 2;
+		contentPane.add(scrollPane2, gbc_scrollPane2);
+		
+		console = new JTextArea();
+		console.setLineWrap(true);
+		console.setFont(new Font("Arial", Font.PLAIN, 12));
+		console.setColumns(getWidth());
+		scrollPane2.setViewportView(console);
 		s.GetFFT();
 
 		// scrollPane.add(diagram);
