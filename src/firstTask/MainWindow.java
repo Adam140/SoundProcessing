@@ -26,6 +26,11 @@ import javax.swing.JButton;
 import javax.swing.JTextArea;
 import java.awt.Font;
 import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
 
 public class MainWindow extends JFrame {
 
@@ -34,7 +39,7 @@ public class MainWindow extends JFrame {
 	private JScrollPane scrollPane;
 	private JTextField textFieldInputFile;
 	private Diagram diagram;
-	private JFileChooser fc = new JFileChooser();
+	private JFileChooser fc = new JFileChooser(new File("./wav/"));
 	private JButton btnGenerateWave;
 	private JLabel lblMainFrequency;
 	private JTextField textFieldMainFreq;
@@ -47,6 +52,13 @@ public class MainWindow extends JFrame {
 	private JScrollPane scrollPane2;
 	private JButton btnCalculate;
 	private JComboBox comboBox;
+
+	private double[] point; // all values of wave
+	private File input;
+	private JPanel panelPhaseSpace;
+	private JTextField textFieldK;
+	private JLabel lblNewLabel;
+	private JComboBox comboBoxDim;
 
 	/**
 	 * Launch the application.
@@ -68,6 +80,9 @@ public class MainWindow extends JFrame {
 	 * Create the frame.
 	 */
 	public MainWindow() {
+		// TODO zeby odrazu ladowal sie jakis plik
+		this.input = new File("./wav/artificial/easy/225Hz.wav");
+		// ********************************************************
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 518, 534);
@@ -76,12 +91,18 @@ public class MainWindow extends JFrame {
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
 		gbl_contentPane.columnWidths = new int[] { 424, 0 };
-		gbl_contentPane.rowHeights = new int[] { 200, 131, 0, 0 };
+		gbl_contentPane.rowHeights = new int[] { 200, 175, 0, 0 };
 		gbl_contentPane.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-		gbl_contentPane.rowWeights = new double[] { 0.0, 0.0, 1.0, Double.MIN_VALUE };
+		gbl_contentPane.rowWeights = new double[] { 0.0, 0.0, 1.0,
+				Double.MIN_VALUE };
 		contentPane.setLayout(gbl_contentPane);
 
 		diagram = new Diagram(100, getWidth());
+		if(input != null && input.exists())
+		{
+			convertMusicToPoint();
+			diagram.recountPoint(point);
+		}
 		diagram.addMouseWheelListener(new MouseWheelListener() {
 			public void mouseWheelMoved(MouseWheelEvent e) {
 				int notches = e.getWheelRotation();
@@ -136,10 +157,10 @@ public class MainWindow extends JFrame {
 		contentPane.add(panelBottom, gbc_panelBottom);
 		GridBagLayout gbl_panelBottom = new GridBagLayout();
 		gbl_panelBottom.columnWidths = new int[] { 96, 232, 0, 0 };
-		gbl_panelBottom.rowHeights = new int[] { 20, 0, 0, 0, 0 };
+		gbl_panelBottom.rowHeights = new int[] { 20, 0, 0, 0, 0, 0 };
 		gbl_panelBottom.columnWeights = new double[] { 0.0, 1.0, 0.0,
 				Double.MIN_VALUE };
-		gbl_panelBottom.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0,
+		gbl_panelBottom.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0,
 				Double.MIN_VALUE };
 		panelBottom.setLayout(gbl_panelBottom);
 
@@ -153,22 +174,26 @@ public class MainWindow extends JFrame {
 
 		textFieldInputFile = new JTextField();
 		textFieldInputFile.addMouseListener(new MouseAdapter() {
-			/* 
+			/*
 			 * Controler dla pola tekstowe gdzie wskazujemy plik dzwiekowy
-			 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
+			 * 
+			 * @see
+			 * java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent
+			 * )
 			 */
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				int returnVal = fc.showOpenDialog(MainWindow.this);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File file = fc.getSelectedFile();
-					diagram.file = file;
-					textFieldInputFile.setText(file.getAbsolutePath());
-					diagram.once = false;
+//					fc.setCurrentDirectory();
+					input = fc.getSelectedFile();
+					textFieldInputFile.setText(input.getAbsolutePath());
+					convertMusicToPoint();
+					diagram.recountPoint(point);
 					diagram.revalidate();
 					diagram.repaint();
-					System.out.println(diagram.getWidth());
+//					System.out.println(diagram.getWidth());
 				} else
 					textFieldInputFile.setText("");
 			}
@@ -187,18 +212,18 @@ public class MainWindow extends JFrame {
 		panelBottom.add(textFieldInputFile, gbc_textFieldInputFile);
 		textFieldInputFile.setColumns(10);
 
-		btnGenerateWave = new JButton("GENERATE WAVE");
+		btnGenerateWave = new JButton("Generate chart");
 		btnGenerateWave.addMouseListener(new MouseAdapter() {
-			@Override
+//			przycisk generuj
 			public void mouseClicked(MouseEvent arg0) {
-				File file = fc.getSelectedFile();
-				diagram.file = file;
-				textFieldInputFile.setText(file.getAbsolutePath());
-				diagram.once = false;
+				if(input != null && input.exists())
+				convertMusicToPoint();
+				diagram.recountPoint(point);
+				textFieldInputFile.setText(input.getAbsolutePath());
 				diagram.revalidate();
 				diagram.repaint();
 				scrollPane.revalidate();
-				System.out.println(diagram.getWidth());
+//				System.out.println(diagram.getWidth());
 			}
 		});
 		GridBagConstraints gbc_btnGenerateWave = new GridBagConstraints();
@@ -227,30 +252,30 @@ public class MainWindow extends JFrame {
 
 		btnPlay = new JButton("PLAY");
 		btnPlay.addMouseListener(new MouseAdapter() {
-			/* 
+			/*
 			 * Kontroler dla przycisu PLAY czyli generowanie dzwieku
-			 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
+			 * 
+			 * @see
+			 * java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent
+			 * )
 			 */
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if ("Stop".equalsIgnoreCase(btnPlay.getText())) {
 					btnPlay.setText("Play");
 					wave.exit();
-				}
-				else if(!textFieldMainFreq.getText().isEmpty())
-				{
-					try{
-						Double freq = Double.parseDouble(textFieldMainFreq.getText());
+				} else if (!textFieldMainFreq.getText().isEmpty()) {
+					try {
+						Double freq = Double.parseDouble(textFieldMainFreq
+								.getText());
 						btnPlay.setText("Stop");
 						wave = new WaveGenerator(freq);
 						wave.start();
-					}
-					catch(Exception e1)
-					{
+					} catch (Exception e1) {
 						textFieldMainFreq.setText("ERROR");
 						System.out.println(e1);
 					}
-					
+
 				}
 			}
 		});
@@ -282,20 +307,23 @@ public class MainWindow extends JFrame {
 		btnSave.addMouseListener(new MouseAdapter() {
 			/*
 			 * Plik dzwiekowy wyjsciowy na podstawie rzeczy w konsoli
-			 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
+			 * 
+			 * @see
+			 * java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent
+			 * )
 			 */
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				if(console.getText().isEmpty() && textFieldOutputFile.getText().isEmpty())
-				{
-					JOptionPane.showMessageDialog(MainWindow.this,"Enter parameter below or complet output file");
-				}
-				else
-				{
-					WavFileGenerator output = new WavFileGenerator(new File(textFieldOutputFile.getText())
-					, ConsoleUtil.convertText(console.getText()));
+				if (console.getText().isEmpty()
+						&& textFieldOutputFile.getText().isEmpty()) {
+					JOptionPane.showMessageDialog(MainWindow.this,
+							"Enter parameter below or complet output file");
+				} else {
+					WavFileGenerator output = new WavFileGenerator(new File(
+							textFieldOutputFile.getText()), ConsoleUtil
+							.convertText(console.getText()));
 					output.write();
-					JOptionPane.showMessageDialog(MainWindow.this,"OK");
+					JOptionPane.showMessageDialog(MainWindow.this, "OK");
 				}
 			}
 		});
@@ -305,22 +333,59 @@ public class MainWindow extends JFrame {
 		gbc_btnSave.gridx = 2;
 		gbc_btnSave.gridy = 2;
 		panelBottom.add(btnSave, gbc_btnSave);
-		
+
 		comboBox = new JComboBox();
+		comboBox.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent arg0) {
+				// TODO ukrycie odpowiedniego panelu
+			}
+		});
+		comboBox.setModel(new DefaultComboBoxModel(new String[] {"Phase space analysis", "Cepstrum"}));
 		comboBox.setToolTipText("Choose algorithm");
 		GridBagConstraints gbc_comboBox = new GridBagConstraints();
-		gbc_comboBox.insets = new Insets(0, 0, 0, 5);
+		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_comboBox.gridx = 1;
 		gbc_comboBox.gridy = 3;
 		panelBottom.add(comboBox, gbc_comboBox);
-		
+
 		btnCalculate = new JButton("Calculate");
+		btnCalculate.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent arg0) {
+				if(textFieldK.getText().isEmpty())
+					textFieldK.setText("10");
+				PhaseSpace plot = new PhaseSpace(point, Integer.valueOf(textFieldK.getText()), 2);
+				if(comboBoxDim.getSelectedIndex() == 0)
+					plot.draw2D();
+				else
+					plot.draw3D();
+			}
+		});
 		GridBagConstraints gbc_btnCalculate = new GridBagConstraints();
+		gbc_btnCalculate.insets = new Insets(0, 0, 5, 0);
 		gbc_btnCalculate.anchor = GridBagConstraints.WEST;
 		gbc_btnCalculate.gridx = 2;
 		gbc_btnCalculate.gridy = 3;
 		panelBottom.add(btnCalculate, gbc_btnCalculate);
+		
+		panelPhaseSpace = new JPanel();
+		GridBagConstraints gbc_panelPhaseSpace = new GridBagConstraints();
+		gbc_panelPhaseSpace.insets = new Insets(0, 0, 0, 5);
+		gbc_panelPhaseSpace.fill = GridBagConstraints.BOTH;
+		gbc_panelPhaseSpace.gridx = 1;
+		gbc_panelPhaseSpace.gridy = 4;
+		panelBottom.add(panelPhaseSpace, gbc_panelPhaseSpace);
+		
+		lblNewLabel = new JLabel("K");
+		panelPhaseSpace.add(lblNewLabel);
+		
+		textFieldK = new JTextField();
+		panelPhaseSpace.add(textFieldK);
+		textFieldK.setColumns(10);
+		
+		comboBoxDim = new JComboBox();
+		comboBoxDim.setModel(new DefaultComboBoxModel(new String[] {"2 dimension", "3 dimension"}));
+		panelPhaseSpace.add(comboBoxDim);
 
 		panel = new JPanel();
 		panel.setMaximumSize(new Dimension(32767, 50));
@@ -331,17 +396,16 @@ public class MainWindow extends JFrame {
 		// scrollPane.setRowHeaderView(panel);
 		// scrollPane.add(panel);
 		panel.setLayout(null);
-		
-		
-		Spectrum s = new Spectrum(diagram.file);
-		
+
+		Spectrum s = new Spectrum(input);
+
 		scrollPane2 = new JScrollPane();
 		GridBagConstraints gbc_scrollPane2 = new GridBagConstraints();
 		gbc_scrollPane2.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane2.gridx = 0;
 		gbc_scrollPane2.gridy = 2;
 		contentPane.add(scrollPane2, gbc_scrollPane2);
-		
+
 		console = new JTextArea();
 		console.setLineWrap(true);
 		console.setFont(new Font("Arial", Font.PLAIN, 12));
@@ -349,8 +413,53 @@ public class MainWindow extends JFrame {
 		scrollPane2.setViewportView(console);
 		s.GetFFT();
 
-		// scrollPane.add(diagram);
-		// contentPane.add(diagram);
+	}
+
+	/**
+	 *  Z podanego inputa pobiera wszystkie wartosci wykresu i zapisuje w point
+	 */
+	public void convertMusicToPoint() {
+		if (input != null && input.exists()) {
+			try {
+				WavFile wavFile = WavFile.openWavFile(input);
+				// wavFile.display();
+
+				int numChannels = wavFile.getNumChannels();
+				int xLenght = (int) wavFile.getNumFrames();
+				point = new double[xLenght];
+
+				double[] buffer = new double[100 * numChannels];
+
+				int framesRead;
+				// double min = Double.MAX_VALUE;
+				// double max = Double.MIN_VALUE;
+
+				// double hstep = (double) maxWidth / (double) points;
+
+				int i = 0;
+				do {
+
+					framesRead = wavFile.readFrames(buffer, 100);
+
+					// Loop through frames and look for minimum and maximum
+					// value
+					for (int s = 0; s < framesRead * numChannels; s++) {
+						try {
+							point[i] = buffer[s];
+							i++;
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				} while (framesRead != 0);
+
+				// Close the wavFile
+				wavFile.close();
+
+			} catch (Exception e) {
+				System.err.println(e);
+			}
+		}
 	}
 
 	public JPanel getPanel() {
