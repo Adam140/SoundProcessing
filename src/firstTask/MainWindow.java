@@ -13,6 +13,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.File;
+import java.util.Arrays;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -437,6 +438,7 @@ public class MainWindow extends JFrame {
 				// double hstep = (double) maxWidth / (double) points;
 
 				int i = 0;
+				double max = 0;
 				do {
 
 					framesRead = wavFile.readFrames(buffer, 100);
@@ -445,6 +447,8 @@ public class MainWindow extends JFrame {
 					// value
 					for (int s = 0; s < framesRead * numChannels; s++) {
 						try {
+							if(Math.abs(buffer[s]) > max)
+								max = Math.abs(buffer[s]);
 							point[i] = buffer[s];
 							i++;
 						} catch (Exception e) {
@@ -455,6 +459,9 @@ public class MainWindow extends JFrame {
 
 				// Close the wavFile
 				wavFile.close();
+				
+				for(i = 0; i < point.length; i++)
+					point[i] = point[i] * ( 1 / max );
 
 			} catch (Exception e) {
 				System.err.println(e);
