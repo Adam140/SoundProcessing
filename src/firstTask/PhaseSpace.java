@@ -3,6 +3,7 @@ package firstTask;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 
 import javax.swing.JFrame;
 
@@ -28,30 +29,23 @@ public class PhaseSpace {
 		int lenght = point.length;
 		double[] x = new double[lenght - k];
 		double[] y = new double[lenght - k];
-		int last = 0;
-		List meeting = new ArrayList();
-		meeting.add(0);
-		boolean correct;
+		
 		for (int i = 0; i < x.length; i++) {
 			x[i] = point[i + k];
 			y[i] = point[i];
-
-			if (i != 0 && x[0] == x[i] && y[0] == y[i]) {
-				meeting.add(i);
-			}
 		}
 
-		// System.out.println("Czestotliwosc podstawowa to  " + lenght / (int)
-		// meeting.get(1));
-		// create your PlotPanel (you can use it as a JPanel)
+
+		searchPrimFreq(x, y);
+		
 		Plot2DPanel plot = new Plot2DPanel();
 
 		// define the legend position
 		plot.addLegend("SOUTH");
 
 		// add a line plot to the PlotPanel
-		plot.addLinePlot("phase space", x, y);
-
+//		plot.addLinePlot("phase space", x, y);
+		plot.addScatterPlot("Phase space 2D", x, y);
 		// put the PlotPanel in a JFrame like a JPanel
 		JFrame frame = new JFrame("a plot panel");
 		frame.setSize(600, 600);
@@ -65,48 +59,122 @@ public class PhaseSpace {
 		double[] x = new double[lenght - 2*k];
 		double[] y = new double[lenght - 2*k];
 		double[] z = new double[lenght - 2*k];
-		int last = 0;
-		boolean correct = true;
+		
 		for (int i = 0; i < x.length; i++) {
 			x[i] = point[i + 2*k];
 			y[i] = point[i + k];
 			z[i] = point[i];
 
-			if (correct && i != 0 && x[0] == x[i] && y[0] == y[i] && z[0] == z[i]) {
-//				meeting.add(i);
-				System.out.println("Czestotliwosc podstawowa to  " + lenght / i + " \t " + i);
-				correct = false;
-			}
 		}
-		// create your PlotPanel (you can use it as a JPanel) with a legend at
+		
+		searchPrimFreq(x, y, z);
 		// SOUTH
 		Plot3DPanel plot = new Plot3DPanel("SOUTH");
 
-		// add grid plot to the PlotPanel
-		plot.addLinePlot("Phase space", x, y, z);
+//		plot.addLinePlot("Phase space", x, y, z);
+		plot.addScatterPlot("Phase space", x, y, z);
 
 		// put the PlotPanel in a JFrame like a JPanel
 		JFrame frame = new JFrame("a plot panel");
 		frame.setSize(600, 600);
 		frame.setContentPane(plot);
 		frame.setVisible(true);
+		
 
 	}
-
-	private void checkMeeting(List meeting, int length) {
-		int prev = 0;
-		double prim = 0;
-		boolean result = false;
-
-		for (int i = 0; i < meeting.size(); i++) {
-			if (meeting.size() - 1 > i) {
-				prev = (int) meeting.get(i + 1) - (int) meeting.get(i);
-			}
+	
+	private void searchPrimFreq(double[] x, double[] y)
+	{
+		int similarSize = 10;
+		double[] copyX = new double[similarSize], copyY = new double[similarSize];
+		Vector freq = new Vector<>();
+		
+		int i = 0;
+		for(i = 0; i < similarSize; i ++)
+		{
+			copyX[i] = x[i];
+			copyY[i] = y[i];
 		}
-
-		if (result)
-			System.out.println("Czestotliwosc podstawowa to " + prim);
+		i = 0;
+		for(int j = similarSize; j < x.length; j++)
+		{
+			while( i < copyX.length && i + j < x.length && comparePoints(copyX[i], copyY[i], x[j + i], y[j + i], 0.01))
+			{
+				i++;
+			}
+			
+			if( i == similarSize)
+			{
+				freq.add(j);
+			}
+				
+			i = 0;
+		}
+		
+		if(freq.size() != 0)
+		{
+			System.out.println("\nPrimary freq = " + Math.round((double)x.length / (double)(int)freq.get(0) ) + "Hz");
+			
+//			for(i = 1; i < freq.size(); i++)
+//				System.out.print( x.length / ((int)freq.get(i) - (int)freq.get(i-1)) + "Hz, ");
+		}
+	}
+	
+	private void searchPrimFreq(double[] x, double[] y, double[] z)
+	{
+		int similarSize = 10;
+		double[] copyX = new double[similarSize], copyY = new double[similarSize], copyZ = new double[similarSize];
+		Vector freq = new Vector<>();
+		
+		int i = 0;
+		for(i = 0; i < similarSize; i ++)
+		{
+			copyX[i] = x[i];
+			copyY[i] = y[i];
+			copyZ[i] = z[i];
+		}
+		i = 0;
+		for(int j = similarSize; j < x.length; j++)
+		{
+			while( i < copyX.length && i + j < x.length && comparePoints(copyX[i], copyY[i], copyZ[i], x[j + i], y[j + i], z[j + i], 0.01))
+			{
+				i++;
+			}
+			
+			if( i == similarSize)
+			{
+				freq.add(j);
+			}
+			
+			i = 0;
+		}
+		
+		if(freq.size() != 0)
+		{
+			System.out.println("\nPrimary freq = " + Math.round((double)x.length / (double)(int)freq.get(0) ) + "Hz");
+			
+//			for(i = 1; i < freq.size(); i++)
+//				System.out.print( x.length / ((int)freq.get(i) - (int)freq.get(i-1)) + "Hz, ");
+		}
+	}
+	
+	private boolean comparePoints(double x1, double y1, double x2, double y2, double tolerance )
+	{
+		double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+		
+		if(distance <= tolerance)
+			return true;
 		else
-			System.out.println("Zmien k lub dodaj wymiar");
+			return false;
+	}
+	
+	private boolean comparePoints(double x1, double y1, double z1, double x2, double y2, double z2, double tolerance )
+	{
+		double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2) + Math.pow(z1 - z2, 2));
+		
+		if(distance <= tolerance)
+			return true;
+		else
+			return false;
 	}
 }
