@@ -187,6 +187,7 @@ public class MainWindow extends JFrame {
 //					fc.setCurrentDirectory();
 					input = fc.getSelectedFile();
 					textFieldInputFile.setText(input.getAbsolutePath());
+
 					convertMusicToPoint();
 					diagram.recountPoint(point);
 					diagram.revalidate();
@@ -395,7 +396,8 @@ public class MainWindow extends JFrame {
 		// scrollPane.add(panel);
 		panel.setLayout(null);
 
-		Spectrum s = new Spectrum(input);
+
+		
 
 		scrollPane2 = new JScrollPane();
 		GridBagConstraints gbc_scrollPane2 = new GridBagConstraints();
@@ -409,7 +411,14 @@ public class MainWindow extends JFrame {
 		console.setFont(new Font("Arial", Font.PLAIN, 12));
 		console.setColumns(getWidth());
 		scrollPane2.setViewportView(console);
-		s.GetFFT();
+		
+		Cepstrum ce = new Cepstrum(input);
+		try {
+			ce.getCepstrum();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
 	}
 
