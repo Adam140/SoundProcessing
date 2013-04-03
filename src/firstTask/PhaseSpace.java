@@ -27,6 +27,7 @@ public class PhaseSpace {
 
 		// define your data
 		int lenght = point.length;
+//		int lenght = 100;
 		double[] x = new double[lenght - k];
 		double[] y = new double[lenght - k];
 		
@@ -85,7 +86,7 @@ public class PhaseSpace {
 	
 	private void searchPrimFreq(double[] x, double[] y)
 	{
-		int similarSize = 20;
+		int similarSize = 25;
 		double[] copyX = new double[similarSize], copyY = new double[similarSize];
 		Vector freq = new Vector<>();
 		
@@ -98,7 +99,7 @@ public class PhaseSpace {
 		i = 0;
 		for(int j = similarSize; j < x.length; j++)
 		{
-			while( i < copyX.length && i + j < x.length && comparePoints(copyX[i], copyY[i], x[j + i], y[j + i], 0.05))
+			while( i < copyX.length && i + j < x.length && comparePoints(copyX[i], copyY[i], x[j + i], y[j + i], 0.2))
 			{
 				i++;
 			}
@@ -136,7 +137,7 @@ public class PhaseSpace {
 		i = 0;
 		for(int j = similarSize; j < x.length; j++)
 		{
-			while( i < copyX.length && i + j < x.length && comparePoints(copyX[i], copyY[i], copyZ[i], x[j + i], y[j + i], z[j + i], 0.05))
+			while( i < copyX.length && i + j < x.length && comparePoints(copyX[i], copyY[i], copyZ[i], x[j + i], y[j + i], z[j + i], 0.2))
 			{
 				i++;
 			}
