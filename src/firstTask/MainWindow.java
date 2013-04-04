@@ -58,7 +58,9 @@ public class MainWindow extends JFrame {
 	private JTextField textFieldK;
 	private JLabel lblNewLabel;
 	private JComboBox comboBoxDim;
-	public int samplingRate = 1024;
+	public int samplingRate = 4*1024;
+	private JLabel lblSampleRate;
+	private JTextField textFieldSample;
 
 	/**
 	 * Launch the application.
@@ -96,7 +98,8 @@ public class MainWindow extends JFrame {
 		gbl_contentPane.rowWeights = new double[] { 0.0, 0.0, 1.0,
 				Double.MIN_VALUE };
 		contentPane.setLayout(gbl_contentPane);
-
+		textFieldSample = new JTextField();
+		textFieldSample.setText("1024");
 		diagram = new Diagram(100, getWidth());
 		if(input != null && input.exists())
 		{
@@ -160,7 +163,7 @@ public class MainWindow extends JFrame {
 		gbl_panelBottom.rowHeights = new int[] { 20, 0, 0, 0, 0, 0 };
 		gbl_panelBottom.columnWeights = new double[] { 0.0, 1.0, 0.0,
 				Double.MIN_VALUE };
-		gbl_panelBottom.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0,
+		gbl_panelBottom.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0,
 				Double.MIN_VALUE };
 		panelBottom.setLayout(gbl_panelBottom);
 
@@ -355,11 +358,11 @@ public class MainWindow extends JFrame {
 			public void mouseClicked(MouseEvent arg0) {
 				if(textFieldK.getText().isEmpty())
 					textFieldK.setText("10");
-				PhaseSpace plot = new PhaseSpace(points, Integer.valueOf(textFieldK.getText()), 2);
+				PhaseSpace plot = new PhaseSpace(dividedPoints, Integer.valueOf(textFieldK.getText()), 2);
 				if(comboBoxDim.getSelectedIndex() == 0)
-					plot.draw2D();
+					plot.draw2D(10);
 				else
-					plot.draw3D();
+					plot.draw3D(10);
 			}
 		});
 		GridBagConstraints gbc_btnCalculate = new GridBagConstraints();
@@ -377,10 +380,14 @@ public class MainWindow extends JFrame {
 		gbc_panelPhaseSpace.gridy = 4;
 		panelBottom.add(panelPhaseSpace, gbc_panelPhaseSpace);
 		
+		lblSampleRate = new JLabel("Sample rate");
+		panelPhaseSpace.add(lblSampleRate);
+		
 		lblNewLabel = new JLabel("K");
 		panelPhaseSpace.add(lblNewLabel);
 		
 		textFieldK = new JTextField();
+		textFieldK.setMaximumSize(new Dimension(6, 20));
 		panelPhaseSpace.add(textFieldK);
 		textFieldK.setColumns(10);
 		
@@ -396,6 +403,8 @@ public class MainWindow extends JFrame {
 		panel.setBounds(new Rectangle(0, 0, 1000, 50));
 		// scrollPane.setRowHeaderView(panel);
 		// scrollPane.add(panel);
+		panelPhaseSpace.add(textFieldSample);
+		textFieldSample.setColumns(10);
 		panel.setLayout(null);
 
 
@@ -475,8 +484,8 @@ public class MainWindow extends JFrame {
 				System.err.println(e);
 			}
 		}
-		
-		this.dividedPoints = WindowFunction.sampling(points, samplingRate);
+		this.textFieldSample.setText(String.valueOf(this.samplingRate));
+		this.dividedPoints = WindowFunction.sampling(points, Integer.valueOf(textFieldSample.getText() ));
 	}
 
 	public JPanel getPanel() {
