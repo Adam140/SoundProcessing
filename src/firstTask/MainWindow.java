@@ -51,12 +51,14 @@ public class MainWindow extends JFrame {
 	private JButton btnCalculate;
 	private JComboBox comboBox;
 
-	private double[] point; // all values of wave
+	private double[] points; // all values of wave
+	private double[][] dividedPoints; // all values of wave after sampling
 	private File input;
 	private JPanel panelPhaseSpace;
 	private JTextField textFieldK;
 	private JLabel lblNewLabel;
 	private JComboBox comboBoxDim;
+	public int samplingRate = 1024;
 
 	/**
 	 * Launch the application.
@@ -99,7 +101,7 @@ public class MainWindow extends JFrame {
 		if(input != null && input.exists())
 		{
 			convertMusicToPoint();
-			diagram.recountPoint(point);
+			diagram.recountPoint(points);
 		}
 		diagram.addMouseWheelListener(new MouseWheelListener() {
 			public void mouseWheelMoved(MouseWheelEvent e) {
@@ -189,7 +191,7 @@ public class MainWindow extends JFrame {
 					textFieldInputFile.setText(input.getAbsolutePath());
 
 					convertMusicToPoint();
-					diagram.recountPoint(point);
+					diagram.recountPoint(points);
 					diagram.revalidate();
 					diagram.repaint();
 //					System.out.println(diagram.getWidth());
@@ -217,7 +219,7 @@ public class MainWindow extends JFrame {
 			public void mouseClicked(MouseEvent arg0) {
 				if(input != null && input.exists())
 				convertMusicToPoint();
-				diagram.recountPoint(point);
+				diagram.recountPoint(points);
 				textFieldInputFile.setText(input.getAbsolutePath());
 				diagram.revalidate();
 				diagram.repaint();
@@ -353,7 +355,7 @@ public class MainWindow extends JFrame {
 			public void mouseClicked(MouseEvent arg0) {
 				if(textFieldK.getText().isEmpty())
 					textFieldK.setText("10");
-				PhaseSpace plot = new PhaseSpace(point, Integer.valueOf(textFieldK.getText()), 2);
+				PhaseSpace plot = new PhaseSpace(points, Integer.valueOf(textFieldK.getText()), 2);
 				if(comboBoxDim.getSelectedIndex() == 0)
 					plot.draw2D();
 				else
@@ -433,7 +435,7 @@ public class MainWindow extends JFrame {
 
 				int numChannels = wavFile.getNumChannels();
 				int xLenght = (int) wavFile.getNumFrames();
-				point = new double[xLenght];
+				points = new double[xLenght];
 
 				double[] buffer = new double[100 * numChannels];
 
@@ -455,7 +457,7 @@ public class MainWindow extends JFrame {
 						try {
 							if(Math.abs(buffer[s]) > max)
 								max = Math.abs(buffer[s]);
-							point[i] = buffer[s];
+							points[i] = buffer[s];
 							i++;
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -466,13 +468,15 @@ public class MainWindow extends JFrame {
 				// Close the wavFile
 				wavFile.close();
 				
-				for(i = 0; i < point.length; i++)
-					point[i] = point[i] * ( 1 / max );
+				for(i = 0; i < points.length; i++)
+					points[i] = points[i] * ( 1 / max );
 
 			} catch (Exception e) {
 				System.err.println(e);
 			}
 		}
+		
+		this.dividedPoints = WindowFunction.sampling(points, samplingRate);
 	}
 
 	public JPanel getPanel() {
@@ -485,5 +489,13 @@ public class MainWindow extends JFrame {
 
 	public JScrollPane getScrollPane() {
 		return scrollPane;
+	}
+
+	public double[][] getDividedPoints() {
+		return dividedPoints;
+	}
+
+	public void setDividedPoints(double[][] dividedPoints) {
+		this.dividedPoints = dividedPoints;
 	}
 }
