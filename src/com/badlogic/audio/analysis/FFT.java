@@ -152,7 +152,7 @@ public class FFT extends FourierTransform
     {
         throw new IllegalArgumentException("FFT.forward: The length of the passed sample buffer must be equal to timeSize().");
     }
-    doWindow(buffer);
+    //doWindow(buffer);
     // copy samples to real/imag in bit-reversed order
     bitReverseSamples(buffer);
     // perform the fft

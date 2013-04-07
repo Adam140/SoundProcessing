@@ -6,8 +6,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Vector;
+
+import javax.swing.JFrame;
+
+import org.math.plot.Plot2DPanel;
 
 import transforms.FFT;
+
 
 import com.badlogic.audio.analysis.Complex;
 import com.badlogic.audio.analysis.WaveDecoder;
@@ -47,75 +53,108 @@ public class Cepstrum {
 	public void getCepstrum() throws Exception
 	{
         WaveDecoder decoder = new WaveDecoder( new FileInputStream( this.filePath ) );
-        int N = 44100;
 		long framerate = wf.getSampleRate();
 		long nframe = wf.getNumFrames();
 		System.out.println("Framerate:" + framerate);
 		System.out.println("Frames:" + nframe);
-		int[] buf = new int[N];
-		double[] data = new double[N];
-		
-		wf.readFrames(buf, (int) framerate);
-		
-		double twopi = 8.0*Math.atan(1.0);            
-		double arg = twopi/((double)N-1.0);
-		
-		Complex[] csignal = new Complex[N];
-		for (int i = 0; i < N; ++i)
-			//hammming window
-			csignal[i] = new Complex(buf[i]*(0.54 - 0.46*Math.cos(arg*(double)i)), 0);
-		
-		csignal = FFT.fft1D(csignal);
-		for (int i = 0; i < csignal.length; ++i)
-			//power spectrum
-			//csignal[i] = new Complex(10.0*Math.log10(Math.pow(csignal[i].abs(),2)+1), 0);
-			//complex spectrum
-			//csignal[i] = csignal[i].log();
-			//real spectrum
-			csignal[i] = new Complex(10.0*Math.log10(csignal[i].abs()+1), 0);
-		
-		
-		csignal = FFT.fft1D(csignal);
 
-		
-		
-		
-//		DoubleFFT_1D fft = new DoubleFFT_1D((int) nframe);
-//		// OK!
-//		for(int i=0;i<nframe;i++)
-//		{
-//			data[i] = (float)buf[i]*this.HammingWindow(i, (int) nframe);
-//		}
-//		fft.realForward(data);
-//		for(int i=0;i<nframe;i++)
-//		{
-//			data[i] = Math.log((data[i]));//*this.HammingWindow(i, (int) nframe);
-//		}
-//		fft.realInverse(data,false);
-//		
+ 
+        
+        int N = 1024;
+        float[] samples = new float[N];
+  //      FFT fft = new FFT( );
+        double[] temp = new double[N];
+        double[] x = new double[N];
+        double[] y = new double[N];
+        
+        double[] x1 = new double[N];
+        double[] y1 = new double[N];
         
         
-//        int N = 1024;
-//        float[] samples = new float[1024];
-//        FFT fft = new FFT( N, 44100 );
-//        float[] temp;
-//        
-//       
-//        while( decoder.readSamples( samples ) > 0 )
+        Complex[] s = new Complex[N];
+        Vector< double[] > vec = new Vector< double[]>();
+        
+       
+        while( decoder.readSamples( samples ) > 0 )
+        {
+        	
+        		samples = WindowFunction.Hamming(samples);
+                for(int i=0;i<N;i++)
+                {
+            		samples[i] = (float) Math.sin(i);
+                	temp[i] = samples[i];
+                	y[i] = samples[i];
+                	x[i] = i ;
+                	s[i] = new Complex(samples[i],0);
+                }
+                s = FFT.fft1D(s);
+                //s = FFT.ifft1D(s);
+        		//DoubleFFT_1D fft = new DoubleFFT_1D(N);
+        		//fft.realForward(temp);
+        		//fft.realInverse(temp,true);
+
+//                s = FFT.ifft1D(s);
+
+                for(int i=0;i<N;i++)
+                {
+                	//freq = max_index * Fs / N
+                	//System.out.println( i * framerate / N );
+                	temp[i] = Math.log10(Math.abs(s[i].getReal()));
+                	s[i] = new Complex(temp[i],0);
+                }
+                s = FFT.ifft1D(s);
+                for(int i=0;i<N;i++)
+                {
+                	
+                	temp[i] = Math.abs(s[i].getReal());
+
+                }
+                vec.add( temp );
+                
+//                FFT.ifft1D(s);
+//                for(int i=0;i<N;i++)
+//                {
+//                	
+//                	y1[i] = s[i].getReal();
+//                	if(i == 0)
+//                		x1[i] = 0;
+//                	else
+//                		x1[i] = i*framerate/N;
+//                }
+               // break;
+        }
+        System.out.print( vec.size() );
+        // AVG
+        for(int i =0 ; i < vec.size(); i++)
+        {
+        	double[] t = vec.elementAt(i);
+        	for(int j=0;j<t.length;j++)
+        	{
+        		temp[i] += t[j];
+        	}
+        	temp[i] = temp[i]/t.length;
+        }
+        
+        
+//        for(int i=0;i<N;i++)
 //        {
-//                fft.forward( samples );
-//        		temp = samples;
-//        		
-//        		for(int i=0;i<N;i++)
-//        		{
-//        			temp[i] = (float) Math.log(Math.abs(temp[i]));
-//        		}
-//        		
-//        		
-//                fft.forward( temp );
-//                int a =1;
-//                break;
+//        	y[i] = samples[i];
+//        	x[i] = i;
 //        }
+        
+		Plot2DPanel plot = new Plot2DPanel();
+		plot.addLegend("SOUTH");
+
+		// add a line plot to the PlotPanel
+		//plot.addLinePlot("Normal", x, y);
+		plot.addLinePlot("Spec", x, temp);
+		//plot.addScatterPlot("Spec", temp, y);
+
+		JFrame frame = new JFrame("a plot panel");
+		frame.setSize(600, 600);
+		frame.setContentPane(plot);
+		frame.setVisible(true);
+
 	}
 
 }
