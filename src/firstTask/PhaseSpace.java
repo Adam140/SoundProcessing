@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JFrame;
+import javax.swing.JTextArea;
 
 import org.math.plot.Plot2DPanel;
 import org.math.plot.Plot3DPanel;
@@ -18,25 +19,28 @@ public class PhaseSpace {
 	private int numberOfSamples;
 	private int k;
 	private int dimensions;
+	private JTextArea console;
 
-	public PhaseSpace(double[][] points, int k, int dimensions) {
+	public PhaseSpace(double[][] points, int k, int dimensions, JTextArea console) {
 		this.dividedPoints = points;
 		this.k = k;
 		if (k <= 0)
 			this.k = 10;
 		this.dimensions = dimensions;
 		this.numberOfSamples = dividedPoints.length;
+		this.console = console;
 	}
 	
 	public void draw2D(int sampleIndex) {
 
 		points = dividedPoints[sampleIndex];
+//		points = WindowFunction.Hamming(points);
 		// define your data
 		int lenght = points.length;
 		double[] x = new double[lenght - k];
 		double[] y = new double[lenght - k];
-		double[] x1 = new double[25];
-		double[] y1 = new double[25];
+		double[] x1 = new double[10];
+		double[] y1 = new double[10];
 		double[] x2 = new double[25];
 		double[] y2 = new double[25];
 		
@@ -48,13 +52,13 @@ public class PhaseSpace {
 			x1[i] = points[i + k];
 			y1[i] = points[i];
 		}
-		for (int i = 0; i < x1.length; i++) {
-			x2[i] = x[490 + i];
-			y2[i] = y[490+ i];
-		}
+//		for (int i = 0; i < x1.length; i++) {
+//			x2[i] = x[490 + i];
+//			y2[i] = y[490+ i];
+//		}
 
 
-		searchPrimFreq(x, y,x1,y1);
+		searchPrimFreq(x, y,x2,y2);
 		
 		Plot2DPanel plot = new Plot2DPanel();
 
@@ -122,11 +126,11 @@ public class PhaseSpace {
 		{
 			while( i < copyX.length && i + j < x.length && distanceBetweenPoints(copyX[i], copyY[i], x[j + i], y[j + i], 0.2))
 			{
-//				if(freq.size()==0)
-//				{
-//					fx[i] = x[j+i];
-//					fy[i] = y[j+i];
-//				}
+				if(i == similarSize -1 && freq.size()==0)
+				{
+					fx[i] = x[j+i];
+					fy[i] = y[j+i];
+				}
 				i++;
 			}
 			
@@ -144,10 +148,10 @@ public class PhaseSpace {
 		
 		if(freq.size() != 0)
 		{
-			System.out.println("\nPrimary freq = " + Math.round(44100.0 / (double)(int)freq.get(0) ) + "Hz");
+			console.setText("\nPrimary freq = " + Math.round(44100.0 / (double)(int)freq.get(0) ) + "Hz");
 			
-//			for(i = 1; i < freq.size(); i++)
-//				System.out.print( x.length / ((int)freq.get(i) - (int)freq.get(i-1)) + "Hz, ");
+			for(i = 0; i < freq.size(); i++)
+				console.setText( console.getText() + "\n" + x.length / ((int)freq.get(i)) + "Hz, ");
 		}
 	}
 	
@@ -182,10 +186,10 @@ public class PhaseSpace {
 		
 		if(freq.size() != 0)
 		{
-			System.out.println("\nPrimary freq = " + Math.round((double)x.length / (double)(int)freq.get(0) ) + "Hz");
+			console.setText("\nPrimary freq = " + Math.round((double)x.length / (double)(int)freq.get(0) ) + "Hz");
 			
 //			for(i = 1; i < freq.size(); i++)
-//				System.out.print( x.length / ((int)freq.get(i) - (int)freq.get(i-1)) + "Hz, ");
+//				console.setText( x.length / ((int)freq.get(i) - (int)freq.get(i-1)) + "Hz, ");
 		}
 	}
 	

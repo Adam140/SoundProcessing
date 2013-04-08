@@ -361,7 +361,7 @@ public class MainWindow extends JFrame {
 				{
 				if(textFieldK.getText().isEmpty())
 					textFieldK.setText("10");
-				PhaseSpace plot = new PhaseSpace(dividedPoints, Integer.valueOf(textFieldK.getText()), 2);
+				PhaseSpace plot = new PhaseSpace(dividedPoints, Integer.valueOf(textFieldK.getText()), 2, console);
 				if(comboBoxDim.getSelectedIndex() == 0)
 					plot.draw2D(10);
 				else
