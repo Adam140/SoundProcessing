@@ -86,7 +86,7 @@ public class MainWindow extends JFrame {
 		// TODO zeby odrazu ladowal sie jakis plik
 		this.input = new File("./wav/artificial/easy/225Hz.wav");
 		// ********************************************************
-
+		this.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 518, 534);
 		contentPane = new JPanel();
@@ -105,7 +105,7 @@ public class MainWindow extends JFrame {
 		if(input != null && input.exists())
 		{
 			convertMusicToPoint();
-			diagram.recountPoint(points);
+			diagram.recountPoint(points, Integer.valueOf(textFieldSample.getText() ));
 		}
 		diagram.addMouseWheelListener(new MouseWheelListener() {
 			public void mouseWheelMoved(MouseWheelEvent e) {
@@ -195,7 +195,7 @@ public class MainWindow extends JFrame {
 					textFieldInputFile.setText(input.getAbsolutePath());
 					cep = new Cepstrum(input);
 					convertMusicToPoint();
-					diagram.recountPoint(points);
+					diagram.recountPoint(points, Integer.valueOf(textFieldSample.getText() ));
 					diagram.revalidate();
 					diagram.repaint();
 //					System.out.println(diagram.getWidth());
@@ -223,7 +223,7 @@ public class MainWindow extends JFrame {
 			public void mouseClicked(MouseEvent arg0) {
 				if(input != null && input.exists())
 				convertMusicToPoint();
-				diagram.recountPoint(points);
+				diagram.recountPoint(points, Integer.valueOf(textFieldSample.getText() ));
 				textFieldInputFile.setText(input.getAbsolutePath());
 				diagram.revalidate();
 				diagram.repaint();
@@ -498,7 +498,19 @@ public class MainWindow extends JFrame {
 				System.err.println(e);
 			}
 		}
-		this.textFieldSample.setText(String.valueOf(this.samplingRate));
+		try
+		{
+			if(Integer.valueOf(textFieldSample.getText())<0)
+			{
+				this.textFieldSample.setText(String.valueOf(this.samplingRate));
+			}
+			else
+				this.samplingRate = Integer.valueOf(textFieldSample.getText());
+		}
+		catch(Exception e)
+		{
+			this.textFieldSample.setText(String.valueOf(this.samplingRate));
+		}
 		this.dividedPoints = WindowFunction.sampling(points, Integer.valueOf(textFieldSample.getText() ));
 	}
 
