@@ -61,6 +61,7 @@ public class MainWindow extends JFrame {
 	public int samplingRate = 4*1024;
 	private JLabel lblSampleRate;
 	private JTextField textFieldSample;
+	private Cepstrum cep;
 
 	/**
 	 * Launch the application.
@@ -192,7 +193,7 @@ public class MainWindow extends JFrame {
 //					fc.setCurrentDirectory();
 					input = fc.getSelectedFile();
 					textFieldInputFile.setText(input.getAbsolutePath());
-
+					cep = new Cepstrum(input);
 					convertMusicToPoint();
 					diagram.recountPoint(points);
 					diagram.revalidate();
@@ -356,6 +357,8 @@ public class MainWindow extends JFrame {
 		btnCalculate = new JButton("Calculate");
 		btnCalculate.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
+				if(comboBox.getSelectedIndex() == 0)
+				{
 				if(textFieldK.getText().isEmpty())
 					textFieldK.setText("10");
 				PhaseSpace plot = new PhaseSpace(dividedPoints, Integer.valueOf(textFieldK.getText()), 2);
@@ -363,6 +366,17 @@ public class MainWindow extends JFrame {
 					plot.draw2D(10);
 				else
 					plot.draw3D(10);
+				}
+				else
+				{
+					try {
+						double freq = cep.getCepstrum(Integer.valueOf(textFieldSample.getText()));
+						console.setText("Detected frequency:"+ freq+" Hz");
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			}
 		});
 		GridBagConstraints gbc_btnCalculate = new GridBagConstraints();
@@ -423,13 +437,13 @@ public class MainWindow extends JFrame {
 		console.setColumns(getWidth());
 		scrollPane2.setViewportView(console);
 		
-		Cepstrum ce = new Cepstrum(input);
-		try {
-			ce.getCepstrum();
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+//		Cepstrum ce = new Cepstrum(input);
+//		try {
+//			ce.getCepstrum();
+//		} catch (Exception e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
 
 	}
 
