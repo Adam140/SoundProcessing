@@ -43,7 +43,8 @@ class Diagram extends JPanel {
 		if(samplingRate > 0)
 		for(int i = 0; i < xLenght / samplingRate; i++)
 		{
-			g.drawLine(i * samplingRate, 0, i * samplingRate, getHeight()); // linia pozioma
+			g.drawLine(i * samplingRate, 0, i * samplingRate, getHeight()); // linia pionowa podzialki
+			g.drawString(String.valueOf(i+1), i * samplingRate + 10, getHeight() -10);
 		}
 	}
 

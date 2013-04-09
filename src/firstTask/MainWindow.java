@@ -58,12 +58,15 @@ public class MainWindow extends JFrame {
 	private JTextField textFieldK;
 	private JLabel lblNewLabel;
 	private JComboBox comboBoxDim;
-	public int samplingRate = 4*1024;
+	public int samplingRate = 2*1024;
+	public int index;
 	private JLabel lblSampleRate;
 	private Cepstrum cep;
 	private JTextField textFieldSample = new JTextField();
 	private JLabel lblTolerantDistance;
 	private JTextField textFieldTolerant;
+	private JLabel lblNumberOfFrame;
+	private JTextField textFieldFrameNumber;
 
 	/**
 	 * Launch the application.
@@ -96,7 +99,7 @@ public class MainWindow extends JFrame {
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
 		gbl_contentPane.columnWidths = new int[] { 424, 0 };
-		gbl_contentPane.rowHeights = new int[] { 200, 202, 0, 0 };
+		gbl_contentPane.rowHeights = new int[] { 200, 216, 0, 0 };
 		gbl_contentPane.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
 		gbl_contentPane.rowWeights = new double[] { 0.0, 0.0, 1.0,
 				Double.MIN_VALUE };
@@ -161,10 +164,10 @@ public class MainWindow extends JFrame {
 		contentPane.add(panelBottom, gbc_panelBottom);
 		GridBagLayout gbl_panelBottom = new GridBagLayout();
 		gbl_panelBottom.columnWidths = new int[] { 96, 845, 0, 0 };
-		gbl_panelBottom.rowHeights = new int[] { 20, 0, 0, 0, 0, 0, 0 };
+		gbl_panelBottom.rowHeights = new int[] { 20, 0, 0, 0, 42, 0, 0, 0 };
 		gbl_panelBottom.columnWeights = new double[] { 0.0, 1.0, 0.0,
 				Double.MIN_VALUE };
-		gbl_panelBottom.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+		gbl_panelBottom.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 				Double.MIN_VALUE };
 		panelBottom.setLayout(gbl_panelBottom);
 
@@ -222,13 +225,21 @@ public class MainWindow extends JFrame {
 //			przycisk generuj
 			public void mouseClicked(MouseEvent arg0) {
 				if(input != null && input.exists())
+				{
 				convertMusicToPoint();
 				diagram.recountPoint(points, Integer.valueOf(textFieldSample.getText() ));
+				index = Integer.valueOf(textFieldFrameNumber.getText());
+				if(index >= dividedPoints.length)
+				{
+					JOptionPane.showMessageDialog(MainWindow.this,
+							"Wrong frame index, choose from range <1;" + dividedPoints.length +">");
+					index = 0;
+				}
 				textFieldInputFile.setText(input.getAbsolutePath());
 				diagram.revalidate();
 				diagram.repaint();
 				scrollPane.revalidate();
-//				System.out.println(diagram.getWidth());
+				}
 			}
 		});
 		GridBagConstraints gbc_btnGenerateWave = new GridBagConstraints();
@@ -365,7 +376,7 @@ public class MainWindow extends JFrame {
 					textFieldTolerant.setText("0.1");
 				
 				int dim = comboBoxDim.getSelectedIndex() + 2;
-				PhaseSpace plot = new PhaseSpace(dividedPoints, Integer.valueOf(textFieldK.getText()), dim, Double.valueOf(textFieldTolerant.getText()), console);
+				PhaseSpace plot = new PhaseSpace(dividedPoints, Integer.valueOf(textFieldK.getText()), dim, Double.valueOf(textFieldTolerant.getText()), index, console);
 				plot.calculate();
 				}
 				else
@@ -404,7 +415,7 @@ public class MainWindow extends JFrame {
 		textFieldK.setColumns(10);
 		
 		comboBoxDim = new JComboBox();
-		comboBoxDim.setModel(new DefaultComboBoxModel(new String[] {"2 dimension", "3 dimension", "4 dimension", "5 dimension", "6 dimension"}));
+		comboBoxDim.setModel(new DefaultComboBoxModel(new String[] {"2 dimension", "3 dimension", "4 dimension", "5 dimension", "6 dimension", "7 dimension", "8 dimension", "9 dimension", "10 dimension"}));
 		panelPhaseSpace.add(comboBoxDim);
 		
 		lblTolerantDistance = new JLabel("Tolerant distance");
@@ -417,17 +428,36 @@ public class MainWindow extends JFrame {
 		
 		lblSampleRate = new JLabel("Sample rate:");
 		GridBagConstraints gbc_lblSampleRate = new GridBagConstraints();
-		gbc_lblSampleRate.insets = new Insets(0, 0, 0, 5);
+		gbc_lblSampleRate.insets = new Insets(0, 0, 5, 5);
 		gbc_lblSampleRate.gridx = 0;
 		gbc_lblSampleRate.gridy = 5;
 		panelBottom.add(lblSampleRate, gbc_lblSampleRate);
 		textFieldSample.setColumns(10);
 		GridBagConstraints gbc_textFieldSample = new GridBagConstraints();
 		gbc_textFieldSample.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textFieldSample.insets = new Insets(0, 0, 0, 5);
+		gbc_textFieldSample.insets = new Insets(0, 0, 5, 5);
 		gbc_textFieldSample.gridx = 1;
 		gbc_textFieldSample.gridy = 5;
 		panelBottom.add(textFieldSample, gbc_textFieldSample);
+		
+		lblNumberOfFrame = new JLabel("Index of frame:");
+		GridBagConstraints gbc_lblNumberOfFrame = new GridBagConstraints();
+		gbc_lblNumberOfFrame.anchor = GridBagConstraints.EAST;
+		gbc_lblNumberOfFrame.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNumberOfFrame.gridx = 0;
+		gbc_lblNumberOfFrame.gridy = 6;
+		panelBottom.add(lblNumberOfFrame, gbc_lblNumberOfFrame);
+		
+		textFieldFrameNumber = new JTextField();
+		textFieldFrameNumber.setText("0");
+		textFieldFrameNumber.setToolTipText("Enter number of frame ( 0 means all )");
+		GridBagConstraints gbc_textFieldFrameNumber = new GridBagConstraints();
+		gbc_textFieldFrameNumber.insets = new Insets(0, 0, 0, 5);
+		gbc_textFieldFrameNumber.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textFieldFrameNumber.gridx = 1;
+		gbc_textFieldFrameNumber.gridy = 6;
+		panelBottom.add(textFieldFrameNumber, gbc_textFieldFrameNumber);
+		textFieldFrameNumber.setColumns(10);
 
 		panel = new JPanel();
 		panel.setMaximumSize(new Dimension(32767, 50));
