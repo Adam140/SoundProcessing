@@ -60,8 +60,10 @@ public class MainWindow extends JFrame {
 	private JComboBox comboBoxDim;
 	public int samplingRate = 4*1024;
 	private JLabel lblSampleRate;
-	private JTextField textFieldSample;
 	private Cepstrum cep;
+	private JTextField textFieldSample = new JTextField();
+	private JLabel lblTolerantDistance;
+	private JTextField textFieldTolerant;
 
 	/**
 	 * Launch the application.
@@ -86,26 +88,24 @@ public class MainWindow extends JFrame {
 		// TODO zeby odrazu ladowal sie jakis plik
 		this.input = new File("./wav/artificial/easy/225Hz.wav");
 		// ********************************************************
-
+//		this.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 518, 534);
+		setBounds(100, 100, 751, 534);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
 		gbl_contentPane.columnWidths = new int[] { 424, 0 };
-		gbl_contentPane.rowHeights = new int[] { 200, 175, 0, 0 };
+		gbl_contentPane.rowHeights = new int[] { 200, 202, 0, 0 };
 		gbl_contentPane.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
 		gbl_contentPane.rowWeights = new double[] { 0.0, 0.0, 1.0,
 				Double.MIN_VALUE };
 		contentPane.setLayout(gbl_contentPane);
-		textFieldSample = new JTextField();
-		textFieldSample.setText("1024");
 		diagram = new Diagram(100, getWidth());
 		if(input != null && input.exists())
 		{
 			convertMusicToPoint();
-			diagram.recountPoint(points);
+			diagram.recountPoint(points, Integer.valueOf(textFieldSample.getText() ));
 		}
 		diagram.addMouseWheelListener(new MouseWheelListener() {
 			public void mouseWheelMoved(MouseWheelEvent e) {
@@ -160,11 +160,11 @@ public class MainWindow extends JFrame {
 		gbc_panelBottom.gridy = 1;
 		contentPane.add(panelBottom, gbc_panelBottom);
 		GridBagLayout gbl_panelBottom = new GridBagLayout();
-		gbl_panelBottom.columnWidths = new int[] { 96, 232, 0, 0 };
-		gbl_panelBottom.rowHeights = new int[] { 20, 0, 0, 0, 0, 0 };
+		gbl_panelBottom.columnWidths = new int[] { 96, 845, 0, 0 };
+		gbl_panelBottom.rowHeights = new int[] { 20, 0, 0, 0, 0, 0, 0 };
 		gbl_panelBottom.columnWeights = new double[] { 0.0, 1.0, 0.0,
 				Double.MIN_VALUE };
-		gbl_panelBottom.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0,
+		gbl_panelBottom.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
 				Double.MIN_VALUE };
 		panelBottom.setLayout(gbl_panelBottom);
 
@@ -195,7 +195,7 @@ public class MainWindow extends JFrame {
 					textFieldInputFile.setText(input.getAbsolutePath());
 					cep = new Cepstrum(input);
 					convertMusicToPoint();
-					diagram.recountPoint(points);
+					diagram.recountPoint(points, Integer.valueOf(textFieldSample.getText() ));
 					diagram.revalidate();
 					diagram.repaint();
 //					System.out.println(diagram.getWidth());
@@ -209,8 +209,8 @@ public class MainWindow extends JFrame {
 		textFieldInputFile.setEnabled(false);
 		textFieldInputFile.setEditable(false);
 		GridBagConstraints gbc_textFieldInputFile = new GridBagConstraints();
-		gbc_textFieldInputFile.insets = new Insets(0, 0, 5, 5);
 		gbc_textFieldInputFile.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textFieldInputFile.insets = new Insets(0, 0, 5, 5);
 		gbc_textFieldInputFile.anchor = GridBagConstraints.NORTH;
 		gbc_textFieldInputFile.gridx = 1;
 		gbc_textFieldInputFile.gridy = 0;
@@ -223,7 +223,7 @@ public class MainWindow extends JFrame {
 			public void mouseClicked(MouseEvent arg0) {
 				if(input != null && input.exists())
 				convertMusicToPoint();
-				diagram.recountPoint(points);
+				diagram.recountPoint(points, Integer.valueOf(textFieldSample.getText() ));
 				textFieldInputFile.setText(input.getAbsolutePath());
 				diagram.revalidate();
 				diagram.repaint();
@@ -248,8 +248,8 @@ public class MainWindow extends JFrame {
 
 		textFieldMainFreq = new JTextField();
 		GridBagConstraints gbc_textFieldMainFreq = new GridBagConstraints();
-		gbc_textFieldMainFreq.insets = new Insets(0, 0, 5, 5);
 		gbc_textFieldMainFreq.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textFieldMainFreq.insets = new Insets(0, 0, 5, 5);
 		gbc_textFieldMainFreq.gridx = 1;
 		gbc_textFieldMainFreq.gridy = 1;
 		panelBottom.add(textFieldMainFreq, gbc_textFieldMainFreq);
@@ -301,8 +301,8 @@ public class MainWindow extends JFrame {
 
 		textFieldOutputFile = new JTextField();
 		GridBagConstraints gbc_textFieldOutputFile = new GridBagConstraints();
-		gbc_textFieldOutputFile.insets = new Insets(0, 0, 5, 5);
 		gbc_textFieldOutputFile.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textFieldOutputFile.insets = new Insets(0, 0, 5, 5);
 		gbc_textFieldOutputFile.gridx = 1;
 		gbc_textFieldOutputFile.gridy = 2;
 		panelBottom.add(textFieldOutputFile, gbc_textFieldOutputFile);
@@ -348,8 +348,8 @@ public class MainWindow extends JFrame {
 		comboBox.setModel(new DefaultComboBoxModel(new String[] {"Phase space analysis", "Cepstrum"}));
 		comboBox.setToolTipText("Choose algorithm");
 		GridBagConstraints gbc_comboBox = new GridBagConstraints();
-		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_comboBox.gridx = 1;
 		gbc_comboBox.gridy = 3;
 		panelBottom.add(comboBox, gbc_comboBox);
@@ -361,11 +361,12 @@ public class MainWindow extends JFrame {
 				{
 				if(textFieldK.getText().isEmpty())
 					textFieldK.setText("10");
-				PhaseSpace plot = new PhaseSpace(dividedPoints, Integer.valueOf(textFieldK.getText()), 2);
-				if(comboBoxDim.getSelectedIndex() == 0)
-					plot.draw2D(10);
-				else
-					plot.draw3D(10);
+				if(textFieldTolerant.getText().isEmpty())
+					textFieldTolerant.setText("0.1");
+				
+				int dim = comboBoxDim.getSelectedIndex() + 2;
+				PhaseSpace plot = new PhaseSpace(dividedPoints, Integer.valueOf(textFieldK.getText()), dim, Double.valueOf(textFieldTolerant.getText()), console);
+				plot.calculate();
 				}
 				else
 				{
@@ -388,14 +389,11 @@ public class MainWindow extends JFrame {
 		
 		panelPhaseSpace = new JPanel();
 		GridBagConstraints gbc_panelPhaseSpace = new GridBagConstraints();
-		gbc_panelPhaseSpace.insets = new Insets(0, 0, 0, 5);
+		gbc_panelPhaseSpace.insets = new Insets(0, 0, 5, 5);
 		gbc_panelPhaseSpace.fill = GridBagConstraints.BOTH;
 		gbc_panelPhaseSpace.gridx = 1;
 		gbc_panelPhaseSpace.gridy = 4;
 		panelBottom.add(panelPhaseSpace, gbc_panelPhaseSpace);
-		
-		lblSampleRate = new JLabel("Sample rate");
-		panelPhaseSpace.add(lblSampleRate);
 		
 		lblNewLabel = new JLabel("K");
 		panelPhaseSpace.add(lblNewLabel);
@@ -406,8 +404,30 @@ public class MainWindow extends JFrame {
 		textFieldK.setColumns(10);
 		
 		comboBoxDim = new JComboBox();
-		comboBoxDim.setModel(new DefaultComboBoxModel(new String[] {"2 dimension", "3 dimension"}));
+		comboBoxDim.setModel(new DefaultComboBoxModel(new String[] {"2 dimension", "3 dimension", "4 dimension", "5 dimension", "6 dimension"}));
 		panelPhaseSpace.add(comboBoxDim);
+		
+		lblTolerantDistance = new JLabel("Tolerant distance");
+		lblTolerantDistance.setToolTipText("tolerant distance between two points");
+		panelPhaseSpace.add(lblTolerantDistance);
+		
+		textFieldTolerant = new JTextField();
+		panelPhaseSpace.add(textFieldTolerant);
+		textFieldTolerant.setColumns(10);
+		
+		lblSampleRate = new JLabel("Sample rate:");
+		GridBagConstraints gbc_lblSampleRate = new GridBagConstraints();
+		gbc_lblSampleRate.insets = new Insets(0, 0, 0, 5);
+		gbc_lblSampleRate.gridx = 0;
+		gbc_lblSampleRate.gridy = 5;
+		panelBottom.add(lblSampleRate, gbc_lblSampleRate);
+		textFieldSample.setColumns(10);
+		GridBagConstraints gbc_textFieldSample = new GridBagConstraints();
+		gbc_textFieldSample.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textFieldSample.insets = new Insets(0, 0, 0, 5);
+		gbc_textFieldSample.gridx = 1;
+		gbc_textFieldSample.gridy = 5;
+		panelBottom.add(textFieldSample, gbc_textFieldSample);
 
 		panel = new JPanel();
 		panel.setMaximumSize(new Dimension(32767, 50));
@@ -415,10 +435,6 @@ public class MainWindow extends JFrame {
 		panel.setBackground(Color.LIGHT_GRAY);
 		panel.setMinimumSize(new Dimension(1000, 50));
 		panel.setBounds(new Rectangle(0, 0, 1000, 50));
-		// scrollPane.setRowHeaderView(panel);
-		// scrollPane.add(panel);
-		panelPhaseSpace.add(textFieldSample);
-		textFieldSample.setColumns(10);
 		panel.setLayout(null);
 
 
@@ -454,7 +470,6 @@ public class MainWindow extends JFrame {
 		if (input != null && input.exists()) {
 			try {
 				WavFile wavFile = WavFile.openWavFile(input);
-				// wavFile.display();
 
 				int numChannels = wavFile.getNumChannels();
 				int xLenght = (int) wavFile.getNumFrames();
@@ -463,19 +478,12 @@ public class MainWindow extends JFrame {
 				double[] buffer = new double[100 * numChannels];
 
 				int framesRead;
-				// double min = Double.MAX_VALUE;
-				// double max = Double.MIN_VALUE;
-
-				// double hstep = (double) maxWidth / (double) points;
 
 				int i = 0;
 				double max = 0;
 				do {
 
 					framesRead = wavFile.readFrames(buffer, 100);
-
-					// Loop through frames and look for minimum and maximum
-					// value
 					for (int s = 0; s < framesRead * numChannels; s++) {
 						try {
 							if(Math.abs(buffer[s]) > max)
@@ -488,7 +496,6 @@ public class MainWindow extends JFrame {
 					}
 				} while (framesRead != 0);
 
-				// Close the wavFile
 				wavFile.close();
 				
 				for(i = 0; i < points.length; i++)
@@ -498,7 +505,19 @@ public class MainWindow extends JFrame {
 				System.err.println(e);
 			}
 		}
-		this.textFieldSample.setText(String.valueOf(this.samplingRate));
+		try
+		{
+			if(Integer.valueOf(textFieldSample.getText())<0)
+			{
+				this.textFieldSample.setText(String.valueOf(this.samplingRate));
+			}
+			else
+				this.samplingRate = Integer.valueOf(textFieldSample.getText());
+		}
+		catch(Exception e)
+		{
+			this.textFieldSample.setText(String.valueOf(this.samplingRate));
+		}
 		this.dividedPoints = WindowFunction.sampling(points, Integer.valueOf(textFieldSample.getText() ));
 	}
 
