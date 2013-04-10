@@ -56,18 +56,20 @@ public class Cepstrum {
 		return (float) (0.5*(1-Math.cos(2*Math.PI*i/(nframes-1))));
 	}
 	
-	public double getCepstrum(int size) throws Exception
+	public double getCepstrum(double[][] signal,int size) throws Exception
 	{
-        WaveDecoder decoder = new WaveDecoder( new FileInputStream( this.filePath ) );
+
+        //WaveDecoder decoder = new WaveDecoder( new FileInputStream( this.filePath ) );
 		long framerate = wf.getSampleRate();
-		long nframe = wf.getNumFrames();
+		long nframe = signal.length;
 		System.out.println("Framerate:" + framerate);
 		System.out.println("Frames:" + nframe);
 
  
         
         int N = size;
-        float[] samples = new float[N];
+        double[] detected_frequency = new double[(int) nframe];
+        //float[] samples = new float[N];
   //      FFT fft = new FFT( );
         double[] spectrum = new double[N];
 
@@ -90,9 +92,12 @@ public class Cepstrum {
         Vector< double[] > detected_freq = new Vector< double[]>();
         int zero_index = 0;
         
-        while( decoder.readSamples( samples ) > 0 )
+        //while( decoder.readSamples( samples ) > 0 )
+        for(int f=0;f<nframe;f++)
         {
-        	
+        		double[] samples = signal[f];
+        		if(samples.length != N)
+        			break;
         		samples = WindowFunction.Hamming(samples);
                 for(int i=0;i<N;i++)
                 {
@@ -120,16 +125,32 @@ public class Cepstrum {
                 	temp[i] = s[i].getReal();
                 	if(zero_index == 0 && temp[i] < 0)
                 		zero_index = i;
-                	end[i] += Math.abs(temp[i]);
+                	end[i] = Math.abs(temp[i]);
                 }
+                double max_value = 0;
+                int max_index = 0;
                 
                 
+                for(int i=zero_index;i<N/2;i++)
+                {
+
+                		if(end[i] > max_value)
+                		{
+                			max_value = end[i];
+                			max_index = i;
+                		}
+                		
+                }
+                detected_frequency[f] = ComputeFrequency(max_index, N, (int) framerate);
               
                 //break;
                 //vec.add( temp );
                 
         }
  
+        for(int a=0;a<detected_frequency.length;a++)
+            System.out.println(detected_frequency[a]);
+
         boolean going_down = true;
         double max_value = 0;
         int max_index = 0;
