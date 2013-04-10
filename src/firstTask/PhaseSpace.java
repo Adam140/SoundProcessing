@@ -260,4 +260,8 @@ public class PhaseSpace {
 
 		return entries.get(0).getKey();
 	}
+
+	public List<Integer> getMode() {
+		return mode;
+	}
 }

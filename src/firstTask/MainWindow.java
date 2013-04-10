@@ -16,6 +16,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -29,6 +33,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+import javax.swing.JCheckBox;
 
 public class MainWindow extends JFrame {
 
@@ -68,6 +73,8 @@ public class MainWindow extends JFrame {
 	private JTextField textFieldTolerant;
 	private JLabel lblNumberOfFrame;
 	private JTextField textFieldFrameNumber;
+	private JLabel lblSequence;
+	private JCheckBox checkBoxSequence;
 
 	/**
 	 * Launch the application.
@@ -355,6 +362,10 @@ public class MainWindow extends JFrame {
 		comboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent arg0) {
 				// TODO ukrycie odpowiedniego panelu
+				if(comboBox.getSelectedIndex() == 0)
+					panelPhaseSpace.setVisible(true);
+				else
+					panelPhaseSpace.setVisible(false);
 			}
 		});
 		comboBox.setModel(new DefaultComboBoxModel(new String[] {"Phase space analysis", "Cepstrum"}));
@@ -375,10 +386,18 @@ public class MainWindow extends JFrame {
 					textFieldK.setText("10");
 				if(textFieldTolerant.getText().isEmpty())
 					textFieldTolerant.setText("0.1");
-				
+				boolean seq = checkBoxSequence.isSelected();
 				int dim = comboBoxDim.getSelectedIndex() + 2;
 				PhaseSpace plot = new PhaseSpace(dividedPoints, sampleRate, Integer.valueOf(textFieldK.getText()), dim, Double.valueOf(textFieldTolerant.getText()), index, console);
 				plot.calculate();
+				if(seq)
+				{
+					generateSeq(plot.getMode());
+				}
+				else
+				{
+					generateTone(plot.mode(plot.getMode()));
+				}
 				}
 				else
 				{
@@ -426,6 +445,12 @@ public class MainWindow extends JFrame {
 		textFieldTolerant = new JTextField();
 		panelPhaseSpace.add(textFieldTolerant);
 		textFieldTolerant.setColumns(10);
+		
+		lblSequence = new JLabel("Sequence");
+		panelPhaseSpace.add(lblSequence);
+		
+		checkBoxSequence = new JCheckBox("");
+		panelPhaseSpace.add(checkBoxSequence);
 		
 		lblSampleRate = new JLabel("Sample rate:");
 		GridBagConstraints gbc_lblSampleRate = new GridBagConstraints();
@@ -553,6 +578,49 @@ public class MainWindow extends JFrame {
 		}
 		this.dividedPoints = WindowFunction.sampling(points, Integer.valueOf(textFieldSample.getText() ));
 	}
+	
+	private void generateSeq(List<Integer> mode)
+	{
+		// freq[Hz] , duration[ms];
+		String sequence = "";
+		double samplePeerMs = this.sampleRate / 1000;
+		for(int i = 0; i < mode.size(); i++)
+		{
+			int duration = (int) (dividedPoints[i].length / samplePeerMs);
+			if(mode.get(i) > 0)
+			{
+				sequence += mode.get(i) + "," + duration + ";";
+			}
+			else
+			{
+				sequence += 0.0 + "," + duration + ";";
+			}
+		}
+		if(textFieldOutputFile.getText().isEmpty())
+		{
+			DateFormat dateFormat = new SimpleDateFormat("HH_mm");
+			Date date = new Date();
+			textFieldOutputFile.setText(dateFormat.format(date) + "seq.wav");
+		}
+		
+		if(!textFieldOutputFile.getText().endsWith(".wav"))
+			textFieldOutputFile.setText(textFieldOutputFile.getText() + ".wav");
+		WavFileGenerator wf = new WavFileGenerator(new File(textFieldOutputFile.getText()), ConsoleUtil.convertText(sequence));
+		wf.write();
+		;
+	}
+	
+	private void generateTone(int freq)
+	{
+		double samplePeerMs = this.sampleRate / 1000;
+		String sequence = freq + "," + (int)(points.length / samplePeerMs) + ";";
+		DateFormat dateFormat = new SimpleDateFormat("HH_mm");
+		Date date = new Date();
+		String file = "./output/" + dateFormat.format(date) + "_" + freq + "Hz.wav";
+		WavFileGenerator wf = new WavFileGenerator(new File(file), ConsoleUtil.convertText(sequence));
+		wf.write();
+	}
+	
 
 	public JPanel getPanel() {
 		return panel;
