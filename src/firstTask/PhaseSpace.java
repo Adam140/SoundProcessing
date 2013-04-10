@@ -5,8 +5,13 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.swing.JFrame;
@@ -19,14 +24,15 @@ import org.math.plot.PlotPanel;
 public class PhaseSpace {
 	private double[] points;
 	private double[][] dividedPoints;
-	private List mode = new ArrayList();
+	private List<Integer> mode = new ArrayList();
 	private double tolerance;
 	private int indexOfFrame;
 	private int k;
 	private int dimensions;
+	private int fileSize;
 	private JTextArea console;
 
-	public PhaseSpace(double[][] points, int k, int dimensions,
+	public PhaseSpace(double[][] points, int size, int k, int dimensions,
 			double tolerance, int index, JTextArea console) {
 		this.dividedPoints = points;
 		this.tolerance = tolerance;
@@ -36,6 +42,7 @@ public class PhaseSpace {
 		this.dimensions = dimensions;
 		this.indexOfFrame = index;
 		this.console = console;
+		this.fileSize = size;
 	}
 
 	public void calculate() {
@@ -53,10 +60,11 @@ public class PhaseSpace {
 
 			for (int i = 0; i < dimensions; i++)
 				pointsVec.add(new double[lenght - dimensions * k]);
-			points = dividedPoints[indexOfFrame]; // number of frame
 
+			points = dividedPoints[a]; // number of frame
+			
+			for (int j = 0; j < pointsVec.size(); j++) {
 			for (int i = 0; i < lenght - dimensions * k; i++) {
-				for (int j = 0; j < pointsVec.size(); j++) {
 					pointsVec.get(j)[i] = points[i + j * k];
 				}
 			}
@@ -97,17 +105,18 @@ public class PhaseSpace {
 	}
 
 	private void searchPrimFreq(Vector<double[]> pointsVec) {
-		int wait = 30; // amount of points where we sure that cycle doesn't
+		int wait = 10; // amount of points where we sure that cycle doesn't
 						// occur
 		int lenght = pointsVec.get(0).length; // amount of points in every
 												// dimension
-		int amountOfRandom = 100;	
-		List allCycles = new ArrayList<>();
+//		int amountOfRandom = 100;	
+		int amountOfRandom = lenght;	
+		List<Integer> allCycles = new ArrayList<>();
 
 		for (int i = 0; i < amountOfRandom; i++) {
 			int randIndex = 0;
-			do randIndex = randInt(0, lenght - 1); while (randIndex < 0 || randIndex >= lenght);
-//			randIndex = i;
+//			do randIndex = randInt(0, lenght - 1); while (randIndex < 0 || randIndex >= lenght);
+			randIndex = i;
 			
 			int cycle = 0; // if is -1 when cycle didn't detected
 			boolean forward = true; // direction of searching
@@ -134,17 +143,21 @@ public class PhaseSpace {
 				}
 			}
 
-			allCycles.add(cycle);
+			// cycle after 20 sample is 2 200 Hz
+			// cycle after 1000 sample is 40 Hz
+			// this is range of frequency in this task
+			if( cycle > 20 && cycle < 1000 && cycle != -1 )
+				allCycles.add(cycle);
 		}
 		
 		
 		String buffer = console.getText() + "Cycles detected ";
 //		for(int i = 0; i < allCycles.length; i++)
 //		{
-//			buffer+= Math.round( 44100.0 / (double) allCycles[i] ) + ", ";
+//			buffer+= Math.round( fileSize / (double) allCycles[i] ) + ", ";
 //		}
-		mode.add(44100 / mode(allCycles));
-		buffer+= "mode=" + 44100 / mode(allCycles); //+ " avg=" + 44100 / average(allCycles) + " median=" + 44100 / median(allCycles);
+		mode.add(fileSize / mode(allCycles));
+		buffer+= "mode=" + fileSize / mode(allCycles); //+ " avg=" + fileSize / average(allCycles) + " median=" + fileSize / median(allCycles);
 		buffer+="\n";
 		console.setText(buffer);
 	}
@@ -218,20 +231,33 @@ public class PhaseSpace {
 	
 	public static int mode(List list)
 	{
-			int tolerant = 10;
-		    int maxValue = 0, maxCount = 0;
-
-		    for (int i = 0; i < list.size(); ++i) {
-		        int count = 0;
-		        for (int j = 0; j < list.size(); ++j) {
-		            if (list.get(j) == list.get(i)) ++count;
-		        }
-		        if (count > maxCount) {
-		            maxCount = count;
-		            maxValue = (int) list.get(i);
-		        }
+	
+		if(list.size()==0)
+			return -1;
+		
+		Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+		
+		for(int i = 0; i < list.size(); i++)
+		{
+			Integer value = (Integer) list.get(i);
+			if(map.containsKey(value))
+			{
+				map.put(value, map.get(value) + 1);
+			}
+			else
+			{
+				map.put(value, 1);
+			}
+		}
+		
+		List<Entry<Integer, Integer>> entries = new ArrayList<Entry<Integer, Integer>>(map.entrySet());
+		Collections.sort(entries, new Comparator<Entry<Integer, Integer>>() {
+		    public int compare(Entry<Integer, Integer> e1, Entry<Integer, Integer> e2) {
+		        return -1 * e1.getValue().compareTo(e2.getValue());
 		    }
+		});		
+		
 
-		    return maxValue;
+		return entries.get(0).getKey();
 	}
 }

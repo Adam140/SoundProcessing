@@ -58,7 +58,8 @@ public class MainWindow extends JFrame {
 	private JTextField textFieldK;
 	private JLabel lblNewLabel;
 	private JComboBox comboBoxDim;
-	public int samplingRate = 2*1024;
+	public int windowSize = 2*1024;
+	public int sampleRate;
 	public int index;
 	private JLabel lblSampleRate;
 	private Cepstrum cep;
@@ -376,7 +377,7 @@ public class MainWindow extends JFrame {
 					textFieldTolerant.setText("0.1");
 				
 				int dim = comboBoxDim.getSelectedIndex() + 2;
-				PhaseSpace plot = new PhaseSpace(dividedPoints, Integer.valueOf(textFieldK.getText()), dim, Double.valueOf(textFieldTolerant.getText()), index, console);
+				PhaseSpace plot = new PhaseSpace(dividedPoints, sampleRate, Integer.valueOf(textFieldK.getText()), dim, Double.valueOf(textFieldTolerant.getText()), index, console);
 				plot.calculate();
 				}
 				else
@@ -501,6 +502,8 @@ public class MainWindow extends JFrame {
 			try {
 				WavFile wavFile = WavFile.openWavFile(input);
 
+				this.sampleRate = (int) wavFile.getSampleRate();
+				wavFile.display();
 				int numChannels = wavFile.getNumChannels();
 				int xLenght = (int) wavFile.getNumFrames();
 				points = new double[xLenght];
@@ -539,14 +542,14 @@ public class MainWindow extends JFrame {
 		{
 			if(Integer.valueOf(textFieldSample.getText())<0)
 			{
-				this.textFieldSample.setText(String.valueOf(this.samplingRate));
+				this.textFieldSample.setText(String.valueOf(this.windowSize));
 			}
 			else
-				this.samplingRate = Integer.valueOf(textFieldSample.getText());
+				this.windowSize = Integer.valueOf(textFieldSample.getText());
 		}
 		catch(Exception e)
 		{
-			this.textFieldSample.setText(String.valueOf(this.samplingRate));
+			this.textFieldSample.setText(String.valueOf(this.windowSize));
 		}
 		this.dividedPoints = WindowFunction.sampling(points, Integer.valueOf(textFieldSample.getText() ));
 	}
