@@ -7,9 +7,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Vector;
 
 import javax.swing.JFrame;
@@ -51,12 +54,7 @@ public class Cepstrum {
 	}
 	
 
-	private float HammingWindow(float i,int nframes)
-	{
-		return (float) (0.5*(1-Math.cos(2*Math.PI*i/(nframes-1))));
-	}
-	
-	public double getCepstrum(double[][] signal,int size) throws Exception
+	public double getCepstrum(double[][] signal,int size,boolean sequence) throws Exception
 	{
 
         //WaveDecoder decoder = new WaveDecoder( new FileInputStream( this.filePath ) );
@@ -152,11 +150,7 @@ public class Cepstrum {
  
         String sounds = "";
 		double samplePeerMs = framerate / 1000;
-        for(int a=0;a<detected_frequency.length;a++)
-        {
-        	sounds += detected_frequency[a]+","+(int)( N/ samplePeerMs)+";";
-            System.out.println(detected_frequency[a]);
-        }
+
 
         boolean going_down = true;
         double max_value = 0;
@@ -200,10 +194,18 @@ public class Cepstrum {
         double freq = 0;
         max_value =  (double)N / max_index;
         freq = Median(detected_frequency);
+        
+        if(sequence)
+	        for(int a=0;a<detected_frequency.length;a++)
+	        {
+	        	sounds += detected_frequency[a]+","+(int)( N/ samplePeerMs)+";";
+	            System.out.println(detected_frequency[a]);
+	        }
+        else
+        	sounds = freq+","+(int)( N/ samplePeerMs)*nframe+";";
+        
         System.out.println("Detected freq: "+Median(detected_frequency)+"Hz");
         System.out.println("Position: "+max_index);
-        System.out.println("value: "+max_value);
-        System.out.println("value: "+end[max_index]);
 
         System.out.println("zero index: "+zero_index);
 
@@ -227,8 +229,11 @@ public class Cepstrum {
 		frame.setContentPane(plot);
 		frame.setVisible(true);
 		
-		Vector<Sound> sound_vec =ConsoleUtil.convertText(sounds);
-		WavFileGenerator wg = new WavFileGenerator(new File("odp.wav"), sound_vec);
+		DateFormat dateFormat = new SimpleDateFormat("HH_mm");
+		Date date = new Date();
+		
+		Vector<Sound> sound_vec = ConsoleUtil.convertText(sounds);
+		WavFileGenerator wg = new WavFileGenerator(new File(dateFormat.format(date) + "seq.wav"), sound_vec);
         wg.write();
 
 		return freq;

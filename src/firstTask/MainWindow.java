@@ -402,7 +402,7 @@ public class MainWindow extends JFrame {
 				else
 				{
 					try {
-						double freq = cep.getCepstrum(dividedPoints,Integer.valueOf(textFieldSample.getText()));
+						double freq = cep.getCepstrum(dividedPoints,Integer.valueOf(textFieldSample.getText()),checkBoxSequence.isSelected());
 						console.setText("Detected frequency:"+ freq+" Hz");
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
