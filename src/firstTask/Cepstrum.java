@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -193,12 +194,36 @@ public class Cepstrum {
         double freq = 0;
         max_value =  (double)N / max_index;
         freq = Median(detected_frequency);
-        
+  	  	DecimalFormat df = new DecimalFormat("#.##");
+  	  	double to_compare = 0;
+  	  	double prev = 0;
+  	  	int times = 0;
         if(sequence)
 	        for(int a=0;a<detected_frequency.length;a++)
 	        {
-	        	sounds += detected_frequency[a]+","+(int)( N/ samplePeerMs)+";";
-	            System.out.println(detected_frequency[a]);
+	        	if(a != 0)
+	        		prev = detected_frequency[a-1];
+	        	
+	        	if(times == 0 && to_compare == 0 && Math.abs(prev - detected_frequency[a]) < 5)
+	        	{
+	        		to_compare = prev;
+	        		times++;
+	        	}
+	        	else if( times != 0 && Math.abs(to_compare - detected_frequency[a]) < 5 )
+	        		times++;
+	        	else if(times != 0)
+	        	{
+		            System.out.println(df.format(prev) + " & "+(int)( N/ samplePeerMs)*times+" ms \\\\");
+
+		        	//sounds += detected_frequency[a]+","+(int)( N/ samplePeerMs)*times+";";
+		        	times = 0;
+		        	to_compare = 0;
+
+	        	}
+	        	else
+		            System.out.println(df.format(detected_frequency[a]) + " & "+(int)( N/ samplePeerMs)+" ms \\\\");
+
+	        		sounds += detected_frequency[a]+","+(int)( N/ samplePeerMs)+";";
 	        }
         else
         	sounds = freq+","+(int)( N/ samplePeerMs)*nframe+";";
