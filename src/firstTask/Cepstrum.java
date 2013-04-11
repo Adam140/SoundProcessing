@@ -150,8 +150,13 @@ public class Cepstrum {
                 
         }
  
+        String sounds = "";
+		double samplePeerMs = framerate / 1000;
         for(int a=0;a<detected_frequency.length;a++)
+        {
+        	sounds += detected_frequency[a]+","+(int)( N/ samplePeerMs)+";";
             System.out.println(detected_frequency[a]);
+        }
 
         boolean going_down = true;
         double max_value = 0;
@@ -222,7 +227,9 @@ public class Cepstrum {
 		frame.setContentPane(plot);
 		frame.setVisible(true);
 		
-        
+		Vector<Sound> sound_vec =ConsoleUtil.convertText(sounds);
+		WavFileGenerator wg = new WavFileGenerator(new File("odp.wav"), sound_vec);
+        wg.write();
 
 		return freq;
 
