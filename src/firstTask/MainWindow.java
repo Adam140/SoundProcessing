@@ -17,6 +17,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.File;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -234,6 +235,7 @@ public class MainWindow extends JFrame {
 			public void mouseClicked(MouseEvent arg0) {
 				if(input != null && input.exists())
 				{
+					System.out.println("CLICKED");
 				convertMusicToPoint();
 				diagram.recountPoint(points, Integer.valueOf(textFieldSample.getText() ));
 				index = Integer.valueOf(textFieldFrameNumber.getText());
@@ -516,6 +518,12 @@ public class MainWindow extends JFrame {
 //			// TODO Auto-generated catch block
 //			e1.printStackTrace();
 //		}
+//		try {
+//			this.generateLatexTable();
+//		} catch (Exception e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
 
 	}
 
@@ -641,4 +649,96 @@ public class MainWindow extends JFrame {
 	public void setDividedPoints(double[][] dividedPoints) {
 		this.dividedPoints = dividedPoints;
 	}
+	
+	public void ClickGenerateButton()
+	{
+		{
+			if(input != null && input.exists())
+			{
+				System.out.println("CLICKED");
+			convertMusicToPoint();
+			diagram.recountPoint(points, Integer.valueOf(textFieldSample.getText() ));
+			index = Integer.valueOf(textFieldFrameNumber.getText());
+			if(index >= dividedPoints.length)
+			{
+				JOptionPane.showMessageDialog(MainWindow.this,
+						"Wrong frame index, choose from range <1;" + dividedPoints.length +">");
+				index = 0;
+			}
+			textFieldInputFile.setText(input.getAbsolutePath());
+			diagram.revalidate();
+			diagram.repaint();
+			scrollPane.revalidate();
+			}
+		}
+	}
+	
+    public void generateLatexTable() throws Exception, Exception
+    {
+    	  javaxt.io.Directory directory = new javaxt.io.Directory("D:\\Projekty\\Java\\SoundProcessing\\wav");
+    	  javaxt.io.File[] files;
+    	  files = directory.getFiles(true);
+    	  
+    	  double[] n512 = new double[files.length];
+    	  double[] n1024 = new double[files.length];
+    	  double[] n2048 = new double[files.length];
+    	  double[] n4096 = new double[files.length];
+
+    	  double freq = 0;
+    	  DecimalFormat df = new DecimalFormat("#.##");
+    	  for(int i=0;i<files.length;i++)
+    	  {
+    		  String fname = files[i].getName();
+    		  String fpath = files[i].getPath();
+    		  String full = fpath+fname;
+
+    		  //System.out.println(fpath);
+    		 
+    		  textFieldInputFile.setText(fpath+fname);
+    		  //512
+    		  textFieldSample.setText("512");
+    		  this.input = new File(full);
+  			   convertMusicToPoint();
+
+    		  //ClickGenerateButton();
+    		 // btnGenerateWave.d
+    		  Cepstrum c = new Cepstrum(new File(fpath+fname));
+    		  freq = c.getCepstrum(this.dividedPoints, Integer.valueOf(textFieldSample.getText()), false);
+    		  n512[i] = freq;
+    		  
+    		  textFieldSample.setText("1024");
+    		  this.input = new File(full);
+  			   convertMusicToPoint();
+    		  c = new Cepstrum(new File(fpath+fname));
+    		  freq = c.getCepstrum(this.dividedPoints, Integer.valueOf(textFieldSample.getText()), false);
+    		  n1024[i] = freq;
+    		  
+    		  textFieldSample.setText("2048");
+    		  this.input = new File(full);
+  			   convertMusicToPoint();
+    		  c = new Cepstrum(new File(fpath+fname));
+    		  freq = c.getCepstrum(this.dividedPoints, Integer.valueOf(textFieldSample.getText()), false);
+    		  n2048[i] = freq;
+    		  
+    		  textFieldSample.setText("4096");
+    		  this.input = new File(full);
+  			   convertMusicToPoint();
+    		  c = new Cepstrum(new File(fpath+fname));
+    		  freq = c.getCepstrum(this.dividedPoints, 4096, false);
+    		  n4096[i] = freq;
+    		  //System.out.println(files[i].getName());
+    	  }
+    	  
+    	  for(int i=0;i<files.length;i++)
+    	  {
+    		  String fname = files[i].getName();
+    		  String fpath = files[i].getPath();
+    		  String full = fpath+fname;
+    		  
+    		  System.out.println(fname+" & "+ df.format(n512[i])+" & "+ df.format(n1024[i])+" & "+ df.format(n2048[i])+" \\\\");
+    		  
+    	  }
+    	  
+    }
+	
 }

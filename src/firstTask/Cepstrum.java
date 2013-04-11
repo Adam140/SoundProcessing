@@ -72,7 +72,7 @@ public class Cepstrum {
         double[] spectrum = new double[N];
 
         double[] temp = new double[N];
-        double[] end = new double[N];
+        double[] cepstrum = new double[N];
 
         double[] x = new double[N];
         double[] y = new double[N];
@@ -87,7 +87,6 @@ public class Cepstrum {
         Complex[] s = new Complex[N];
         Vector< double[] > vec = new Vector< double[]>();
         // 0 - freq , 1- position
-        Vector< double[] > detected_freq = new Vector< double[]>();
         int zero_index = 0;
         double right_max = 99999;
         
@@ -113,8 +112,8 @@ public class Cepstrum {
 
                 for(int i=0;i<N;i++)
                 {
-                	temp[i] = Math.log10(Math.abs(s[i].getReal()));
-                	s[i] = new Complex(temp[i],0);
+                	spectrum[i] = Math.log10(Math.abs(s[i].getReal()));
+                	s[i] = new Complex(spectrum[i],0);
                 }
                 s = FFT.ifft1D(s);
                 zero_index = 0;
@@ -125,7 +124,7 @@ public class Cepstrum {
                 	temp[i] = s[i].getReal();
                 	if(zero_index == 0 && temp[i] < 0)
                 		zero_index = i;
-                	end[i] = Math.abs(temp[i]);
+                	cepstrum[i] = Math.abs(temp[i]);
                 }
                 double max_value = 0;
                 int max_index = 0;
@@ -134,9 +133,9 @@ public class Cepstrum {
                 for(int i=zero_index;i<N/2;i++)
                 {
 
-                		if(end[i] > max_value)
+                		if(cepstrum[i] > max_value)
                 		{
-                			max_value = end[i];
+                			max_value = cepstrum[i];
                 			max_index = i;
                 		}
                 		
@@ -180,9 +179,9 @@ public class Cepstrum {
 //        	
 //        	if(!going_down)
 //        	{
-        		if(end[i] > max_value)
+        		if(cepstrum[i] > max_value)
         		{
-        			max_value = end[i];
+        			max_value = cepstrum[i];
         			max_index = i;
         		}
         	//}
@@ -204,37 +203,39 @@ public class Cepstrum {
         else
         	sounds = freq+","+(int)( N/ samplePeerMs)*nframe+";";
         
-        System.out.println("Detected freq: "+Median(detected_frequency)+"Hz");
-        System.out.println("Position: "+max_index);
-
-        System.out.println("zero index: "+zero_index);
-
-        System.out.println("Left going down: "+going_down_index);
-        System.out.println("Right going down: "+right_going_down_index);
+//        System.out.println("Detected freq: "+Median(detected_frequency)+"Hz");
+//        System.out.println("Position: "+max_index);
+//
+//        System.out.println("zero index: "+zero_index);
+//
+//        System.out.println("Left going down: "+going_down_index);
+//        System.out.println("Right going down: "+right_going_down_index);
 
         
-       //x = TrimTable(zero_index,N/2, x);
-       //end =  TrimTable(zero_index,N/2, end);
+       x = TrimTable(15,N/2, x);
+       spectrum =  TrimTable(15,N/2, cepstrum);
+       cepstrum =  TrimTable(zero_index,N/2, cepstrum);
 
-		Plot2DPanel plot = new Plot2DPanel();
-		plot.addLegend("SOUTH");
-
-		// add a line plot to the PlotPanel
-		//plot.addLinePlot("Normal", x, y);
-		plot.addLinePlot("Cepstrum", x, end);
-		//plot.addScatterPlot("Point", (double[]])max_index);
-		//plot.addLinePlot("Point",Color.RED, new double[] { max_index,max_index }, new double[] { getMaxValue(end),getMinValue(end) });
-		JFrame frame = new JFrame("a plot panel");
-		frame.setSize(600, 600);
-		frame.setContentPane(plot);
-		frame.setVisible(true);
-		
-		DateFormat dateFormat = new SimpleDateFormat("HH_mm");
-		Date date = new Date();
-		
-		Vector<Sound> sound_vec = ConsoleUtil.convertText(sounds);
-		WavFileGenerator wg = new WavFileGenerator(new File(dateFormat.format(date) + "seq.wav"), sound_vec);
-        wg.write();
+//		Plot2DPanel plot = new Plot2DPanel();
+//		plot.addLegend("SOUTH");
+//
+//		// add a line plot to the PlotPanel
+//		//plot.addLinePlot("Normal", x, y);
+//		plot.addLinePlot("Spectrum", x, spectrum);
+//		//plot.addLinePlot("Cepstrum", x, cepstrum);
+//		//plot.addScatterPlot("Point", (double[]])max_index);
+//		//plot.addLinePlot("Point",Color.RED, new double[] { max_index,max_index }, new double[] { getMaxValue(end),getMinValue(end) });
+//		JFrame frame = new JFrame("a plot panel");
+//		frame.setSize(600, 600);
+//		frame.setContentPane(plot);
+//		frame.setVisible(true);
+//		
+//		DateFormat dateFormat = new SimpleDateFormat("HH_mm");
+//		Date date = new Date();
+//		
+//		Vector<Sound> sound_vec = ConsoleUtil.convertText(sounds);
+//		WavFileGenerator wg = new WavFileGenerator(new File(dateFormat.format(date) + "seq.wav"), sound_vec);
+//        wg.write();
 
 		return freq;
 
@@ -272,8 +273,9 @@ public class Cepstrum {
 	public double ComputeFrequency(int max_index,int N,int framerate)
 	{
         double freq = 0;
-        double max_value =  (double)N / max_index;
-        freq = (max_value * framerate)/N;
+        //double max_value =  (double)N / max_index;
+        //freq = (max_value * framerate)/N;
+        freq = (double)framerate / max_index;
         return freq;
 	}
 	
@@ -297,5 +299,12 @@ public class Cepstrum {
 	    }  
 	    return minValue;  
 	} 
+	
+	public double calculateTime(int N,int sampleRate)
+	{
+		double samplePeerMs = sampleRate / 1000;
+
+		return (int)( N/ samplePeerMs);
+	}
 
 }
