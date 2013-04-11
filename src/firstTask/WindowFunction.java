@@ -41,7 +41,7 @@ public class WindowFunction {
 	
 	public static double[][] sampling(double[] array, int sampRate)
 	{
-		int samplingRate = 2048;
+		int samplingRate = sampRate;
 		if(isPowerOfTwo(sampRate))
 		{
 			samplingRate = sampRate;

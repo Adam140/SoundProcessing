@@ -91,6 +91,7 @@ public class Cepstrum {
         // 0 - freq , 1- position
         Vector< double[] > detected_freq = new Vector< double[]>();
         int zero_index = 0;
+        double right_max = 99999;
         
         //while( decoder.readSamples( samples ) > 0 )
         for(int f=0;f<nframe;f++)
@@ -119,6 +120,7 @@ public class Cepstrum {
                 }
                 s = FFT.ifft1D(s);
                 zero_index = 0;
+                //right_max = temp[N-1];
                 for(int i=0;i<N;i++)
                 {
                 	
@@ -192,8 +194,8 @@ public class Cepstrum {
 //      return float(spectrummax * FRAMERATE) / frames
         double freq = 0;
         max_value =  (double)N / max_index;
-        freq = (max_value * framerate)/N;
-        System.out.println("Detected freq: "+freq+"Hz");
+        freq = Median(detected_frequency);
+        System.out.println("Detected freq: "+Median(detected_frequency)+"Hz");
         System.out.println("Position: "+max_index);
         System.out.println("value: "+max_value);
         System.out.println("value: "+end[max_index]);
@@ -204,8 +206,8 @@ public class Cepstrum {
         System.out.println("Right going down: "+right_going_down_index);
 
         
-       x = TrimTable(zero_index,N/2, x);
-       end =  TrimTable(zero_index,N/2, end);
+       //x = TrimTable(zero_index,N/2, x);
+       //end =  TrimTable(zero_index,N/2, end);
 
 		Plot2DPanel plot = new Plot2DPanel();
 		plot.addLegend("SOUTH");
