@@ -71,11 +71,49 @@ public class WavFileGenerator {
 	             for (int s=0 ; s<toWrite ; s++, frameCounter++)
 	             {
 	                buffer[s] = Math.sin(2.0 * Math.PI * sound.getFrequency() * (frameCounter + phase) / sampleRate);
+
 	                if(duration + sound.getDuration() * sampleDuration <= frameCounter && it.hasNext())
 	                {
 	                	sound = it.next();
 	                	duration+=sound.getDuration() * sampleDuration;
+	                	double last = 0;
+	                	if(s == 0)
+	                		last = buffer[buffer.length - 1];
+	                	else
+	                		last = buffer[s - 1];
 	                	
+	                	boolean growing = true;
+	                	if(buffer[s] - last > 0)
+	                		growing = true;
+	                	else
+	                		growing = false;
+	                	
+	                	phase = 0;
+	                	double temp,temp2;
+	                	while(true)
+	                	{
+	                		temp = Math.sin(2.0 * Math.PI * sound.getFrequency() * (frameCounter + phase) / sampleRate);
+	                		temp2 = Math.sin(2.0 * Math.PI * sound.getFrequency() * (frameCounter + phase + 1) / sampleRate);
+	                		if(temp2 - temp > 0 == growing)	// nastepna czesc wykresu powinna miec taka sama monotonicznosc
+	                		{
+	                			while(true)
+	                			{
+	                				temp = Math.sin(2.0 * Math.PI * sound.getFrequency() * (frameCounter + phase) / sampleRate);
+	                				if(growing && (temp > buffer[s] || Math.abs(temp - buffer[s]) <= 0.01))
+	                				{
+	                					break;
+	                				}
+	                				else if(!growing && (temp < buffer[s] || Math.abs(temp - buffer[s]) <= 0.01))
+	                				{
+	                					break;
+	                				}
+	                				phase++;
+	                			}
+	                			
+	                			break;
+	                		}
+	                		phase++;
+	                	}
 	                }
 	             }
 	             

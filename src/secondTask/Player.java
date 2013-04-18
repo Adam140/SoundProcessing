@@ -23,8 +23,6 @@ public class Player {
 			clip = (Clip) AudioSystem.getLine(info);
 			clip.open(stream);
 			clip.start();
-			clip.close();
-			stream.close();
 		} catch (Exception e) {
 			// whatevers
 		}
