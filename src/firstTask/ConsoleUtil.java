@@ -8,6 +8,7 @@ public class ConsoleUtil {
 	{
 		Vector<Sound> vec =  new Vector<>();
 		try{
+			s = s.replaceAll("\\n", "");
 			String[] allTone = s.split(";");
 			
 			for(String tmp:allTone)
