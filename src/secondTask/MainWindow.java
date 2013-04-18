@@ -29,6 +29,7 @@ public class MainWindow {
 	private JTextField jtfDuration;
 	private JTextArea console;
 	private JButton btnPlay;
+	private final File staticFile = new File("./output/player.wav");	// from this we will play sound
 
 	/**
 	 * Launch the application.
@@ -75,7 +76,10 @@ public class MainWindow {
 		btnPlay.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				WavFileGenerator output = new WavFileGenerator(staticFile, ConsoleUtil.convertText(console.getText()));
+				output.write();
 				
+				Player.play(staticFile);
 			}
 		});
 		btnPlay.setBounds(174, 27, 121, 23);
@@ -186,8 +190,5 @@ public class MainWindow {
 		});
 		btnSave.setBounds(176, 56, 121, 23);
 		frame.getContentPane().add(btnSave);
-	}
-	public JButton getBtnPlay() {
-		return btnPlay;
 	}
 }

@@ -47,7 +47,7 @@ public class WavFileGenerator {
 	          it = vector.iterator();
 	          long counter = 0;
 	          // Calculate the number of frames required for specified duration
-	          long numFrames = (long)(duration / 1000 * sampleRate);
+	          long numFrames = (long)((double)duration / 1000.0 * sampleRate);
 
 	          // Create a wav file with the name specified as the first argument
 	          WavFile wavFile = WavFile.newWavFile(file, 1, numFrames, 16, sampleRate);
@@ -57,6 +57,7 @@ public class WavFileGenerator {
 
 	          // Initialise a local frame counter
 	          long frameCounter = 0;
+	          int phase = 0;
 	          Sound sound = it.next();
 	          duration = 0;
 	          // Loop until all frames written
@@ -69,11 +70,12 @@ public class WavFileGenerator {
 	             // Fill the buffer, one tone per channel
 	             for (int s=0 ; s<toWrite ; s++, frameCounter++)
 	             {
-	                buffer[s] = Math.sin(2.0 * Math.PI * sound.getFrequency() * frameCounter / sampleRate);
+	                buffer[s] = Math.sin(2.0 * Math.PI * sound.getFrequency() * (frameCounter + phase) / sampleRate);
 	                if(duration + sound.getDuration() * sampleDuration <= frameCounter && it.hasNext())
 	                {
 	                	sound = it.next();
 	                	duration+=sound.getDuration() * sampleDuration;
+	                	
 	                }
 	             }
 	             
@@ -89,5 +91,6 @@ public class WavFileGenerator {
 	          System.err.println(e);
 	       }
 	    }
+	
 
 }

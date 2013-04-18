@@ -2,22 +2,22 @@ package firstTask;
 
 public class Sound {
 
-	private Double frequency;
+	private double frequency;
 	private int duration;
 	
 	/**
 	 * @param frequency HZ
 	 * @param duration millisecond
 	 */
-	public Sound(Double frequency, int duration) {
+	public Sound(double frequency, int duration) {
 		this.frequency = frequency;
 		this.duration = duration;
 	}
 	
-	public Double getFrequency() {
+	public double getFrequency() {
 		return frequency;
 	}
-	public void setFrequency(Double frequency) {
+	public void setFrequency(double frequency) {
 		this.frequency = frequency;
 	}
 	public int getDuration() {
