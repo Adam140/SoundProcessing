@@ -9,6 +9,12 @@ public class WavFileGenerator {
 	private File file;
 	private Vector<Sound> vector = new Vector<Sound>();
 	private static boolean phaseShift = false;	// czy uwzgledniac dopasowanie fazowe
+	private int option = 3;	// pobierane z okna radio czy cos
+	// 0 - sinus
+	// 1 - trojkatne
+	// 2 - piloksztaltne
+	// 3 - prostokantne
+	// 4 - noise
 	private static int sampleRate = 44100;    // Samples per second
 	private static double eightDivideByPI = 8 / Math.pow(Math.PI,2);
 
@@ -80,7 +86,8 @@ public class WavFileGenerator {
 	            	 }
 	            	 else
 	            		 last = buffer[s - 1];
-	                buffer[s] = triangle(frameCounter, sound.getFrequency(),last);
+	            	 
+	                buffer[s] = function(frameCounter, sound.getFrequency(), phase);
 
 	                if(duration + sound.getDuration() * sampleDuration <= frameCounter && it.hasNext())
 	                {
@@ -105,13 +112,13 @@ public class WavFileGenerator {
 		                	double temp,temp2;
 		                	while(true)
 		                	{
-		                		temp = Math.sin(2.0 * Math.PI * sound.getFrequency() * (frameCounter + phase) / sampleRate);
-		                		temp2 = Math.sin(2.0 * Math.PI * sound.getFrequency() * (frameCounter + phase + 1) / sampleRate);
+		                		temp = function(frameCounter, sound.getFrequency(), phase);
+		                		temp2 = function(frameCounter, sound.getFrequency(), phase + 1);
 		                		if(temp2 - temp > 0 == growing)	// nastepna czesc wykresu powinna miec taka sama monotonicznosc
 		                		{
 		                			while(true)
 		                			{
-		                				temp = Math.sin(2.0 * Math.PI * sound.getFrequency() * (frameCounter + phase) / sampleRate);
+		                				temp = function(frameCounter, sound.getFrequency(), phase);
 		                				if(growing && (temp > buffer[s] || Math.abs(temp - buffer[s]) <= 0.01))
 		                				{
 		                					break;
@@ -144,6 +151,25 @@ public class WavFileGenerator {
 	       }
 	    }
 	
+	private double function(long x, double freq, int phase)
+	{
+		switch(option)
+		{
+		case 0:
+			return sin(x, freq, phase);
+		case 1:
+			return 0;
+		case 2:
+			return 0;
+		case 3:
+			return rectangular(x, freq, phase);
+		case 4:
+			return 0;
+		default:
+			return 0;
+		}
+	}
+	
 	static double triangle(long x, double freq, double lastValue)
 	{
 		double result = 0;
@@ -170,7 +196,26 @@ public class WavFileGenerator {
 		result = Math.sin(2.0 * Math.PI * freq * (x + phase) / sampleRate);
 		
 		return result;
+	}
+	
+	static double rectangular(long x, double freq, int phase)
+	{
+		double result = 0;
 		
+		double sin = sin(x,freq,phase);
+		
+		if(sin >= 0)
+			return 1;
+		else
+			return -1;
+	}
+	
+	static double saw(long x, double freq, int phase)
+	{
+		double result =0;
+		result = sin(x,freq,phase) - Math.floor(sin(x,freq,phase));
+		
+		return result;
 	}
 	
 
