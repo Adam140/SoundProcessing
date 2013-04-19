@@ -9,7 +9,7 @@ public class WavFileGenerator {
 	private File file;
 	private Vector<Sound> vector = new Vector<Sound>();
 	private static boolean phaseShift = false;	// czy uwzgledniac dopasowanie fazowe
-	private int option = 3;	// pobierane z okna radio czy cos
+	private int option = 1;	// pobierane z okna radio czy cos
 	// 0 - sinus
 	// 1 - trojkatne
 	// 2 - piloksztaltne
@@ -158,7 +158,7 @@ public class WavFileGenerator {
 		case 0:
 			return sin(x, freq, phase);
 		case 1:
-			return 0;
+			return triangle(x, freq, phase);
 		case 2:
 			return 0;
 		case 3:
@@ -170,22 +170,43 @@ public class WavFileGenerator {
 		}
 	}
 	
-	static double triangle(long x, double freq, double lastValue)
+	static double triangle(long x, double freq, int phase)
 	{
 		double result = 0;
+		int period = (int) (sampleRate / freq);
+		int halfPeriod = period / 2;
+		
+		result = (1.0 / halfPeriod) * (x % period) - 1;
+		
+		if(x % period > halfPeriod)
+			result = -1 * result;
 //		double a = 1 / freq / 2.0; // period 2a
 //		
 //		result = 2 / a * (x - a * Math.floor(x/a + 0.5)) * Math.pow(-1,Math.floor(x/a + 0.5));
-		
-		
-		result = lastValue / eightDivideByPI;
-		x = x / sampleRate;
-		double temp = Math.sin((2*x + 1) * freq * x);
-		temp = temp / (Math.pow(2 * x + 1, 2));
-		temp = temp * Math.pow(-1, x);
-		
-		result = temp + result;
-		result = eightDivideByPI * result;
+//		int x1, x2 = (int) x;
+//		do
+//		{
+//			result = sin(x1, freq, phase);
+//			x1++; // miejsce zerowe
+//		}
+//		while(Math.abs(result) <= 0.01);
+//		
+//		x2 = x1;
+//		do
+//		{
+//			result = sin(x2, freq, phase);
+//			x2++; // nastepne miejsce zerowe
+//		}
+//		while(Math.abs(result) <= 0.01);
+//		
+//		result = lastValue / eightDivideByPI;
+//		x = x / sampleRate;
+//		double temp = Math.sin((2*x + 1) * freq * x);
+//		temp = temp / (Math.pow(2 * x + 1, 2));
+//		temp = temp * Math.pow(-1, x);
+//		
+//		result = temp + result;
+//		result = eightDivideByPI * result;
 		return result;
 	}
 	
