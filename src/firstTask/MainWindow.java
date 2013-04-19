@@ -347,7 +347,7 @@ public class MainWindow extends JFrame {
 				} else {
 					WavFileGenerator output = new WavFileGenerator(new File(
 							textFieldOutputFile.getText()), ConsoleUtil
-							.convertText(console.getText()));
+							.convertText(console.getText()),0);
 					output.write();
 					JOptionPane.showMessageDialog(MainWindow.this, "OK");
 				}
@@ -613,7 +613,7 @@ public class MainWindow extends JFrame {
 		
 		if(!textFieldOutputFile.getText().endsWith(".wav"))
 			textFieldOutputFile.setText(textFieldOutputFile.getText() + ".wav");
-		WavFileGenerator wf = new WavFileGenerator(new File(textFieldOutputFile.getText()), ConsoleUtil.convertText(sequence));
+		WavFileGenerator wf = new WavFileGenerator(new File(textFieldOutputFile.getText()), ConsoleUtil.convertText(sequence),0);
 		wf.write();
 		;
 	}
@@ -625,7 +625,7 @@ public class MainWindow extends JFrame {
 		DateFormat dateFormat = new SimpleDateFormat("HH_mm");
 		Date date = new Date();
 		String file = "./output/" + dateFormat.format(date) + "_" + freq + "Hz.wav";
-		WavFileGenerator wf = new WavFileGenerator(new File(file), ConsoleUtil.convertText(sequence));
+		WavFileGenerator wf = new WavFileGenerator(new File(file), ConsoleUtil.convertText(sequence),0);
 		wf.write();
 	}
 	

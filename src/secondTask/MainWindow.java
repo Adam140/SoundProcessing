@@ -21,6 +21,8 @@ import javax.swing.SwingConstants;
 
 import firstTask.ConsoleUtil;
 import firstTask.WavFileGenerator;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
 
 public class MainWindow {
 
@@ -30,6 +32,7 @@ public class MainWindow {
 	private JTextArea console;
 	private JButton btnPlay;
 	private final File staticFile = new File("./output/player.wav");	// from this we will play sound
+	private JComboBox comboWave;
 
 	/**
 	 * Launch the application.
@@ -76,7 +79,7 @@ public class MainWindow {
 		btnPlay.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				WavFileGenerator output = new WavFileGenerator(staticFile, ConsoleUtil.convertText(console.getText()));
+				WavFileGenerator output = new WavFileGenerator(staticFile, ConsoleUtil.convertText(console.getText()), comboWave.getSelectedIndex());
 				output.write();
 				
 				Player.play(staticFile);
@@ -170,7 +173,7 @@ public class MainWindow {
 				console.setText("");
 			}
 		});
-		btnClearConsole.setBounds(10, 313, 121, 23);
+		btnClearConsole.setBounds(190, 311, 121, 23);
 		frame.getContentPane().add(btnClearConsole);
 		
 		JButton btnSave = new JButton("Save");
@@ -182,7 +185,7 @@ public class MainWindow {
 					DateFormat dateFormat = new SimpleDateFormat("HH_mm_ss");
 					Date date = new Date();
 					String file = "./output/" + dateFormat.format(date) + ".wav";
-					WavFileGenerator output = new WavFileGenerator(new File(file), ConsoleUtil.convertText(console.getText()));
+					WavFileGenerator output = new WavFileGenerator(new File(file), ConsoleUtil.convertText(console.getText()), comboWave.getSelectedIndex());
 					output.write();
 					JOptionPane.showMessageDialog(frame, "Save in " + file);
 				}
@@ -190,5 +193,10 @@ public class MainWindow {
 		});
 		btnSave.setBounds(176, 56, 121, 23);
 		frame.getContentPane().add(btnSave);
+		
+		comboWave = new JComboBox();
+		comboWave.setModel(new DefaultComboBoxModel(new String[] {"sinusoidal wave", "triangular wave", "sawtooth wave", "rectangular wave", "red noise", "white noise"}));
+		comboWave.setBounds(10, 311, 175, 20);
+		frame.getContentPane().add(comboWave);
 	}
 }
