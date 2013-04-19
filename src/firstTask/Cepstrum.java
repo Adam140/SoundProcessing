@@ -1,34 +1,14 @@
 package firstTask;
 
-
-
-import java.awt.Color;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
 import java.util.Vector;
-
-import javax.swing.JFrame;
-import javax.swing.plaf.SliderUI;
-
-import org.math.plot.Plot2DPanel;
-import org.math.plot.utils.Array;
 
 import transforms.FFT;
 
-
 import com.badlogic.audio.analysis.Complex;
-import com.badlogic.audio.analysis.WaveDecoder;
-
-import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 
 public class Cepstrum {
 	
