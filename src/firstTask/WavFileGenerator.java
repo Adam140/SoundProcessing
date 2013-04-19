@@ -208,6 +208,7 @@ public class WavFileGenerator {
 			return 1;
 		else
 			return -1;
+<<<<<<< HEAD
 	}
 	
 	static double saw(long x, double freq, int phase)
@@ -216,6 +217,8 @@ public class WavFileGenerator {
 		result = sin(x,freq,phase) - Math.floor(sin(x,freq,phase));
 		
 		return result;
+=======
+>>>>>>> branch 'master' of https://github.com/Adam140/SoundProcessing.git
 	}
 	
 
