@@ -68,6 +68,7 @@ public class WavFileGenerator {
 	          int phase = 0;
 	          Sound sound = it.next();
 	          duration = 0;
+	          double min = 0;
 	          // Loop until all frames written
 	          while (frameCounter < numFrames)
 	          {
@@ -78,63 +79,23 @@ public class WavFileGenerator {
 	             // Fill the buffer, one tone per channel
 	             for (int s=0 ; s<toWrite ; s++, frameCounter++)
 	             {
-//	            	buffer[s] = sin(frameCounter, sound.getFrequency(), phase);
-	            	 double last = 0;
-	            	 if(s == 0)
-	            	 {
-	            		 if(frameCounter!=0)
-	            			 last = buffer[buffer.length - 1];
-	            	 }
-	            	 else
-	            		 last = buffer[s - 1];
-	            	 
 	                buffer[s] = function(frameCounter, sound.getFrequency(), phase);
 
+	                if(buffer[s] < min)
+	                	min = buffer[s];
+	                if(phaseShift && buffer[s] >= -0.99)	// element przesuniecia fazowego
+	                	continue;			// zeby konczylo sie zawsze na dole wykresu
+	                
 	                if(duration + sound.getDuration() * sampleDuration <= frameCounter && it.hasNext())
 	                {
+	                	System.out.println(min);
+	                	min = 0;
 	                	sound = it.next();
 	                	duration+=sound.getDuration() * sampleDuration;
 	                	
 	                	if(phaseShift)
 	                	{
-//		                	double last = 0;
-		                	if(s == 0)
-		                		last = buffer[buffer.length - 1];
-		                	else
-		                		last = buffer[s - 1];
-		                	
-		                	boolean growing = true;
-		                	if(buffer[s] - last > 0)
-		                		growing = true;
-		                	else
-		                		growing = false;
-		                	
-		                	phase = 0;
-		                	double temp,temp2;
-		                	while(true)
-		                	{
-		                		temp = function(frameCounter, sound.getFrequency(), phase);
-		                		temp2 = function(frameCounter, sound.getFrequency(), phase + 1);
-		                		if(temp2 - temp > 0 == growing)	// nastepna czesc wykresu powinna miec taka sama monotonicznosc
-		                		{
-		                			while(true)
-		                			{
-		                				temp = function(frameCounter, sound.getFrequency(), phase);
-		                				if(growing && (temp > buffer[s] || Math.abs(temp - buffer[s]) <= 0.01))
-		                				{
-		                					break;
-		                				}
-		                				else if(!growing && (temp < buffer[s] || Math.abs(temp - buffer[s]) <= 0.01))
-		                				{
-		                					break;
-		                				}
-		                				phase++;
-		                			}
-		                			
-		                			break;
-		                		}
-		                		phase++;
-		                	}
+	                		phase = phaseShift(frameCounter, sound.getFrequency());
 	                	}
 	                }
 	             }
@@ -169,6 +130,21 @@ public class WavFileGenerator {
 		default:
 			return 0;
 		}
+	}
+	
+	private int phaseShift(long x, double freq)
+	{
+		int phase = 0;
+    
+    	while(true)
+    	{
+    		if(function(x, freq, phase) <= -0.99 )
+    			break;
+    		
+    		phase++;
+    	}
+    	
+		return phase;
 	}
 	
 	static double triangle(long x, double freq, int phase)
