@@ -5,6 +5,8 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Vector;
 
+import secondTask.BrownNoiseGenerator;
+
 public class WavFileGenerator {
 	private File file;
 	private Vector<Sound> vector = new Vector<Sound>();
@@ -17,6 +19,7 @@ public class WavFileGenerator {
 	// 4 - noise
 	private static int sampleRate = 44100;    // Samples per second
 	private static double eightDivideByPI = 8 / Math.pow(Math.PI,2);
+	BrownNoiseGenerator bng= new BrownNoiseGenerator();
 
 
 	public WavFileGenerator() {
@@ -40,6 +43,7 @@ public class WavFileGenerator {
 //		w.write();
 //	}
 	public void write() {
+		this.bng = new BrownNoiseGenerator();
 		try
 	      {
 	          int duration = 0;     // Seconds
@@ -126,9 +130,12 @@ public class WavFileGenerator {
 		case 3:
 			return rectangular(x, freq, phase);
 		case 4:
-			return 0;
+			return this.bng.getNext();
+		case 5:
+			return whitenoise(x, freq, phase);
 		default:
 			return 0;
+
 		}
 	}
 	
@@ -193,5 +200,11 @@ public class WavFileGenerator {
 		return result;
 	}
 	
+	static double whitenoise(long x, double freq, int phase)
+	{
+		float amp = 1;
+	    double result = amp * (2 * (float) Math.random() - 1);
 
+		return result;
+	}
 }
