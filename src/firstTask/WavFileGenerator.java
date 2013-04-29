@@ -112,6 +112,7 @@ public class WavFileGenerator {
 
 	          // Close the wavFile
 	          wavFile.close();
+	          System.out.println(min);
 	       }
 	       catch (Exception e)
 	       {
@@ -181,8 +182,8 @@ public class WavFileGenerator {
 		
 		result = (2.0 / halfPeriod) * (x % period) - 1;
 		
-		if(x % period > halfPeriod)
-			result = (-2.0 / halfPeriod) * (x % period) - 1;
+		if(result > 1.0)
+			result = (-2.0 / halfPeriod) * (x % period) + 3;
 		
 		return result;
 	}
