@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import secondTask.BrownNoiseGenerator;
+import secondTask.Filter;
 
 public class WavFileGenerator {
 	private File file;
@@ -20,6 +21,7 @@ public class WavFileGenerator {
 	private static int sampleRate = 44100;    // Samples per second
 	private static double eightDivideByPI = 8 / Math.pow(Math.PI,2);
 	BrownNoiseGenerator bng= new BrownNoiseGenerator();
+	private double last_value = -99999;
 
 
 	public WavFileGenerator() {
@@ -83,7 +85,7 @@ public class WavFileGenerator {
 	             // Fill the buffer, one tone per channel
 	             for (int s=0 ; s<toWrite ; s++, frameCounter++)
 	             {
-	                buffer[s] = function(frameCounter, sound.getFrequency(), phase);
+	                buffer[s] = function(frameCounter, sound.getFrequency(), phase,true);
 
 	                if(buffer[s] < min)
 	                	min = buffer[s];
@@ -117,27 +119,42 @@ public class WavFileGenerator {
 	       }
 	    }
 	
-	private double function(long x, double freq, int phase)
+	private double function(long x, double freq, int phase, boolean filter)
 	{
+
+		double value = 0;
 		switch(option)
 		{
 		case 0:
-			return sin(x, freq, phase);
+			value = sin(x, freq, phase);
+			break;
 		case 1:
-			return triangle(x, freq, phase);
+			value = triangle(x, freq, phase);
+			break;
 		case 2:
-			return saw(x, freq, phase);
+			value = saw(x, freq, phase);
+			break;
 		case 3:
-			return rectangular(x, freq, phase);
+			value = rectangular(x, freq, phase);
+			break;
 		case 4:
-			return this.bng.getNext();
+			value = this.bng.getNext();
+			break;
 		case 5:
-			return whitenoise(x, freq, phase);
+			value = whitenoise(x, freq, phase);
+			break;
 		default:
-			return 0;
-
+			value = 0;
+			break;
 			
 		}
+//		if(filter && this.last_value != -99999)
+//		{
+//			value = Filter.LFO(this.last_value, value, 25);
+//			
+//		}
+		this.last_value = value;
+		return value;
 	}
 	
 	private int phaseShift(long x, double freq)
@@ -146,7 +163,7 @@ public class WavFileGenerator {
     
     	while(true)
     	{
-    		if(function(x, freq, phase) <= -0.99 )
+    		if(function(x, freq, phase, true) <= -0.99 )
     			break;
     		
     		phase++;
