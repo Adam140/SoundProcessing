@@ -23,6 +23,9 @@ import firstTask.ConsoleUtil;
 import firstTask.WavFileGenerator;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JCheckBox;
+import javax.swing.JSlider;
+import javax.swing.JSeparator;
 
 public class MainWindow {
 
@@ -33,6 +36,12 @@ public class MainWindow {
 	private JButton btnPlay;
 	private final File staticFile = new File("./output/player.wav");	// from this we will play sound
 	private JComboBox comboWave;
+	private JTextField tf_sin_hz;
+	private JTextField tf_tri_hz;
+	private JTextField tf_saw_hz;
+	private JTextField tf_rec_hz;
+	private JTextField tf_red_hz;
+	private JTextField tf_white_hz;
 
 	/**
 	 * Launch the application.
@@ -63,7 +72,7 @@ public class MainWindow {
 	private void initialize() {
 		frame = new JFrame();
 		frame.getContentPane().setBackground(Color.LIGHT_GRAY);
-		frame.setBounds(100, 100, 340, 380);
+		frame.setBounds(100, 100, 522, 378);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
@@ -198,5 +207,79 @@ public class MainWindow {
 		comboWave.setModel(new DefaultComboBoxModel(new String[] {"sinusoidal wave", "triangular wave", "sawtooth wave", "rectangular wave", "red noise", "white noise"}));
 		comboWave.setBounds(10, 311, 175, 20);
 		frame.getContentPane().add(comboWave);
+		
+		JButton btnSinusoidal = new JButton("Sinusoidal");
+		btnSinusoidal.setBounds(326, 27, 89, 23);
+		frame.getContentPane().add(btnSinusoidal);
+		
+		JLabel lblGenerators = new JLabel("Generators");
+		lblGenerators.setBounds(372, 13, 62, 14);
+		frame.getContentPane().add(lblGenerators);
+		
+		tf_sin_hz = new JTextField();
+		tf_sin_hz.setBounds(420, 28, 46, 20);
+		frame.getContentPane().add(tf_sin_hz);
+		tf_sin_hz.setColumns(10);
+		
+		JButton btnTriangular = new JButton("Triangular");
+		btnTriangular.setBounds(326, 56, 89, 23);
+		frame.getContentPane().add(btnTriangular);
+		
+		tf_tri_hz = new JTextField();
+		tf_tri_hz.setColumns(10);
+		tf_tri_hz.setBounds(420, 57, 46, 20);
+		frame.getContentPane().add(tf_tri_hz);
+		
+		JButton btnSawtooth = new JButton("Sawtooth ");
+		btnSawtooth.setBounds(326, 88, 89, 23);
+		frame.getContentPane().add(btnSawtooth);
+		
+		tf_saw_hz = new JTextField();
+		tf_saw_hz.setColumns(10);
+		tf_saw_hz.setBounds(420, 89, 46, 20);
+		frame.getContentPane().add(tf_saw_hz);
+		
+		JButton btnRectangular = new JButton("Rectangular");
+		btnRectangular.setBounds(326, 119, 91, 23);
+		frame.getContentPane().add(btnRectangular);
+		
+		tf_rec_hz = new JTextField();
+		tf_rec_hz.setColumns(10);
+		tf_rec_hz.setBounds(420, 120, 46, 20);
+		frame.getContentPane().add(tf_rec_hz);
+		
+		JButton btnRedNoise = new JButton("Red noise");
+		btnRedNoise.setBounds(326, 153, 89, 23);
+		frame.getContentPane().add(btnRedNoise);
+		
+		tf_red_hz = new JTextField();
+		tf_red_hz.setEnabled(false);
+		tf_red_hz.setEditable(false);
+		tf_red_hz.setColumns(10);
+		tf_red_hz.setBounds(420, 154, 46, 20);
+		frame.getContentPane().add(tf_red_hz);
+		
+		JButton btnWhiteNoise = new JButton("White noise");
+		btnWhiteNoise.setBounds(326, 185, 89, 23);
+		frame.getContentPane().add(btnWhiteNoise);
+		
+		tf_white_hz = new JTextField();
+		tf_white_hz.setEnabled(false);
+		tf_white_hz.setEditable(false);
+		tf_white_hz.setColumns(10);
+		tf_white_hz.setBounds(420, 186, 46, 20);
+		frame.getContentPane().add(tf_white_hz);
+		
+		JCheckBox chckbxLowpassFilter = new JCheckBox("Low-pass filter");
+		chckbxLowpassFilter.setBounds(326, 216, 97, 23);
+		frame.getContentPane().add(chckbxLowpassFilter);
+		
+		JSlider slider = new JSlider();
+		slider.setBounds(386, 250, 110, 23);
+		frame.getContentPane().add(slider);
+		
+		JLabel lblSmoothness = new JLabel("Smoothness");
+		lblSmoothness.setBounds(322, 254, 62, 14);
+		frame.getContentPane().add(lblSmoothness);
 	}
 }
