@@ -72,7 +72,7 @@ public class MainWindow {
 	private void initialize() {
 		frame = new JFrame();
 		frame.getContentPane().setBackground(Color.LIGHT_GRAY);
-		frame.setBounds(100, 100, 522, 378);
+		frame.setBounds(100, 100, 562, 378);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
@@ -275,11 +275,19 @@ public class MainWindow {
 		frame.getContentPane().add(chckbxLowpassFilter);
 		
 		JSlider slider = new JSlider();
-		slider.setBounds(386, 250, 110, 23);
+		slider.setBounds(420, 250, 110, 23);
 		frame.getContentPane().add(slider);
 		
-		JLabel lblSmoothness = new JLabel("Smoothness");
-		lblSmoothness.setBounds(322, 254, 62, 14);
+		JLabel lblSmoothness = new JLabel("Cut-off frequency");
+		lblSmoothness.setBounds(322, 254, 93, 14);
 		frame.getContentPane().add(lblSmoothness);
+		
+		JLabel lblResonance = new JLabel("Resonance");
+		lblResonance.setBounds(322, 281, 93, 14);
+		frame.getContentPane().add(lblResonance);
+		
+		JSlider slider_1 = new JSlider();
+		slider_1.setBounds(420, 277, 110, 23);
+		frame.getContentPane().add(slider_1);
 	}
 }
