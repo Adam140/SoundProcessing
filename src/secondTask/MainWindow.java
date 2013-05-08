@@ -11,6 +11,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -26,8 +27,10 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JSlider;
 import javax.swing.JSeparator;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
-public class MainWindow {
+public class MainWindow implements ActionListener{
 
 	private JFrame frame;
 	private JTextField jtfCustomHz;
@@ -42,6 +45,19 @@ public class MainWindow {
 	private JTextField tf_rec_hz;
 	private JTextField tf_red_hz;
 	private JTextField tf_white_hz;
+	private JButton btnSinusoidal;
+	private JButton btnWhiteNoise;
+	private JButton btnTriangular;
+	private JButton btnRectangular;
+	private JLabel iconRedN;
+	private JLabel iconSaw;
+	private JLabel iconWhiteN;
+	private JLabel iconSin;
+	private JLabel iconRect;
+	private JLabel iconTrian;
+	private ImageIcon iconOn = new ImageIcon("icon/on.png", "on");
+	private ImageIcon iconOff = new ImageIcon("icon/off.png", "off");
+	private RealTimePlayer realTimePlayer = new RealTimePlayer();
 
 	/**
 	 * Launch the application.
@@ -72,17 +88,13 @@ public class MainWindow {
 	private void initialize() {
 		frame = new JFrame();
 		frame.getContentPane().setBackground(Color.LIGHT_GRAY);
-		frame.setBounds(100, 100, 562, 378);
+		frame.setBounds(100, 100, 611, 378);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
 		console = new JTextArea();
 		console.setBounds(10, 27, 154, 210);
 		frame.getContentPane().add(console);
-		
-		JLabel lblMenu = new JLabel("Menu");
-		lblMenu.setBounds(190, 13, 46, 14);
-		frame.getContentPane().add(lblMenu);
 		
 		btnPlay = new JButton("Play");
 		btnPlay.addMouseListener(new MouseAdapter() {
@@ -153,7 +165,7 @@ public class MainWindow {
 		jtfCustomHz.setColumns(10);
 		
 		JButton btnCustomHz = new JButton("Custom Hz");
-		btnCustomHz.setBounds(190, 277, 122, 23);
+		btnCustomHz.setBounds(190, 277, 112, 23);
 		frame.getContentPane().add(btnCustomHz);
 		
 		jtfDuration = new JTextField();
@@ -164,15 +176,15 @@ public class MainWindow {
 		jtfDuration.setColumns(10);
 		
 		JLabel lblDuration = new JLabel("Duration");
-		lblDuration.setBounds(190, 200, 71, 14);
+		lblDuration.setBounds(190, 200, 71, 16);
 		frame.getContentPane().add(lblDuration);
 		
 		JLabel lblNewLabel = new JLabel("ms");
-		lblNewLabel.setBounds(259, 223, 36, 14);
+		lblNewLabel.setBounds(259, 223, 36, 16);
 		frame.getContentPane().add(lblNewLabel);
 		
 		JLabel lblHz = new JLabel("Hz");
-		lblHz.setBounds(288, 254, 24, 14);
+		lblHz.setBounds(288, 254, 24, 16);
 		frame.getContentPane().add(lblHz);
 		
 		JButton btnClearConsole = new JButton("Clear console");
@@ -208,86 +220,252 @@ public class MainWindow {
 		comboWave.setBounds(10, 311, 175, 20);
 		frame.getContentPane().add(comboWave);
 		
-		JButton btnSinusoidal = new JButton("Sinusoidal");
-		btnSinusoidal.setBounds(326, 27, 89, 23);
+		btnSinusoidal = new JButton("Sinusoidal");
+		btnSinusoidal.setActionCommand("sinusoidal_ON");
+		btnSinusoidal.setBounds(390, 24, 110, 23);
+		btnSinusoidal.addActionListener(this);
 		frame.getContentPane().add(btnSinusoidal);
 		
 		JLabel lblGenerators = new JLabel("Generators");
-		lblGenerators.setBounds(372, 13, 62, 14);
+		lblGenerators.setBounds(324, 12, 104, 16);
 		frame.getContentPane().add(lblGenerators);
 		
 		tf_sin_hz = new JTextField();
-		tf_sin_hz.setBounds(420, 28, 46, 20);
+		tf_sin_hz.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent arg0) {
+				try{
+					double freq = Double.parseDouble(tf_sin_hz.getText());
+					realTimePlayer.changeFreq(freq);
+				}
+				catch(Exception e){
+				}
+			}
+		});
+		tf_sin_hz.setBounds(512, 25, 54, 20);
 		frame.getContentPane().add(tf_sin_hz);
 		tf_sin_hz.setColumns(10);
 		
-		JButton btnTriangular = new JButton("Triangular");
-		btnTriangular.setBounds(326, 56, 89, 23);
+		btnTriangular = new JButton("Triangular");
+		btnTriangular.setActionCommand("triangular_ON");
+		btnTriangular.setBounds(392, 56, 108, 23);
+		btnTriangular.addActionListener(this);
 		frame.getContentPane().add(btnTriangular);
 		
 		tf_tri_hz = new JTextField();
 		tf_tri_hz.setColumns(10);
-		tf_tri_hz.setBounds(420, 57, 46, 20);
+		tf_tri_hz.setBounds(512, 57, 54, 20);
 		frame.getContentPane().add(tf_tri_hz);
 		
-		JButton btnSawtooth = new JButton("Sawtooth ");
-		btnSawtooth.setBounds(326, 88, 89, 23);
+		JButton btnSawtooth = new JButton("Sawtooth");
+		btnSawtooth.setActionCommand("sawtooth_ON");
+		btnSawtooth.setBounds(390, 91, 110, 23);
+		btnSawtooth.addActionListener(this);
 		frame.getContentPane().add(btnSawtooth);
 		
 		tf_saw_hz = new JTextField();
 		tf_saw_hz.setColumns(10);
-		tf_saw_hz.setBounds(420, 89, 46, 20);
+		tf_saw_hz.setBounds(512, 92, 54, 20);
 		frame.getContentPane().add(tf_saw_hz);
 		
-		JButton btnRectangular = new JButton("Rectangular");
-		btnRectangular.setBounds(326, 119, 91, 23);
+		btnRectangular = new JButton("Rectangular");
+		btnRectangular.setActionCommand("rectangular_ON");
+		btnRectangular.setBounds(390, 119, 110, 23);
+		btnRectangular.addActionListener(this);
 		frame.getContentPane().add(btnRectangular);
 		
 		tf_rec_hz = new JTextField();
 		tf_rec_hz.setColumns(10);
-		tf_rec_hz.setBounds(420, 120, 46, 20);
+		tf_rec_hz.setBounds(512, 120, 54, 20);
 		frame.getContentPane().add(tf_rec_hz);
 		
 		JButton btnRedNoise = new JButton("Red noise");
-		btnRedNoise.setBounds(326, 153, 89, 23);
+		btnRedNoise.setActionCommand("redNoise_ON");
+		btnRedNoise.setBounds(390, 153, 110, 23);
+		btnRedNoise.addActionListener(this);
 		frame.getContentPane().add(btnRedNoise);
 		
 		tf_red_hz = new JTextField();
 		tf_red_hz.setEnabled(false);
 		tf_red_hz.setEditable(false);
 		tf_red_hz.setColumns(10);
-		tf_red_hz.setBounds(420, 154, 46, 20);
+		tf_red_hz.setBounds(512, 154, 54, 20);
 		frame.getContentPane().add(tf_red_hz);
 		
-		JButton btnWhiteNoise = new JButton("White noise");
-		btnWhiteNoise.setBounds(326, 185, 89, 23);
+		btnWhiteNoise = new JButton("White noise");
+		btnWhiteNoise.setActionCommand("whiteNoise_ON");
+		btnWhiteNoise.setBounds(390, 185, 110, 23);
+		btnWhiteNoise.addActionListener(this);
 		frame.getContentPane().add(btnWhiteNoise);
 		
 		tf_white_hz = new JTextField();
 		tf_white_hz.setEnabled(false);
 		tf_white_hz.setEditable(false);
 		tf_white_hz.setColumns(10);
-		tf_white_hz.setBounds(420, 186, 46, 20);
+		tf_white_hz.setBounds(512, 186, 54, 20);
 		frame.getContentPane().add(tf_white_hz);
 		
 		JCheckBox chckbxLowpassFilter = new JCheckBox("Low-pass filter");
-		chckbxLowpassFilter.setBounds(326, 216, 97, 23);
+		chckbxLowpassFilter.setBounds(390, 214, 122, 23);
 		frame.getContentPane().add(chckbxLowpassFilter);
 		
 		JSlider slider = new JSlider();
-		slider.setBounds(420, 250, 110, 23);
+		slider.setBounds(475, 250, 110, 23);
 		frame.getContentPane().add(slider);
 		
 		JLabel lblSmoothness = new JLabel("Cut-off frequency");
-		lblSmoothness.setBounds(322, 254, 93, 14);
+		lblSmoothness.setBounds(324, 253, 110, 16);
 		frame.getContentPane().add(lblSmoothness);
 		
 		JLabel lblResonance = new JLabel("Resonance");
-		lblResonance.setBounds(322, 281, 93, 14);
+		lblResonance.setBounds(322, 281, 93, 16);
 		frame.getContentPane().add(lblResonance);
 		
 		JSlider slider_1 = new JSlider();
-		slider_1.setBounds(420, 277, 110, 23);
+		slider_1.setBounds(475, 277, 110, 23);
 		frame.getContentPane().add(slider_1);
+		
+		ImageIcon iconOff = new ImageIcon("icon/off.png", "off");
+		
+		iconSin = new JLabel(iconOff);
+		iconSin.setBounds(569, 27, 16, 16);
+		frame.getContentPane().add(iconSin);
+		
+		iconTrian = new JLabel("", iconOff, JLabel.CENTER);
+		iconTrian.setBounds(569, 60, 16, 16);
+		frame.getContentPane().add(iconTrian);
+		
+		iconSaw = new JLabel("", iconOff, JLabel.CENTER);
+		iconSaw.setBounds(569, 95, 16, 16);
+		frame.getContentPane().add(iconSaw);
+		
+		iconRect = new JLabel("", iconOff, JLabel.CENTER);
+		iconRect.setBounds(569, 123, 16, 16);
+		frame.getContentPane().add(iconRect);
+		
+		iconRedN = new JLabel("", iconOff, JLabel.CENTER);
+		iconRedN.setBounds(569, 157, 16, 16);
+		frame.getContentPane().add(iconRedN);
+		
+		iconWhiteN = new JLabel("", iconOff, JLabel.CENTER);
+		iconWhiteN.setBounds(569, 189, 16, 16);
+		frame.getContentPane().add(iconWhiteN);
 	}
+	public JButton getBtnSinusoidal() {
+		return btnSinusoidal;
+	}
+	public JButton getBtnWhiteNoise() {
+		return btnWhiteNoise;
+	}
+	public JButton getBtnTriangular() {
+		return btnTriangular;
+	}
+	public JButton getBtnRectangular() {
+		return btnRectangular;
+	}
+	public JLabel getIconRedN() {
+		return iconRedN;
+	}
+	public JLabel getIconSaw() {
+		return iconSaw;
+	}
+	public JLabel getIconWhiteN() {
+		return iconWhiteN;
+	}
+	public JLabel getIconSin() {
+		return iconSin;
+	}
+	public JLabel getIconRect() {
+		return iconRect;
+	}
+	public JLabel getIconTrian() {
+		return iconTrian;
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent event) {
+
+		String command = event.getActionCommand();
+
+		if (command.startsWith("sinusoidal")) {
+			if(command.endsWith("_ON"))
+			{
+				realTimePlayer.start();
+				getIconSin().setIcon(iconOn);
+				((JButton) event.getSource()).setActionCommand("sinusoidal_OFF");
+			}
+			else
+			{
+				getIconSin().setIcon(iconOff);
+				((JButton) event.getSource()).setActionCommand("sinusoidal_ON");
+			}
+			
+		} else if (command.startsWith("triangular")) {
+			if(command.endsWith("_ON"))
+			{
+				getIconTrian().setIcon(iconOn);
+				((JButton) event.getSource()).setActionCommand("triangular_OFF");
+			}
+			else
+			{
+				
+				getIconTrian().setIcon(iconOff);
+				((JButton) event.getSource()).setActionCommand("triangular_ON");
+			}
+
+		} else if (command.startsWith("sawtooth")) {
+			if(command.endsWith("_ON"))
+			{
+				getIconSaw().setIcon(iconOn);
+				((JButton) event.getSource()).setActionCommand("sawtooth_OFF");
+			}
+			else
+			{
+				
+				getIconSaw().setIcon(iconOff);
+				((JButton) event.getSource()).setActionCommand("sawtooth_ON");
+			}
+
+		} else if (command.startsWith("rectangular")) {
+			if(command.endsWith("_ON"))
+			{
+				getIconRect().setIcon(iconOn);
+				((JButton) event.getSource()).setActionCommand("rectangular_OFF");
+			}
+			else
+			{
+				
+				getIconRect().setIcon(iconOff);
+				((JButton) event.getSource()).setActionCommand("rectangular_ON");
+			}
+
+		} else if (command.startsWith("redNoise")) {
+			if(command.endsWith("_ON"))
+			{
+				getIconRedN().setIcon(iconOn);
+				((JButton) event.getSource()).setActionCommand("redNoise_OFF");
+			}
+			else
+			{
+				
+				getIconRedN().setIcon(iconOff);
+				((JButton) event.getSource()).setActionCommand("redNoise_ON");
+			}
+
+		} else if (command.startsWith("whiteNoise")) {
+			if(command.endsWith("_ON"))
+			{
+				getIconWhiteN().setIcon(iconOn);
+				((JButton) event.getSource()).setActionCommand("whiteNoise_OFF");
+			}
+			else
+			{
+				
+				getIconWhiteN().setIcon(iconOff);
+				((JButton) event.getSource()).setActionCommand("whiteNoise_ON");
+			}
+
+		}
+	}
+
 }
