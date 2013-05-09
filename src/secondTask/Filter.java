@@ -1,6 +1,7 @@
 package secondTask;
 
 public class Filter {
+
 	private double a0;
 	private double a1;
 	private double a2;
@@ -11,7 +12,7 @@ public class Filter {
 	private double Y1 = -9999;// yn -1 
 	private double Y2 = -9999; // yn-2
 	//given data
-	private double fs; // given sampling frequency
+	private double fs = 44100.00; // given sampling frequency
 	private double fc; // desired cutoff freguency
 	private double Q; // resonance
 	// additional parameters
@@ -28,12 +29,18 @@ public class Filter {
 	 * @param fc - Descired cutoff frequnecy
 	 * @param Q - Resonance
 	 */
-	Filter(double fs, double fc, double Q)
+	public Filter(double fs, double fc, double Q)
 	{
 		this.fs = fs;
 		this.fc = fc;
 		this.Q = Q;
 		this.updateParameters();
+	}
+	
+	public Filter() {
+		this(44100.0, 100.0, 1.0);
+		this.amplifiler = 1.0;
+		setParametersForLPF();
 	}
 	/**
 	 *  Update additional parameters (from instruction to task)

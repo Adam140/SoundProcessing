@@ -66,7 +66,8 @@ public class MainWindow implements ActionListener, KeyListener {
 	private ImageIcon iconOn = new ImageIcon("icon/on.png", "on");
 	private ImageIcon iconOff = new ImageIcon("icon/off.png", "off");
 	private Properties waves = new Properties();
-	private RealTimePlayerFacade realTimePlayer = new RealTimePlayerFacade(waves);
+	private Filter filter = new Filter();
+	private RealTimePlayerFacade realTimePlayer = new RealTimePlayerFacade(waves, filter);
 	public static JTextField tf_fc;
 	public static JTextField tf_Q;
 	public static JTextField tf_amplifier;
@@ -101,7 +102,7 @@ public class MainWindow implements ActionListener, KeyListener {
 	private void initialize() {
 		frame = new JFrame();
 		frame.getContentPane().setBackground(Color.LIGHT_GRAY);
-		frame.setBounds(100, 100, 654, 378);
+		frame.setBounds(100, 100, 654, 448);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 
@@ -214,10 +215,10 @@ public class MainWindow implements ActionListener, KeyListener {
 		tf_fc = new JTextField();
 		tf_fc.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				if( RealTimePlayer.filter != null)
+				if( chckbxLowpassFilter.isSelected() )
 				{
-					RealTimePlayer.filter.updateDate(Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()));
-					RealTimePlayer.filter.setParametersForLPF();
+					filter.updateDate(Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()));
+					filter.setParametersForLPF();
 				}
 			}
 		});
@@ -229,10 +230,10 @@ public class MainWindow implements ActionListener, KeyListener {
 		tf_Q = new JTextField();
 		tf_Q.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if( RealTimePlayer.filter != null)
+				if( chckbxLowpassFilter.isSelected())
 				{
-					RealTimePlayer.filter.updateDate(Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()));
-					RealTimePlayer.filter.setParametersForLPF();
+					filter.updateDate(Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()));
+					filter.setParametersForLPF();
 				}
 			}
 		});
@@ -242,15 +243,15 @@ public class MainWindow implements ActionListener, KeyListener {
 		tf_Q.setColumns(10);
 
 		JLabel lblAmplifier = new JLabel("Amplifier");
-		lblAmplifier.setBounds(321, 311, 46, 14);
+		lblAmplifier.setBounds(321, 311, 110, 14);
 		frame.getContentPane().add(lblAmplifier);
 
 		tf_amplifier = new JTextField();
 		tf_amplifier.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if( RealTimePlayer.filter != null)
+				if( chckbxLowpassFilter.isSelected())
 				{
-					RealTimePlayer.filter.setAmplifiler(Double.valueOf(tf_amplifier.getText()));
+					filter.setAmplifiler(Double.valueOf(tf_amplifier.getText()));
 				}
 			}
 		});
@@ -438,6 +439,28 @@ public class MainWindow implements ActionListener, KeyListener {
 		JLabel lblTo = new JLabel("to");
 		lblTo.setBounds(512, 254, 16, 14);
 		frame.getContentPane().add(lblTo);
+		
+		JButton btnSaveCurrent = new JButton("Save current 5 sec to file");
+		btnSaveCurrent.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				realTimePlayer.stop();
+				double[] array = new double[44100*5];
+				for(int i = 0; i < 44100 * 5; i++)
+				{
+					array[i] = realTimePlayer.getValue(i);
+				}
+				DateFormat dateFormat = new SimpleDateFormat("HH_mm_ss");
+				Date date = new Date();
+				String file = "./output/real5sec_" + dateFormat.format(date) + ".wav";
+				WavFileGenerator wf = new WavFileGenerator();
+				wf.setFile(new File(file));
+				wf.write(array);
+				JOptionPane.showMessageDialog(frame, "Save in " + file);
+				realTimePlayer.play();
+			}
+		});
+		btnSaveCurrent.setBounds(317, 337, 303, 26);
+		frame.getContentPane().add(btnSaveCurrent);
 
 	}
 
