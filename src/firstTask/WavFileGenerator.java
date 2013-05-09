@@ -1,6 +1,5 @@
 package firstTask;
 
-import java.awt.EventQueue;
 import java.io.File;
 import java.util.Iterator;
 import java.util.Vector;
@@ -19,9 +18,7 @@ public class WavFileGenerator {
 	// 3 - prostokantne
 	// 4 - noise
 	private static int sampleRate = 44100;    // Samples per second
-	private static double eightDivideByPI = 8 / Math.pow(Math.PI,2);
 	BrownNoiseGenerator bng= new BrownNoiseGenerator();
-	private double last_value = -99999;
 	public static Filter filter;
 	private boolean use_filter = false;
 
@@ -122,6 +119,45 @@ public class WavFileGenerator {
 	       }
 	    }
 	
+	public void write(double [] array) {
+		try
+		{			
+			long numFrames = array.length;
+			
+			// Create a wav file with the name specified as the first argument
+			WavFile wavFile = WavFile.newWavFile(file, 1, numFrames, 16, sampleRate);
+			
+			// Create a buffer of 100 frames
+			double[] buffer = new double[100];
+			
+			// Initialise a local frame counter
+			long frameCounter = 0;
+			// Loop until all frames written
+			while (frameCounter < numFrames)
+			{
+				// Determine how many frames to write, up to a maximum of the buffer size
+				long remaining = wavFile.getFramesRemaining();
+				int toWrite = (remaining > 100) ? 100 : (int) remaining;
+				
+				// Fill the buffer, one tone per channel
+				for (int s=0 ; s<toWrite ; s++, frameCounter++)
+				{
+					buffer[s] = array[(int) frameCounter];
+					
+				}
+				
+				// Write the buffer
+				wavFile.writeFrames(buffer, toWrite);
+			}
+			// Close the wavFile
+			wavFile.close();
+		}
+		catch (Exception e)
+		{
+			System.err.println(e);
+		}
+	}
+	
 	private double function(long x, double freq, int phase)
 	{
 
@@ -151,12 +187,6 @@ public class WavFileGenerator {
 			break;
 			
 		}
-//		if(this.last_value != -99999)
-//		{
-//			value = Filter.LFO(this.last_value, value, 25);
-//			
-//		}
-//		this.last_value = value;
 		if(this.use_filter)
 			value = this.filter.calculate(value);
 		return value ;
@@ -203,8 +233,6 @@ public class WavFileGenerator {
 	
 	static double rectangular(long x, double freq, int phase)
 	{
-		double result = 0;
-		
 		double sin = sin(x,freq,phase);
 		
 		if(sin >= 0)
@@ -237,5 +265,13 @@ public class WavFileGenerator {
 
 	public void setUse_filter(boolean use_filter) {
 		this.use_filter = use_filter;
+	}
+
+	public File getFile() {
+		return file;
+	}
+
+	public void setFile(File file) {
+		this.file = file;
 	}
 }
