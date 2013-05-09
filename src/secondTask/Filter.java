@@ -148,9 +148,9 @@ public class Filter {
 				tmp_amplifiler = this.amplifiler * Generator.function(i, fo, 0, this.type, false);
 			}
 			//this.updateDate(this.fc, this.Q, this.fo);
-			this.updateParameters(tmp_fc,tmp_q);	
-			this.setParametersForLPF();
-			//System.out.println("Q:"+this.Q+ " F: "+this.fc+" A: "+this.amplifiler);
+//			this.updateParameters(tmp_fc,tmp_q);	
+//			this.setParametersForLPF();
+			System.out.println("Q:"+tmp_q+ " F: "+tmp_fc+" A: "+this.amplifiler);
 		}
 		
 		x = x * tmp_amplifiler;
@@ -179,7 +179,16 @@ public class Filter {
 			this.X1 = x;
 			this.Y1 = y;
 		}
-		
+		if(Double.isNaN(y))
+		{
+			this.Y1 = -9999;
+			this.Y2 = -9999;
+			this.X1 = -9999;
+			this.X2 = -9999;
+			this.updateDate(this.fc, this.Q, this.fo);
+			this.updateParameters();
+			this.setParametersForLPF();
+		}
 		return y ;
 		
 	}
