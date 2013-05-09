@@ -214,10 +214,10 @@ public class MainWindow implements ActionListener, KeyListener {
 		tf_fc = new JTextField();
 		tf_fc.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				if( Generator.filter != null)
+				if( RealTimePlayer.filter != null)
 				{
-					Generator.filter.updateDate(Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()));
-					Generator.filter.setParametersForLPF();
+					RealTimePlayer.filter.updateDate(Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()));
+					RealTimePlayer.filter.setParametersForLPF();
 				}
 			}
 		});
@@ -229,10 +229,10 @@ public class MainWindow implements ActionListener, KeyListener {
 		tf_Q = new JTextField();
 		tf_Q.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if( Generator.filter != null)
+				if( RealTimePlayer.filter != null)
 				{
-					Generator.filter.updateDate(Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()));
-					Generator.filter.setParametersForLPF();
+					RealTimePlayer.filter.updateDate(Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()));
+					RealTimePlayer.filter.setParametersForLPF();
 				}
 			}
 		});
@@ -248,9 +248,9 @@ public class MainWindow implements ActionListener, KeyListener {
 		tf_amplifier = new JTextField();
 		tf_amplifier.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if( Generator.filter != null)
+				if( RealTimePlayer.filter != null)
 				{
-					Generator.filter.setAmplifiler(Double.valueOf(tf_amplifier.getText()));
+					RealTimePlayer.filter.setAmplifiler(Double.valueOf(tf_amplifier.getText()));
 				}
 			}
 		});
@@ -434,6 +434,10 @@ public class MainWindow implements ActionListener, KeyListener {
 		});
 		btnPlayRealTime.setBounds(522, 211, 98, 26);
 		frame.getContentPane().add(btnPlayRealTime);
+		
+		JLabel lblTo = new JLabel("to");
+		lblTo.setBounds(512, 254, 16, 14);
+		frame.getContentPane().add(lblTo);
 
 	}
 

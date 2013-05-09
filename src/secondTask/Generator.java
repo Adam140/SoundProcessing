@@ -3,7 +3,7 @@ package secondTask;
 public class Generator {
 	
 	private static final int SAMPLE_RATE = 44100;
-	public static Filter filter = null;
+	//public static Filter filter = null;
 	
 
 	static double function(long x, double freq, int phase, WaveType type, boolean filter)
@@ -35,17 +35,17 @@ public class Generator {
 			break;
 		}
 		
-		if( MainWindow.chckbxLowpassFilter.isSelected() )
-		{
-			if( Generator.filter == null)
-			{
-				Generator.filter =  new Filter(44100, Double.valueOf(MainWindow.tf_fc.getText()), Double.valueOf(MainWindow.tf_Q.getText()));
-				Generator.filter.setParametersForLPF();
-				Generator.filter.setAmplifiler(Double.valueOf(MainWindow.tf_amplifier.getText()));
-			}
-			value = Generator.filter.calculate(value);
-			//System.out.println("Value: "+ value);
-		}
+//		if( MainWindow.chckbxLowpassFilter.isSelected() )
+//		{
+//			if( Generator.filter == null)
+//			{
+//				Generator.filter =  new Filter(44100, Double.valueOf(MainWindow.tf_fc.getText()), Double.valueOf(MainWindow.tf_Q.getText()));
+//				Generator.filter.setParametersForLPF();
+//				Generator.filter.setAmplifiler(Double.valueOf(MainWindow.tf_amplifier.getText()));
+//			}
+//			value = Generator.filter.calculate(value);
+//			//System.out.println("Value: "+ value);
+//		}
 //		else
 //			System.out.println("Value: "+ value);
 		return value;

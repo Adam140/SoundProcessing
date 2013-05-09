@@ -23,6 +23,7 @@ class RealTimePlayer extends Thread {
 
 	// Size in bytes of sine wave samples we'll create on each loop pass
 	final static public int SINE_PACKET_SIZE = (int) (BUFFER_DURATION * SAMPLING_RATE * SAMPLE_SIZE);
+	public static Filter filter = null;
 
 	SourceDataLine line;
 	private Properties waves;
@@ -134,8 +135,21 @@ class RealTimePlayer extends Thread {
 			}
 
 		}
+		double value = result / numberOfWaves;
+		
+		if( MainWindow.chckbxLowpassFilter.isSelected() )
+		{
+			if( RealTimePlayer.filter == null)
+			{
+				RealTimePlayer.filter =  new Filter(44100, Double.valueOf(MainWindow.tf_fc.getText()), Double.valueOf(MainWindow.tf_Q.getText()));
+				RealTimePlayer.filter.setParametersForLPF();
+				RealTimePlayer.filter.setAmplifiler(Double.valueOf(MainWindow.tf_amplifier.getText()));
+			}
+			value = RealTimePlayer.filter.calculate(value);
+			//System.out.println("Value: "+ value);
+		}
 
-		return result / numberOfWaves;
+		return value;
 	}
 
 }

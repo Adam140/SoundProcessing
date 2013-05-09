@@ -158,8 +158,8 @@ public class WavFileGenerator {
 //		}
 //		this.last_value = value;
 		if(this.use_filter)
-			value = this.filter.calculate(value);
-		return value;
+			value = this.filter.calculate(value) * sin(x, freq, phase);
+		return value ;
 	}
 	
 	private int phaseShift(long x, double freq)
