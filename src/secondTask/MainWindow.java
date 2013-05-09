@@ -434,23 +434,23 @@ public class MainWindow implements ActionListener {
 		frame.getContentPane().add(iconSin);
 
 		iconTrian = new JLabel("", iconOff, JLabel.CENTER);
-		iconTrian.setBounds(569, 60, 16, 16);
+		iconTrian.setBounds(569, 57, 16, 16);
 		frame.getContentPane().add(iconTrian);
 
 		iconSaw = new JLabel("", iconOff, JLabel.CENTER);
-		iconSaw.setBounds(569, 95, 16, 16);
+		iconSaw.setBounds(569, 87, 16, 16);
 		frame.getContentPane().add(iconSaw);
 
 		iconRect = new JLabel("", iconOff, JLabel.CENTER);
-		iconRect.setBounds(569, 123, 16, 16);
+		iconRect.setBounds(569, 117, 16, 16);
 		frame.getContentPane().add(iconRect);
 
 		iconRedN = new JLabel("", iconOff, JLabel.CENTER);
-		iconRedN.setBounds(569, 157, 16, 16);
+		iconRedN.setBounds(569, 147, 16, 16);
 		frame.getContentPane().add(iconRedN);
 
 		iconWhiteN = new JLabel("", iconOff, JLabel.CENTER);
-		iconWhiteN.setBounds(569, 189, 16, 16);
+		iconWhiteN.setBounds(569, 177, 16, 16);
 		frame.getContentPane().add(iconWhiteN);
 
 		final JButton btnPlayRealTime = new JButton("Play");
