@@ -734,6 +734,7 @@ public class MainWindow implements ActionListener {
 				getIconRedN().setIcon(iconOn);
 				((JButton) event.getSource()).setActionCommand("redNoise_OFF");
 				waves.put(WaveType.RED_NOISE, 1.0);
+				amplifier.put(WaveType.RED_NOISE, 1.0);
 			} else {
 				tf_red_hz.setText("0");
 				getIconRedN().setIcon(iconOff);
@@ -748,12 +749,12 @@ public class MainWindow implements ActionListener {
 				getIconWhiteN().setIcon(iconOn);
 				((JButton) event.getSource()).setActionCommand("whiteNoise_OFF");
 				waves.put(WaveType.WHITE_NOISE, 1.0);
+				amplifier.put(WaveType.WHITE_NOISE, 1.0);
 			} else {
 				tf_white_hz.setText("0");
 				getIconWhiteN().setIcon(iconOff);
 				((JButton) event.getSource()).setActionCommand("whiteNoise_ON");
 				waves.put(WaveType.WHITE_NOISE, 0.0);
-				amplifier.put(WaveType.WHITE_NOISE, 1.0);
 			}
 
 		}
