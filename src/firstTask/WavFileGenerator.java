@@ -158,7 +158,7 @@ public class WavFileGenerator {
 //		}
 //		this.last_value = value;
 		if(this.use_filter)
-			value = this.filter.calculate(value) * sin(x, freq, phase);
+			value = this.filter.calculate(value);
 		return value ;
 	}
 	
