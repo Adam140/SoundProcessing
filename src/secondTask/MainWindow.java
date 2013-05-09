@@ -32,8 +32,10 @@ import javax.swing.SwingConstants;
 
 import firstTask.ConsoleUtil;
 import firstTask.WavFileGenerator;
+import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
 
-public class MainWindow implements ActionListener, KeyListener {
+public class MainWindow implements ActionListener {
 
 	private JFrame frame;
 	private JTextField jtfCustomHz;
@@ -66,12 +68,21 @@ public class MainWindow implements ActionListener, KeyListener {
 	private ImageIcon iconOn = new ImageIcon("icon/on.png", "on");
 	private ImageIcon iconOff = new ImageIcon("icon/off.png", "off");
 	private Properties waves = new Properties();
+	private Properties amplifier = new Properties();
 	private Filter filter = new Filter();
-	private RealTimePlayerFacade realTimePlayer = new RealTimePlayerFacade(waves, filter);
+	private RealTimePlayerFacade realTimePlayer = new RealTimePlayerFacade(waves, amplifier, filter);
 	public static JTextField tf_fc;
 	public static JTextField tf_Q;
-	public static JTextField tf_amplifier;
+	public static JTextField tfAmplifier;
 	public static JCheckBox chckbxLowpassFilter;
+	private JTextField tfSinAmf;
+	private JTextField tfTrianAmf;
+	private JTextField tfSawAmf;
+	private JTextField tfRectAmf;
+	private JTextField tfRedAmf;
+	private JTextField tfWhiteAmf;
+	public static JTextField tf_fo;
+	private final ButtonGroup buttonGroup = new ButtonGroup();
 
 	/**
 	 * Launch the application.
@@ -209,7 +220,7 @@ public class MainWindow implements ActionListener, KeyListener {
 		frame.getContentPane().add(btnClearConsole);
 
 		chckbxLowpassFilter = new JCheckBox("Low-pass filter");
-		chckbxLowpassFilter.setBounds(390, 214, 122, 23);
+		chckbxLowpassFilter.setBounds(324, 214, 122, 26);
 		frame.getContentPane().add(chckbxLowpassFilter);
 
 		tf_fc = new JTextField();
@@ -217,7 +228,7 @@ public class MainWindow implements ActionListener, KeyListener {
 			public void actionPerformed(ActionEvent arg0) {
 				if( chckbxLowpassFilter.isSelected() )
 				{
-					filter.updateDate(Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()));
+					filter.updateDate(Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()), Double.valueOf(tf_fo.getText()));
 					filter.setParametersForLPF();
 				}
 			}
@@ -232,7 +243,7 @@ public class MainWindow implements ActionListener, KeyListener {
 			public void actionPerformed(ActionEvent e) {
 				if( chckbxLowpassFilter.isSelected())
 				{
-					filter.updateDate(Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()));
+					filter.updateDate(Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()), Double.valueOf(tf_fo.getText()));
 					filter.setParametersForLPF();
 				}
 			}
@@ -246,19 +257,19 @@ public class MainWindow implements ActionListener, KeyListener {
 		lblAmplifier.setBounds(321, 311, 110, 14);
 		frame.getContentPane().add(lblAmplifier);
 
-		tf_amplifier = new JTextField();
-		tf_amplifier.addActionListener(new ActionListener() {
+		tfAmplifier = new JTextField();
+		tfAmplifier.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if( chckbxLowpassFilter.isSelected())
 				{
-					filter.setAmplifiler(Double.valueOf(tf_amplifier.getText()));
+					filter.setAmplifiler(Double.valueOf(tfAmplifier.getText()));
 				}
 			}
 		});
-		tf_amplifier.setText("1");
-		tf_amplifier.setColumns(10);
-		tf_amplifier.setBounds(426, 309, 86, 20);
-		frame.getContentPane().add(tf_amplifier);
+		tfAmplifier.setText("1");
+		tfAmplifier.setColumns(10);
+		tfAmplifier.setBounds(426, 309, 86, 20);
+		frame.getContentPane().add(tfAmplifier);
 
 		JButton btnSave = new JButton("Save");
 		btnSave.addMouseListener(new MouseAdapter() {
@@ -270,10 +281,10 @@ public class MainWindow implements ActionListener, KeyListener {
 					String file = "./output/" + dateFormat.format(date) + ".wav";
 					WavFileGenerator output = new WavFileGenerator(new File(file), ConsoleUtil.convertText(console.getText()), comboWave.getSelectedIndex());
 					if (chckbxLowpassFilter.isSelected()) {
-						Filter f = new Filter(44100, Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()));
+						Filter f = new Filter(44100, Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()),  Double.valueOf(tf_fo.getText()));
 						f.setParametersForLPF();
 						output.filter = f;
-						f.setAmplifiler(Double.valueOf(tf_amplifier.getText()));
+						f.setAmplifiler(Double.valueOf(tfAmplifier.getText()));
 
 						output.setUse_filter(true);
 					} else {
@@ -285,10 +296,37 @@ public class MainWindow implements ActionListener, KeyListener {
 				}
 			}
 		});
-		btnSave.setBounds(176, 56, 121, 23);
+		btnSave.setBounds(174, 57, 121, 23);
 		frame.getContentPane().add(btnSave);
 
 		comboWave = new JComboBox();
+		comboWave.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if( chckbxLowpassFilter.isSelected())
+				{
+					WaveType t = null;
+					int index = comboWave.getSelectedIndex();
+					switch(index)
+					{
+					case 0:
+						t = WaveType.SINUSOIDAL;
+						break;
+					case 1:
+						t = WaveType.TRIANGULAR;
+						break;
+					case 2:
+						t = WaveType.SAWTOOTH;
+						break;
+					case 3:
+						t = WaveType.RECTANGULAR;
+						break;
+						
+					}
+					filter.setType(t);
+				}
+
+			}
+		});
 		comboWave.setModel(new DefaultComboBoxModel(new String[] { "sinusoidal wave", "triangular wave", "sawtooth wave", "rectangular wave", "red noise", "white noise" }));
 		comboWave.setBounds(10, 311, 175, 20);
 		frame.getContentPane().add(comboWave);
@@ -296,67 +334,67 @@ public class MainWindow implements ActionListener, KeyListener {
 		btnSinusoidal = new JButton("Sinusoidal");
 		btnSinusoidal.setActionCommand("sinusoidal_ON");
 		btnSinusoidal.setName(WaveType.SINUSOIDAL.toString());
-		btnSinusoidal.setBounds(390, 24, 110, 23);
+		btnSinusoidal.setBounds(390, 27, 110, 23);
 		btnSinusoidal.addActionListener(this);
 		frame.getContentPane().add(btnSinusoidal);
 
 		JLabel lblGenerators = new JLabel("Generators");
-		lblGenerators.setBounds(324, 12, 104, 16);
+		lblGenerators.setBounds(392, 0, 104, 28);
 		frame.getContentPane().add(lblGenerators);
 
 		tf_sin_hz = new JTextField();
-		tf_sin_hz.setName(WaveType.SINUSOIDAL.toString());
-		tf_sin_hz.addKeyListener(this);
-		tf_sin_hz.setBounds(512, 25, 54, 20);
+		tf_sin_hz.setName(WaveType.SINUSOIDAL.toString() + "!FREQ");
+		tf_sin_hz.addActionListener(this);
+		tf_sin_hz.setBounds(512, 27, 54, 20);
 		frame.getContentPane().add(tf_sin_hz);
 		tf_sin_hz.setColumns(10);
 
 		btnTriangular = new JButton("Triangular");
 		btnTriangular.setActionCommand("triangular_ON");
 		btnTriangular.setName(WaveType.TRIANGULAR.toString());
-		btnTriangular.setBounds(392, 56, 108, 23);
+		btnTriangular.setBounds(390, 56, 110, 23);
 		btnTriangular.addActionListener(this);
 		frame.getContentPane().add(btnTriangular);
 
 		tf_tri_hz = new JTextField();
-		tf_tri_hz.setName(WaveType.TRIANGULAR.toString());
+		tf_tri_hz.setName(WaveType.TRIANGULAR.toString() + "!FREQ");
 		tf_tri_hz.setColumns(10);
 		tf_tri_hz.setBounds(512, 57, 54, 20);
-		tf_tri_hz.addKeyListener(this);
+		tf_tri_hz.addActionListener(this);
 		frame.getContentPane().add(tf_tri_hz);
 
 		JButton btnSawtooth = new JButton("Sawtooth");
 		btnSawtooth.setName(WaveType.SAWTOOTH.toString());
 		btnSawtooth.setActionCommand("sawtooth_ON");
-		btnSawtooth.setBounds(390, 91, 110, 23);
+		btnSawtooth.setBounds(390, 87, 110, 23);
 		btnSawtooth.addActionListener(this);
 		frame.getContentPane().add(btnSawtooth);
 
 		tf_saw_hz = new JTextField();
-		tf_saw_hz.setName(WaveType.SAWTOOTH.toString());
+		tf_saw_hz.setName(WaveType.SAWTOOTH.toString() + "!FREQ");
 		tf_saw_hz.setColumns(10);
-		tf_saw_hz.setBounds(512, 92, 54, 20);
-		tf_saw_hz.addKeyListener(this);
+		tf_saw_hz.setBounds(512, 87, 54, 20);
+		tf_saw_hz.addActionListener(this);
 		frame.getContentPane().add(tf_saw_hz);
 
 		btnRectangular = new JButton("Rectangular");
 		btnRectangular.setActionCommand("rectangular_ON");
 		btnRectangular.setName(WaveType.RECTANGULAR.toString());
-		btnRectangular.setBounds(390, 119, 110, 23);
+		btnRectangular.setBounds(390, 117, 110, 23);
 		btnRectangular.addActionListener(this);
 		frame.getContentPane().add(btnRectangular);
 
 		tf_rec_hz = new JTextField();
-		tf_rec_hz.setName(WaveType.RECTANGULAR.toString());
+		tf_rec_hz.setName(WaveType.RECTANGULAR.toString() + "!FREQ");
 		tf_rec_hz.setColumns(10);
-		tf_rec_hz.setBounds(512, 120, 54, 20);
-		tf_rec_hz.addKeyListener(this);
+		tf_rec_hz.setBounds(512, 117, 54, 20);
+		tf_rec_hz.addActionListener(this);
 		frame.getContentPane().add(tf_rec_hz);
 
 		JButton btnRedNoise = new JButton("Red noise");
 		btnRedNoise.setActionCommand("redNoise_ON");
 		btnRedNoise.setName(WaveType.RED_NOISE.toString());
-		btnRedNoise.setBounds(390, 153, 110, 23);
+		btnRedNoise.setBounds(390, 147, 110, 23);
 		btnRedNoise.addActionListener(this);
 		frame.getContentPane().add(btnRedNoise);
 
@@ -364,13 +402,13 @@ public class MainWindow implements ActionListener, KeyListener {
 		tf_red_hz.setEnabled(false);
 		tf_red_hz.setEditable(false);
 		tf_red_hz.setColumns(10);
-		tf_red_hz.setBounds(512, 154, 54, 20);
+		tf_red_hz.setBounds(512, 147, 54, 20);
 		frame.getContentPane().add(tf_red_hz);
 
 		btnWhiteNoise = new JButton("White noise");
 		btnWhiteNoise.setActionCommand("whiteNoise_ON");
 		btnWhiteNoise.setName(WaveType.WHITE_NOISE.toString());
-		btnWhiteNoise.setBounds(390, 185, 110, 23);
+		btnWhiteNoise.setBounds(390, 177, 110, 23);
 		btnWhiteNoise.addActionListener(this);
 		frame.getContentPane().add(btnWhiteNoise);
 
@@ -378,7 +416,7 @@ public class MainWindow implements ActionListener, KeyListener {
 		tf_white_hz.setEnabled(false);
 		tf_white_hz.setEditable(false);
 		tf_white_hz.setColumns(10);
-		tf_white_hz.setBounds(512, 186, 54, 20);
+		tf_white_hz.setBounds(512, 177, 54, 20);
 		frame.getContentPane().add(tf_white_hz);
 
 		JLabel lblSmoothness = new JLabel("Cut-off frequency");
@@ -433,7 +471,7 @@ public class MainWindow implements ActionListener, KeyListener {
 				}
 			}
 		});
-		btnPlayRealTime.setBounds(522, 211, 98, 26);
+		btnPlayRealTime.setBounds(468, 214, 98, 26);
 		frame.getContentPane().add(btnPlayRealTime);
 		
 		JLabel lblTo = new JLabel("to");
@@ -461,6 +499,133 @@ public class MainWindow implements ActionListener, KeyListener {
 		});
 		btnSaveCurrent.setBounds(317, 337, 303, 26);
 		frame.getContentPane().add(btnSaveCurrent);
+		
+		tfSinAmf = new JTextField();
+		tfSinAmf.setText("1.0");
+		tfSinAmf.addActionListener(this);
+		tfSinAmf.setName(WaveType.SINUSOIDAL.toString() + "!AMP");
+		tfSinAmf.setBounds(324, 27, 50, 20);
+		frame.getContentPane().add(tfSinAmf);
+		tfSinAmf.setColumns(10);
+		
+		JLabel lblMaxA = new JLabel("Max A");
+		lblMaxA.setBounds(324, 6, 55, 16);
+		frame.getContentPane().add(lblMaxA);
+		
+		tfTrianAmf = new JTextField();
+		tfTrianAmf.setText("1.0");
+		tfTrianAmf.addActionListener(this);
+		tfTrianAmf.setName(WaveType.TRIANGULAR.toString() + "!AMP");
+		tfTrianAmf.setColumns(10);
+		tfTrianAmf.setBounds(324, 57, 50, 20);
+		frame.getContentPane().add(tfTrianAmf);
+		
+		tfSawAmf = new JTextField();
+		tfSawAmf.setText("1.0");
+		tfSawAmf.addActionListener(this);
+		tfSawAmf.setName(WaveType.SAWTOOTH.toString() + "!AMP");
+		tfSawAmf.setColumns(10);
+		tfSawAmf.setBounds(324, 87, 50, 20);
+		frame.getContentPane().add(tfSawAmf);
+		
+		tfRectAmf = new JTextField();
+		tfRectAmf.setText("1.0");
+		tfRectAmf.addActionListener(this);
+		tfRectAmf.setName(WaveType.RECTANGULAR.toString() + "!AMP");
+		tfRectAmf.setColumns(10);
+		tfRectAmf.setBounds(324, 117, 50, 20);
+		frame.getContentPane().add(tfRectAmf);
+		
+		tfRedAmf = new JTextField();
+		tfRedAmf.setText("1.0");
+		tfRedAmf.addActionListener(this);
+		tfRedAmf.setName(WaveType.RED_NOISE.toString() + "!AMP");
+		tfRedAmf.setColumns(10);
+		tfRedAmf.setBounds(324, 147, 50, 20);
+		frame.getContentPane().add(tfRedAmf);
+		
+		tfWhiteAmf = new JTextField();
+		tfWhiteAmf.setText("1.0");
+		tfWhiteAmf.addActionListener(this);
+		tfWhiteAmf.setName(WaveType.WHITE_NOISE.toString() + "!AMP");
+		tfWhiteAmf.setColumns(10);
+		tfWhiteAmf.setBounds(324, 177, 50, 20);
+		frame.getContentPane().add(tfWhiteAmf);
+		
+		JRadioButton radio_fc = new JRadioButton("Set oscillator");
+		radio_fc.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if( chckbxLowpassFilter.isSelected())
+				{
+					filter.setOscillate_to("F");
+				}
+			}
+		});
+		buttonGroup.add(radio_fc);
+		radio_fc.setBounds(511, 250, 109, 23);
+		frame.getContentPane().add(radio_fc);
+		
+		JRadioButton radio_Q = new JRadioButton("Set oscillator");
+		radio_Q.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if( chckbxLowpassFilter.isSelected())
+				{
+					filter.setOscillate_to("Q");
+				}
+			}
+		});
+		buttonGroup.add(radio_Q);
+		radio_Q.setBounds(511, 277, 109, 23);
+		frame.getContentPane().add(radio_Q);
+		
+		JRadioButton radio_amplifer = new JRadioButton("Set oscillator");
+		radio_amplifer.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if( chckbxLowpassFilter.isSelected())
+				{
+					filter.setOscillate_to("A");
+				}
+			}
+		});
+		buttonGroup.add(radio_amplifer);
+		radio_amplifer.setBounds(512, 305, 109, 23);
+		frame.getContentPane().add(radio_amplifer);
+		
+		JLabel lblOscillatorFrequency = new JLabel("Oscillator frequency");
+		lblOscillatorFrequency.setBounds(321, 342, 110, 14);
+		frame.getContentPane().add(lblOscillatorFrequency);
+		
+		tf_fo = new JTextField();
+		tf_fo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if( chckbxLowpassFilter.isSelected())
+				{
+					filter.setFo(Double.valueOf(tf_fo.getText()));
+				}
+			}
+		});
+		tf_fo.setText("1");
+		tf_fo.setColumns(10);
+		tf_fo.setBounds(426, 340, 86, 20);
+		frame.getContentPane().add(tf_fo);
+		
+		JRadioButton radio_off = new JRadioButton("Set off");
+		radio_off.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if( chckbxLowpassFilter.isSelected())
+				{
+					filter.setOscillate_to("Off");
+				}
+			}
+		});
+		buttonGroup.add(radio_off);
+		radio_off.setSelected(true);
+		radio_off.setBounds(512, 336, 109, 23);
+		frame.getContentPane().add(radio_off);
 
 	}
 
@@ -507,6 +672,16 @@ public class MainWindow implements ActionListener, KeyListener {
 	@Override
 	public void actionPerformed(ActionEvent event) {
 
+		if(event.getSource() instanceof JButton )
+			buttonEvent(event);
+		else if(event.getSource() instanceof JTextField)
+			textFieldEvent(event);
+		
+	}
+	
+	public void buttonEvent(ActionEvent event)
+	{
+
 		String command = event.getActionCommand();
 
 		if (command.startsWith("sinusoidal")) {
@@ -516,6 +691,7 @@ public class MainWindow implements ActionListener, KeyListener {
 			} else {
 				tf_sin_hz.setText("0.0");
 				waves.put(WaveType.SINUSOIDAL, 0.0);
+				amplifier.put(WaveType.SINUSOIDAL, 1.0);
 				getIconSin().setIcon(iconOff);
 				((JButton) event.getSource()).setActionCommand("sinusoidal_ON");
 			}
@@ -527,6 +703,7 @@ public class MainWindow implements ActionListener, KeyListener {
 			} else {
 				tf_tri_hz.setText("0.0");
 				waves.put(WaveType.TRIANGULAR, 0.0);
+				amplifier.put(WaveType.TRIANGULAR, 1.0);
 				getIconTrian().setIcon(iconOff);
 				((JButton) event.getSource()).setActionCommand("triangular_ON");
 			}
@@ -538,6 +715,7 @@ public class MainWindow implements ActionListener, KeyListener {
 			} else {
 				tf_saw_hz.setText("0.0");
 				waves.put(WaveType.SAWTOOTH, 0.0);
+				amplifier.put(WaveType.SAWTOOTH, 1.0);
 				getIconSaw().setIcon(iconOff);
 				((JButton) event.getSource()).setActionCommand("sawtooth_ON");
 			}
@@ -549,6 +727,7 @@ public class MainWindow implements ActionListener, KeyListener {
 			} else {
 				tf_rec_hz.setText("0.0");
 				waves.put(WaveType.RECTANGULAR, 0.0);
+				amplifier.put(WaveType.RECTANGULAR, 1.0);
 				getIconRect().setIcon(iconOff);
 				((JButton) event.getSource()).setActionCommand("rectangular_ON");
 			}
@@ -564,6 +743,7 @@ public class MainWindow implements ActionListener, KeyListener {
 				getIconRedN().setIcon(iconOff);
 				((JButton) event.getSource()).setActionCommand("redNoise_ON");
 				waves.put(WaveType.RED_NOISE, 0.0);
+				amplifier.put(WaveType.RED_NOISE, 1.0);
 			}
 
 		} else if (command.startsWith("whiteNoise")) {
@@ -577,42 +757,58 @@ public class MainWindow implements ActionListener, KeyListener {
 				getIconWhiteN().setIcon(iconOff);
 				((JButton) event.getSource()).setActionCommand("whiteNoise_ON");
 				waves.put(WaveType.WHITE_NOISE, 0.0);
+				amplifier.put(WaveType.WHITE_NOISE, 1.0);
 			}
 
 		}
 		realTimePlayer.changeParams();
 	}
 
-	@Override
-	public void keyPressed(KeyEvent arg0) {
-	}
-
-	@Override
-	public void keyReleased(KeyEvent arg0) {
-		WaveType wt = WaveType.valueOf(((JTextField) arg0.getSource()).getName());
+	public void textFieldEvent(ActionEvent arg0) {
+		String name = ((JTextField) arg0.getSource()).getName();
+		WaveType wt = WaveType.valueOf(name.split("!")[0]);
 		Component[] components = frame.getContentPane().getComponents();
-		
-		for (int i = 0; i < components.length; i++) {
-			if (components[i] instanceof JButton && wt.toString().equals(components[i].getName())) {
-				if (((JButton) components[i]).getActionCommand().endsWith("_ON"))
-					((JButton) components[i]).doClick();
-			}
-		}
+		double freq = 0.0;
+		double ampl = 1.0;
 
 		try {
-			double freq = Double.parseDouble(((JTextField) arg0.getSource()).getText());
+			for (int i = 0; i < components.length; i++) {
+				if(components[i].getName() == null)
+					continue;
+				if (components[i] instanceof JButton && wt.toString().equals(components[i].getName())) {
+					if (((JButton) components[i]).getActionCommand().endsWith("_ON"))
+						((JButton) components[i]).doClick();
+				}
+				if ( wt.toString().equals(components[i].getName().split("!")[0]) && components[i] instanceof JTextField)
+				{
+					if(components[i].getName().endsWith("!FREQ"))
+						freq = Double.parseDouble(((JTextField) components[i]).getText());
+					if(components[i].getName().endsWith("!AMP"))
+						ampl = Double.parseDouble(((JTextField) components[i]).getText());
+				}
+			}
 			switch (wt) {
 			case SINUSOIDAL:
 				waves.put(WaveType.SINUSOIDAL, freq);
+				amplifier.put(WaveType.SINUSOIDAL, ampl);
 				break;
 			case TRIANGULAR:
 				waves.put(WaveType.TRIANGULAR, freq);
+				amplifier.put(WaveType.TRIANGULAR, ampl);
 				break;
 			case SAWTOOTH:
 				waves.put(WaveType.SAWTOOTH, freq);
+				amplifier.put(WaveType.SAWTOOTH, ampl);
 				break;
 			case RECTANGULAR:
 				waves.put(WaveType.RECTANGULAR, freq);
+				amplifier.put(WaveType.RECTANGULAR, ampl);
+				break;
+			case RED_NOISE:
+				amplifier.put(WaveType.RED_NOISE, ampl);
+				break;
+			case WHITE_NOISE:
+				amplifier.put(WaveType.WHITE_NOISE, ampl);
 				break;
 			default:
 				break;
@@ -638,11 +834,6 @@ public class MainWindow implements ActionListener, KeyListener {
 				break;
 			}
 		}
-
-	}
-
-	@Override
-	public void keyTyped(KeyEvent arg0) {
 
 	}
 }

@@ -26,12 +26,14 @@ class RealTimePlayer extends Thread {
 
 	SourceDataLine line;
 	private Properties waves;
+	private Properties amplifier;
 	private Filter filter = null;
 	public boolean bExitThread;
 
-	public RealTimePlayer(Properties waves, Filter filter) {
+	public RealTimePlayer(Properties waves, Properties amplifier, Filter filter) {
 		super();
 		this.waves = waves;
+		this.amplifier = amplifier;
 		this.filter = filter;
 		this.bExitThread = false;
 	}
@@ -45,7 +47,7 @@ class RealTimePlayer extends Thread {
 	// SINE_PACKET_SIZE/2
 	// samples at a time, until we tell the thread to exit
 	public void run() {
-		changeParams();
+		printParams();
 		// Position through the sine wave as a percentage (i.e. 0-1 is 0-2*PI)
 		// Open up the audio output, using a sampling rate of 44100hz, 16 bit
 		// samples, mono, and big
@@ -116,23 +118,27 @@ class RealTimePlayer extends Thread {
 		bExitThread = true;
 	}
 
-	public synchronized void changeParams() {
-		System.out.println("From player " + waves);
+	public synchronized void printParams() {
+		System.out.println("From player: FREQ" + waves + " AMPL" + amplifier);
 	}
 
 	public double calculateValue(long x) {
 		double result = 0.0;
 		int numberOfWaves = 0;
 
-		Enumeration<?> e = waves.keys();
+		Enumeration<?> enumWave = waves.keys();
+		Enumeration<?> enumAmpl = amplifier.keys();
 
-		while (e.hasMoreElements()) {
-			WaveType key = (WaveType) e.nextElement();
-			double freq = (double) waves.get(key);
+		while (enumWave.hasMoreElements()) {
+			WaveType keyWave = (WaveType) enumWave.nextElement();
+			WaveType keyAmpl = (WaveType) enumAmpl.nextElement();
+			
+			double freq = (double) waves.get(keyWave);
+			double ampl = (double) amplifier.get(keyAmpl);
 
 			if (freq != 0.0) {
-				result += Generator.function(x, freq, 0, key, false);
-				numberOfWaves++;
+				result += ampl * Generator.function(x, freq, 0, keyWave, false);
+				numberOfWaves+= ampl;
 			}
 
 		}
@@ -140,7 +146,7 @@ class RealTimePlayer extends Thread {
 		
 		if( MainWindow.chckbxLowpassFilter.isSelected() )
 		{
-			value = filter.calculate(value);
+			value = filter.calculate(value,x);
 			//System.out.println("Value: "+ value);
 		}
 
