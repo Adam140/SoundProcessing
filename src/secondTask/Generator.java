@@ -5,7 +5,7 @@ public class Generator {
 	private static final int SAMPLE_RATE = 44100;
 	
 
-	private double function(long x, double freq, int phase, WaveType type, boolean filter)
+	static double function(long x, double freq, int phase, WaveType type, boolean filter)
 	{
 		double value = 0;
 		switch(type)

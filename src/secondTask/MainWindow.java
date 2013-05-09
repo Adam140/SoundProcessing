@@ -4,33 +4,35 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Properties;
 
+import javax.swing.AbstractButton;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JSlider;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import firstTask.ConsoleUtil;
 import firstTask.WavFileGenerator;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JCheckBox;
-import javax.swing.JSlider;
-import javax.swing.JSeparator;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 
-public class MainWindow implements ActionListener{
+public class MainWindow implements ActionListener, KeyListener {
 
 	private JFrame frame;
 	private JTextField jtfCustomHz;
@@ -57,7 +59,8 @@ public class MainWindow implements ActionListener{
 	private JLabel iconTrian;
 	private ImageIcon iconOn = new ImageIcon("icon/on.png", "on");
 	private ImageIcon iconOff = new ImageIcon("icon/off.png", "off");
-	private RealTimePlayer realTimePlayer = new RealTimePlayer();
+	private Properties waves = new Properties();
+	private RealTimePlayerFacade realTimePlayer = new RealTimePlayerFacade(waves);
 
 	/**
 	 * Launch the application.
@@ -231,17 +234,7 @@ public class MainWindow implements ActionListener{
 		frame.getContentPane().add(lblGenerators);
 		
 		tf_sin_hz = new JTextField();
-		tf_sin_hz.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyReleased(KeyEvent arg0) {
-				try{
-					double freq = Double.parseDouble(tf_sin_hz.getText());
-					realTimePlayer.changeFreq(freq);
-				}
-				catch(Exception e){
-				}
-			}
-		});
+		tf_sin_hz.addKeyListener(this);
 		tf_sin_hz.setBounds(512, 25, 54, 20);
 		frame.getContentPane().add(tf_sin_hz);
 		tf_sin_hz.setColumns(10);
@@ -255,6 +248,7 @@ public class MainWindow implements ActionListener{
 		tf_tri_hz = new JTextField();
 		tf_tri_hz.setColumns(10);
 		tf_tri_hz.setBounds(512, 57, 54, 20);
+		tf_tri_hz.addKeyListener(this);
 		frame.getContentPane().add(tf_tri_hz);
 		
 		JButton btnSawtooth = new JButton("Sawtooth");
@@ -266,6 +260,7 @@ public class MainWindow implements ActionListener{
 		tf_saw_hz = new JTextField();
 		tf_saw_hz.setColumns(10);
 		tf_saw_hz.setBounds(512, 92, 54, 20);
+		tf_saw_hz.addKeyListener(this);
 		frame.getContentPane().add(tf_saw_hz);
 		
 		btnRectangular = new JButton("Rectangular");
@@ -277,6 +272,7 @@ public class MainWindow implements ActionListener{
 		tf_rec_hz = new JTextField();
 		tf_rec_hz.setColumns(10);
 		tf_rec_hz.setBounds(512, 120, 54, 20);
+		tf_rec_hz.addKeyListener(this);
 		frame.getContentPane().add(tf_rec_hz);
 		
 		JButton btnRedNoise = new JButton("Red noise");
@@ -350,6 +346,15 @@ public class MainWindow implements ActionListener{
 		iconWhiteN = new JLabel("", iconOff, JLabel.CENTER);
 		iconWhiteN.setBounds(569, 189, 16, 16);
 		frame.getContentPane().add(iconWhiteN);
+		
+		JButton btnPlayRealTime = new JButton("Play");
+		btnPlayRealTime.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				realTimePlayer.play();
+			}
+		});
+		btnPlayRealTime.setBounds(390, 309, 98, 26);
+		frame.getContentPane().add(btnPlayRealTime);
 	}
 	public JButton getBtnSinusoidal() {
 		return btnSinusoidal;
@@ -390,12 +395,12 @@ public class MainWindow implements ActionListener{
 		if (command.startsWith("sinusoidal")) {
 			if(command.endsWith("_ON"))
 			{
-				realTimePlayer.start();
 				getIconSin().setIcon(iconOn);
 				((JButton) event.getSource()).setActionCommand("sinusoidal_OFF");
 			}
 			else
 			{
+				tf_sin_hz.setText("0.0");
 				getIconSin().setIcon(iconOff);
 				((JButton) event.getSource()).setActionCommand("sinusoidal_ON");
 			}
@@ -408,7 +413,7 @@ public class MainWindow implements ActionListener{
 			}
 			else
 			{
-				
+				tf_tri_hz.setText("0.0");
 				getIconTrian().setIcon(iconOff);
 				((JButton) event.getSource()).setActionCommand("triangular_ON");
 			}
@@ -421,7 +426,7 @@ public class MainWindow implements ActionListener{
 			}
 			else
 			{
-				
+				tf_saw_hz.setText("0.0");
 				getIconSaw().setIcon(iconOff);
 				((JButton) event.getSource()).setActionCommand("sawtooth_ON");
 			}
@@ -434,7 +439,7 @@ public class MainWindow implements ActionListener{
 			}
 			else
 			{
-				
+				tf_rec_hz.setText("0.0");
 				getIconRect().setIcon(iconOff);
 				((JButton) event.getSource()).setActionCommand("rectangular_ON");
 			}
@@ -442,12 +447,13 @@ public class MainWindow implements ActionListener{
 		} else if (command.startsWith("redNoise")) {
 			if(command.endsWith("_ON"))
 			{
+				tf_red_hz.setText("1");
 				getIconRedN().setIcon(iconOn);
 				((JButton) event.getSource()).setActionCommand("redNoise_OFF");
 			}
 			else
 			{
-				
+				tf_red_hz.setText("0");
 				getIconRedN().setIcon(iconOff);
 				((JButton) event.getSource()).setActionCommand("redNoise_ON");
 			}
@@ -455,12 +461,13 @@ public class MainWindow implements ActionListener{
 		} else if (command.startsWith("whiteNoise")) {
 			if(command.endsWith("_ON"))
 			{
+				tf_white_hz.setText("1");
 				getIconWhiteN().setIcon(iconOn);
 				((JButton) event.getSource()).setActionCommand("whiteNoise_OFF");
 			}
 			else
 			{
-				
+				tf_white_hz.setText("0");
 				getIconWhiteN().setIcon(iconOff);
 				((JButton) event.getSource()).setActionCommand("whiteNoise_ON");
 			}
@@ -468,4 +475,52 @@ public class MainWindow implements ActionListener{
 		}
 	}
 
+	@Override
+	public void keyPressed(KeyEvent arg0) {
+	}
+
+	@Override
+	public void keyReleased(KeyEvent arg0) {
+		try{
+			double freq = Double.parseDouble(((JTextField) arg0.getSource()).getText());
+			switch(((JTextField)arg0.getSource()).getName())
+			{
+				case "tf_sin_hz":
+					waves.put(WaveType.SINUSOIDAL, freq);
+					break;
+				case "tf_tri_hz":
+					waves.put(WaveType.TRIANGULAR, freq);
+					break;
+				case "tf_saw_hz":
+					waves.put(WaveType.SAWTOOTH, freq);
+					break;
+				case "tf_rec_hz":
+					waves.put(WaveType.RECTANGULAR, freq);
+					break;
+			}
+		}
+		catch(Exception e){
+			switch(((JTextField)arg0.getSource()).getName())
+			{
+				case "tf_sin_hz":
+					waves.remove(WaveType.SINUSOIDAL);
+					break;
+				case "tf_tri_hz":
+					waves.remove(WaveType.TRIANGULAR);
+					break;
+				case "tf_saw_hz":
+					waves.remove(WaveType.SAWTOOTH);
+					break;
+				case "tf_rec_hz":
+					waves.remove(WaveType.RECTANGULAR);
+					break;
+			}
+		}
+		
+	}
+
+	@Override
+	public void keyTyped(KeyEvent arg0) {
+		
+	}
 }
