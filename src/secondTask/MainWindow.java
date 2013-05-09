@@ -61,9 +61,9 @@ public class MainWindow implements ActionListener, KeyListener {
 	private ImageIcon iconOff = new ImageIcon("icon/off.png", "off");
 	private Properties waves = new Properties();
 	private RealTimePlayerFacade realTimePlayer = new RealTimePlayerFacade(waves);
-	private JTextField textField;
-	private JTextField textField_1;
-	private JTextField textField_2;
+	private JTextField tf_fc;
+	private JTextField tf_Q;
+	private JTextField tf_amplifier;
 
 	/**
 	 * Launch the application.
@@ -207,6 +207,28 @@ public class MainWindow implements ActionListener, KeyListener {
 		chckbxLowpassFilter.setBounds(390, 214, 122, 23);
 		frame.getContentPane().add(chckbxLowpassFilter);
 		
+		tf_fc = new JTextField();
+		tf_fc.setText("100");
+		tf_fc.setBounds(426, 251, 86, 20);
+		frame.getContentPane().add(tf_fc);
+		tf_fc.setColumns(10);
+		
+		tf_Q = new JTextField();
+		tf_Q.setText("1");
+		tf_Q.setBounds(426, 278, 86, 20);
+		frame.getContentPane().add(tf_Q);
+		tf_Q.setColumns(10);
+		
+		JLabel lblAmplifier = new JLabel("Amplifier");
+		lblAmplifier.setBounds(321, 311, 46, 14);
+		frame.getContentPane().add(lblAmplifier);
+		
+		tf_amplifier = new JTextField();
+		tf_amplifier.setText("1");
+		tf_amplifier.setColumns(10);
+		tf_amplifier.setBounds(426, 309, 86, 20);
+		frame.getContentPane().add(tf_amplifier);
+		
 		JButton btnSave = new JButton("Save");
 		btnSave.addMouseListener(new MouseAdapter() {
 			@Override
@@ -219,9 +241,11 @@ public class MainWindow implements ActionListener, KeyListener {
 					WavFileGenerator output = new WavFileGenerator(new File(file), ConsoleUtil.convertText(console.getText()), comboWave.getSelectedIndex());
 					if( chckbxLowpassFilter.isSelected() )
 					{
-						Filter f = new Filter(44100, 100, 1);
+						Filter f = new Filter(44100, Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()));
 						f.setParametersForLPF();
 						output.filter = f;
+						f.setAmplifiler( Double.valueOf(tf_amplifier.getText()) );
+
 						output.setUse_filter(true);
 					}
 					else
@@ -363,27 +387,7 @@ public class MainWindow implements ActionListener, KeyListener {
 		btnPlayRealTime.setBounds(522, 211, 98, 26);
 		frame.getContentPane().add(btnPlayRealTime);
 		
-		textField = new JTextField();
-		textField.setText("100");
-		textField.setBounds(426, 251, 86, 20);
-		frame.getContentPane().add(textField);
-		textField.setColumns(10);
-		
-		textField_1 = new JTextField();
-		textField_1.setText("1");
-		textField_1.setBounds(426, 278, 86, 20);
-		frame.getContentPane().add(textField_1);
-		textField_1.setColumns(10);
-		
-		JLabel lblAmplifier = new JLabel("Amplifier");
-		lblAmplifier.setBounds(321, 311, 46, 14);
-		frame.getContentPane().add(lblAmplifier);
-		
-		textField_2 = new JTextField();
-		textField_2.setText("1");
-		textField_2.setColumns(10);
-		textField_2.setBounds(426, 309, 86, 20);
-		frame.getContentPane().add(textField_2);
+
 	}
 	public JButton getBtnSinusoidal() {
 		return btnSinusoidal;

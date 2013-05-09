@@ -19,6 +19,7 @@ public class Filter {
 	private double c;
 	private double alpha;
 	private double r;
+	private double amplifiler = 1;
 	
 	
 	/**
@@ -109,7 +110,7 @@ public class Filter {
 			this.Y1 = y;
 		}
 		
-		return y;
+		return y * this.amplifiler;
 		
 	}
 	
@@ -124,6 +125,12 @@ public class Filter {
 //			samples[i] = value;
 //		}
 		return tmp;
+	}
+	public double getAmplifiler() {
+		return amplifiler;
+	}
+	public void setAmplifiler(double amplifiler) {
+		this.amplifiler = amplifiler;
 	}
 	
 }
