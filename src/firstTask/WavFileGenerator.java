@@ -22,6 +22,8 @@ public class WavFileGenerator {
 	private static double eightDivideByPI = 8 / Math.pow(Math.PI,2);
 	BrownNoiseGenerator bng= new BrownNoiseGenerator();
 	private double last_value = -99999;
+	public static Filter filter;
+	private boolean use_filter = false;
 
 
 	public WavFileGenerator() {
@@ -85,7 +87,7 @@ public class WavFileGenerator {
 	             // Fill the buffer, one tone per channel
 	             for (int s=0 ; s<toWrite ; s++, frameCounter++)
 	             {
-	                buffer[s] = function(frameCounter, sound.getFrequency(), phase,true);
+	                buffer[s] = function(frameCounter, sound.getFrequency(), phase);
 
 	                if(buffer[s] < min)
 	                	min = buffer[s];
@@ -120,7 +122,7 @@ public class WavFileGenerator {
 	       }
 	    }
 	
-	private double function(long x, double freq, int phase, boolean filter)
+	private double function(long x, double freq, int phase)
 	{
 
 		double value = 0;
@@ -154,7 +156,8 @@ public class WavFileGenerator {
 //			value = Filter.LFO(this.last_value, value, 25);
 //			
 //		}
-		this.last_value = value;
+		if(this.use_filter)
+			value = this.filter.calculate(value);
 		return value;
 	}
 	
@@ -164,7 +167,7 @@ public class WavFileGenerator {
     
     	while(true)
     	{
-    		if(function(x, freq, phase, true) <= -0.99 )
+    		if(function(x, freq, phase) <= -0.99 )
     			break;
     		
     		phase++;
@@ -225,5 +228,13 @@ public class WavFileGenerator {
 	    double result = amp * (2 * (float) Math.random() - 1);
 
 		return result;
+	}
+
+	public boolean isUse_filter() {
+		return use_filter;
+	}
+
+	public void setUse_filter(boolean use_filter) {
+		this.use_filter = use_filter;
 	}
 }

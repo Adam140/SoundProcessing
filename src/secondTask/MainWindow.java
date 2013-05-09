@@ -197,6 +197,10 @@ public class MainWindow implements ActionListener{
 		btnClearConsole.setBounds(190, 311, 121, 23);
 		frame.getContentPane().add(btnClearConsole);
 		
+		final JCheckBox chckbxLowpassFilter = new JCheckBox("Low-pass filter");
+		chckbxLowpassFilter.setBounds(390, 214, 122, 23);
+		frame.getContentPane().add(chckbxLowpassFilter);
+		
 		JButton btnSave = new JButton("Save");
 		btnSave.addMouseListener(new MouseAdapter() {
 			@Override
@@ -207,6 +211,18 @@ public class MainWindow implements ActionListener{
 					Date date = new Date();
 					String file = "./output/" + dateFormat.format(date) + ".wav";
 					WavFileGenerator output = new WavFileGenerator(new File(file), ConsoleUtil.convertText(console.getText()), comboWave.getSelectedIndex());
+					if( chckbxLowpassFilter.isSelected() )
+					{
+						Filter f = new Filter(44100, 1000, 1);
+						f.setParametersForLPF();
+						output.filter = f;
+						output.setUse_filter(true);
+					}
+					else
+					{
+						output.setUse_filter(false);
+					}
+
 					output.write();
 					JOptionPane.showMessageDialog(frame, "Save in " + file);
 				}
@@ -305,9 +321,7 @@ public class MainWindow implements ActionListener{
 		tf_white_hz.setBounds(512, 186, 54, 20);
 		frame.getContentPane().add(tf_white_hz);
 		
-		JCheckBox chckbxLowpassFilter = new JCheckBox("Low-pass filter");
-		chckbxLowpassFilter.setBounds(390, 214, 122, 23);
-		frame.getContentPane().add(chckbxLowpassFilter);
+
 		
 		JSlider slider = new JSlider();
 		slider.setBounds(475, 250, 110, 23);

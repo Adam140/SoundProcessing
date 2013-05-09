@@ -6,10 +6,10 @@ public class Filter {
 	private double a2;
 	private double b1;
 	private double b2;
-	private double X1 = (Double)null; // xn-1
-	private double X2 = (Double)null; // xn-2
-	private double Y1 = (Double)null;// yn -1 
-	private double Y2 = (Double)null; // yn-2
+	private double X1 = -9999; // xn-1
+	private double X2 = -9999; // xn-2
+	private double Y1 = -9999;// yn -1 
+	private double Y2 = -9999; // yn-2
 	//given data
 	private double fs; // given sampling frequency
 	private double fc; // desired cutoff freguency
@@ -84,13 +84,13 @@ public class Filter {
 	public double calculate(double x)
 	{
 		double y = x;
-		if( this.Y1 == (Double)null && this.X1 == (Double)null)
+		if( this.Y1 == -9999 && this.X1 == -9999)
 		{
 			y = this.a0 * x;
 			this.Y1 = y;
 			this.X1 = x;
 		}
-		else if( this.Y2 == (Double)null && this.X2 == (Double)null)
+		else if( this.Y2 == -9999 && this.X2 == -9999)
 		{
 			this.Y2 = this.Y1;
 			this.X2 = this.X1;
