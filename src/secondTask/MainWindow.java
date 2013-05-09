@@ -474,10 +474,6 @@ public class MainWindow implements ActionListener {
 		btnPlayRealTime.setBounds(468, 214, 98, 26);
 		frame.getContentPane().add(btnPlayRealTime);
 		
-		JLabel lblTo = new JLabel("to");
-		lblTo.setBounds(512, 254, 16, 14);
-		frame.getContentPane().add(lblTo);
-		
 		JButton btnSaveCurrent = new JButton("Save current 5 sec to file");
 		btnSaveCurrent.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -497,7 +493,7 @@ public class MainWindow implements ActionListener {
 				realTimePlayer.play();
 			}
 		});
-		btnSaveCurrent.setBounds(317, 337, 303, 26);
+		btnSaveCurrent.setBounds(321, 373, 303, 26);
 		frame.getContentPane().add(btnSaveCurrent);
 		
 		tfSinAmf = new JTextField();
