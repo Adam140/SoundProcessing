@@ -40,8 +40,8 @@ public class Filter {
 	 */
 	private void updateParameters()
 	{
-		this.s = Math.sin(2*Math.PI / this.fs);
-		this.c = Math.cos(2*Math.PI / this.fs);
+		this.s = Math.sin(2*Math.PI*this.fc / this.fs);
+		this.c = Math.cos(2*Math.PI*this.fc / this.fs);
 		this.alpha = this.s / (2*this.Q);
 		this.r = 1 / (1+this.alpha);
 	}
@@ -64,7 +64,7 @@ public class Filter {
 	public void setParametersForLPF()
 	{
 		this.a0 = 0.5 * (1 - this.c)*this.r;
-		this.a1 = (1 - this.c)*r;
+		this.a1 = (1 - this.c)*this.r;
 		this.a2 = this.a0;
 		this.b1 = -2*this.c*this.r;
 		this.b2 = (1 - this.alpha)*this.r;
@@ -114,6 +114,14 @@ public class Filter {
 		
 	}
 	
+	@Override
+	public String toString() {
+		return "Filter [a0=" + a0 + ", a1=" + a1 + ", a2=" + a2 + ", b1=" + b1
+				+ ", b2=" + b2 + ", X1=" + X1 + ", X2=" + X2 + ", Y1=" + Y1
+				+ ", Y2=" + Y2 + ", fs=" + fs + ", fc=" + fc + ", Q=" + Q
+				+ ", s=" + s + ", c=" + c + ", alpha=" + alpha + ", r=" + r
+				+ ", amplifiler=" + amplifiler + "]";
+	}
 	public static double LFO(double last_value, double value , double smoothing)
 	{
 		double tmp = (value - last_value) / smoothing;

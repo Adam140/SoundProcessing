@@ -67,9 +67,10 @@ public class MainWindow implements ActionListener, KeyListener {
 	private ImageIcon iconOff = new ImageIcon("icon/off.png", "off");
 	private Properties waves = new Properties();
 	private RealTimePlayerFacade realTimePlayer = new RealTimePlayerFacade(waves);
-	private JTextField tf_fc;
-	private JTextField tf_Q;
-	private JTextField tf_amplifier;
+	public static JTextField tf_fc;
+	public static JTextField tf_Q;
+	public static JTextField tf_amplifier;
+	public static JCheckBox chckbxLowpassFilter;
 
 	/**
 	 * Launch the application.
@@ -206,17 +207,35 @@ public class MainWindow implements ActionListener, KeyListener {
 		btnClearConsole.setBounds(190, 311, 121, 23);
 		frame.getContentPane().add(btnClearConsole);
 
-		final JCheckBox chckbxLowpassFilter = new JCheckBox("Low-pass filter");
+		chckbxLowpassFilter = new JCheckBox("Low-pass filter");
 		chckbxLowpassFilter.setBounds(390, 214, 122, 23);
 		frame.getContentPane().add(chckbxLowpassFilter);
 
 		tf_fc = new JTextField();
+		tf_fc.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if( Generator.filter != null)
+				{
+					Generator.filter.updateDate(Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()));
+					Generator.filter.setParametersForLPF();
+				}
+			}
+		});
 		tf_fc.setText("100");
 		tf_fc.setBounds(426, 251, 86, 20);
 		frame.getContentPane().add(tf_fc);
 		tf_fc.setColumns(10);
 
 		tf_Q = new JTextField();
+		tf_Q.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if( Generator.filter != null)
+				{
+					Generator.filter.updateDate(Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()));
+					Generator.filter.setParametersForLPF();
+				}
+			}
+		});
 		tf_Q.setText("1");
 		tf_Q.setBounds(426, 278, 86, 20);
 		frame.getContentPane().add(tf_Q);
@@ -227,6 +246,14 @@ public class MainWindow implements ActionListener, KeyListener {
 		frame.getContentPane().add(lblAmplifier);
 
 		tf_amplifier = new JTextField();
+		tf_amplifier.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if( Generator.filter != null)
+				{
+					Generator.filter.setAmplifiler(Double.valueOf(tf_amplifier.getText()));
+				}
+			}
+		});
 		tf_amplifier.setText("1");
 		tf_amplifier.setColumns(10);
 		tf_amplifier.setBounds(426, 309, 86, 20);

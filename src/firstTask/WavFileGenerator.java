@@ -151,11 +151,12 @@ public class WavFileGenerator {
 			break;
 			
 		}
-//		if(filter && this.last_value != -99999)
+//		if(this.last_value != -99999)
 //		{
 //			value = Filter.LFO(this.last_value, value, 25);
 //			
 //		}
+//		this.last_value = value;
 		if(this.use_filter)
 			value = this.filter.calculate(value);
 		return value;
