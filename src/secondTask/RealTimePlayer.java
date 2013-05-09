@@ -140,7 +140,7 @@ class RealTimePlayer extends Thread {
 		
 		if( MainWindow.chckbxLowpassFilter.isSelected() )
 		{
-			value = filter.calculate(value);
+			value = filter.calculate(value,x);
 			//System.out.println("Value: "+ value);
 		}
 

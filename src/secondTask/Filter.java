@@ -21,24 +21,53 @@ public class Filter {
 	private double alpha;
 	private double r;
 	private double amplifiler = 1;
+	private double fo;
+	private WaveType type= null;
+	private String oscillate_to = "Off"; // Q - Resonance F - cutoff A - amplitude Off - off
 	
 	
+	
+	public double getFo() {
+		return fo;
+	}
+
+	public void setFo(double fo) {
+		this.fo = fo;
+	}
+
+	public WaveType getType() {
+		return type;
+	}
+
+	public void setType(WaveType type) {
+		this.type = type;
+	}
+
+	public String getOscillate_to() {
+		return oscillate_to;
+	}
+
+	public void setOscillate_to(String oscillate_to) {
+		this.oscillate_to = oscillate_to;
+	}
+
 	/**
 	 * 
 	 * @param fs - Sampling frequency
 	 * @param fc - Descired cutoff frequnecy
 	 * @param Q - Resonance
 	 */
-	public Filter(double fs, double fc, double Q)
+	public Filter(double fs, double fc, double Q, double fo)
 	{
 		this.fs = fs;
 		this.fc = fc;
 		this.Q = Q;
+		this.fo = fo;
 		this.updateParameters();
 	}
 	
 	public Filter() {
-		this(44100.0, 100.0, 1.0);
+		this(44100.0, 100.0, 1.0, 1);
 		this.amplifiler = 1.0;
 		setParametersForLPF();
 	}
@@ -53,15 +82,24 @@ public class Filter {
 		this.r = 1 / (1+this.alpha);
 	}
 	
+	private void updateParameters(double fc1, double q1)
+	{
+		this.s = Math.sin(2*Math.PI*fc1 / this.fs);
+		this.c = Math.cos(2*Math.PI*fc1 / this.fs);
+		this.alpha = this.s / (2*q1);
+		this.r = 1 / (1+this.alpha);
+	}
+	
 	/**
 	 * 
 	 * @param fc - Desired cutoff frequency
 	 * @param Q - resonance
 	 */
-	public void updateDate(double fc, double Q)
+	public void updateDate(double fc, double Q, double fo)
 	{
 		this.fc = fc;
 		this.Q = Q;
+		this.fo = fo;
 		this.updateParameters();
 	}
 	
@@ -89,8 +127,32 @@ public class Filter {
 		this.b2 = (1 - this.alpha)*this.r;
 	}
 	
-	public double calculate(double x)
+	public double calculate(double x, long i)
 	{
+		double tmp_amplifiler = this.amplifiler;
+
+		if(this.oscillate_to != "Off")
+		{
+			double tmp_q = this.Q;
+			double tmp_fc = this.fc;
+			if(this.oscillate_to == "Q")
+			{
+				tmp_q = this.Q * Generator.function(i, fo, 0, this.type, false);
+			}
+			else if(this.oscillate_to == "F")
+			{
+				tmp_fc = this.fc * Generator.function(i, fo, 0, this.type, false);
+			}
+			else if(this.oscillate_to == "A")
+			{
+				tmp_amplifiler = this.amplifiler * Generator.function(i, fo, 0, this.type, false);
+			}
+			//this.updateDate(this.fc, this.Q, this.fo);
+			this.updateParameters(tmp_fc,tmp_q);	
+			//System.out.println("Q:"+this.Q+ " F: "+this.fc+" A: "+this.amplifiler);
+		}
+		
+		x = x * tmp_amplifiler;
 		double y = x;
 		if( this.Y1 == -9999 && this.X1 == -9999)
 		{
@@ -117,7 +179,7 @@ public class Filter {
 			this.Y1 = y;
 		}
 		
-		return y * this.amplifiler;
+		return y ;
 		
 	}
 	

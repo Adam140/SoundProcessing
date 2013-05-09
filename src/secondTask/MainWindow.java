@@ -32,6 +32,8 @@ import javax.swing.SwingConstants;
 
 import firstTask.ConsoleUtil;
 import firstTask.WavFileGenerator;
+import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
 
 public class MainWindow implements ActionListener, KeyListener {
 
@@ -72,6 +74,8 @@ public class MainWindow implements ActionListener, KeyListener {
 	public static JTextField tf_Q;
 	public static JTextField tf_amplifier;
 	public static JCheckBox chckbxLowpassFilter;
+	public static JTextField tf_fo;
+	private final ButtonGroup buttonGroup = new ButtonGroup();
 
 	/**
 	 * Launch the application.
@@ -217,7 +221,7 @@ public class MainWindow implements ActionListener, KeyListener {
 			public void actionPerformed(ActionEvent arg0) {
 				if( chckbxLowpassFilter.isSelected() )
 				{
-					filter.updateDate(Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()));
+					filter.updateDate(Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()), Double.valueOf(tf_fo.getText()));
 					filter.setParametersForLPF();
 				}
 			}
@@ -232,7 +236,7 @@ public class MainWindow implements ActionListener, KeyListener {
 			public void actionPerformed(ActionEvent e) {
 				if( chckbxLowpassFilter.isSelected())
 				{
-					filter.updateDate(Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()));
+					filter.updateDate(Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()), Double.valueOf(tf_fo.getText()));
 					filter.setParametersForLPF();
 				}
 			}
@@ -270,7 +274,7 @@ public class MainWindow implements ActionListener, KeyListener {
 					String file = "./output/" + dateFormat.format(date) + ".wav";
 					WavFileGenerator output = new WavFileGenerator(new File(file), ConsoleUtil.convertText(console.getText()), comboWave.getSelectedIndex());
 					if (chckbxLowpassFilter.isSelected()) {
-						Filter f = new Filter(44100, Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()));
+						Filter f = new Filter(44100, Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()),  Double.valueOf(tf_fo.getText()));
 						f.setParametersForLPF();
 						output.filter = f;
 						f.setAmplifiler(Double.valueOf(tf_amplifier.getText()));
@@ -289,6 +293,33 @@ public class MainWindow implements ActionListener, KeyListener {
 		frame.getContentPane().add(btnSave);
 
 		comboWave = new JComboBox();
+		comboWave.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if( chckbxLowpassFilter.isSelected())
+				{
+					WaveType t = null;
+					int index = comboWave.getSelectedIndex();
+					switch(index)
+					{
+					case 0:
+						t = WaveType.SINUSOIDAL;
+						break;
+					case 1:
+						t = WaveType.TRIANGULAR;
+						break;
+					case 2:
+						t = WaveType.SAWTOOTH;
+						break;
+					case 3:
+						t = WaveType.RECTANGULAR;
+						break;
+						
+					}
+					filter.setType(t);
+				}
+
+			}
+		});
 		comboWave.setModel(new DefaultComboBoxModel(new String[] { "sinusoidal wave", "triangular wave", "sawtooth wave", "rectangular wave", "red noise", "white noise" }));
 		comboWave.setBounds(10, 311, 175, 20);
 		frame.getContentPane().add(comboWave);
@@ -436,10 +467,6 @@ public class MainWindow implements ActionListener, KeyListener {
 		btnPlayRealTime.setBounds(522, 211, 98, 26);
 		frame.getContentPane().add(btnPlayRealTime);
 		
-		JLabel lblTo = new JLabel("to");
-		lblTo.setBounds(512, 254, 16, 14);
-		frame.getContentPane().add(lblTo);
-		
 		JButton btnSaveCurrent = new JButton("Save current 5 sec to file");
 		btnSaveCurrent.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -459,8 +486,83 @@ public class MainWindow implements ActionListener, KeyListener {
 				realTimePlayer.play();
 			}
 		});
-		btnSaveCurrent.setBounds(317, 337, 303, 26);
+		btnSaveCurrent.setBounds(321, 373, 303, 26);
 		frame.getContentPane().add(btnSaveCurrent);
+		
+		JRadioButton radio_fc = new JRadioButton("Set oscillator");
+		radio_fc.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if( chckbxLowpassFilter.isSelected())
+				{
+					filter.setOscillate_to("F");
+				}
+			}
+		});
+		buttonGroup.add(radio_fc);
+		radio_fc.setBounds(511, 250, 109, 23);
+		frame.getContentPane().add(radio_fc);
+		
+		JRadioButton radio_Q = new JRadioButton("Set oscillator");
+		radio_Q.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if( chckbxLowpassFilter.isSelected())
+				{
+					filter.setOscillate_to("Q");
+				}
+			}
+		});
+		buttonGroup.add(radio_Q);
+		radio_Q.setBounds(511, 277, 109, 23);
+		frame.getContentPane().add(radio_Q);
+		
+		JRadioButton radio_amplifer = new JRadioButton("Set oscillator");
+		radio_amplifer.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if( chckbxLowpassFilter.isSelected())
+				{
+					filter.setOscillate_to("A");
+				}
+			}
+		});
+		buttonGroup.add(radio_amplifer);
+		radio_amplifer.setBounds(512, 305, 109, 23);
+		frame.getContentPane().add(radio_amplifer);
+		
+		JLabel lblOscillatorFrequency = new JLabel("Oscillator frequency");
+		lblOscillatorFrequency.setBounds(321, 342, 110, 14);
+		frame.getContentPane().add(lblOscillatorFrequency);
+		
+		tf_fo = new JTextField();
+		tf_fo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if( chckbxLowpassFilter.isSelected())
+				{
+					filter.setFo(Double.valueOf(tf_fo.getText()));
+				}
+			}
+		});
+		tf_fo.setText("1");
+		tf_fo.setColumns(10);
+		tf_fo.setBounds(426, 340, 86, 20);
+		frame.getContentPane().add(tf_fo);
+		
+		JRadioButton radio_off = new JRadioButton("Set off");
+		radio_off.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if( chckbxLowpassFilter.isSelected())
+				{
+					filter.setOscillate_to("Off");
+				}
+			}
+		});
+		buttonGroup.add(radio_off);
+		radio_off.setSelected(true);
+		radio_off.setBounds(512, 336, 109, 23);
+		frame.getContentPane().add(radio_off);
 
 	}
 
