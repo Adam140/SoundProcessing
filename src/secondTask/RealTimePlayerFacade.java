@@ -14,9 +14,8 @@ public class RealTimePlayerFacade {
 	
 	public void play()
 	{
-		if(realTimePlayer.bExitThread == true)
-			realTimePlayer = new RealTimePlayer(waves);
-		
+		realTimePlayer.exit();
+		realTimePlayer = new RealTimePlayer(waves);
 		realTimePlayer.start();
 	}
 	
@@ -27,7 +26,6 @@ public class RealTimePlayerFacade {
 	
 	public void changeParams()
 	{
-		System.out.println(waves);
 		realTimePlayer.changeParams();
 	}
 	

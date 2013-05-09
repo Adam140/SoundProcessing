@@ -43,6 +43,7 @@ class RealTimePlayer extends Thread {
 	// SINE_PACKET_SIZE/2
 	// samples at a time, until we tell the thread to exit
 	public void run() {
+		changeParams();
 		// Position through the sine wave as a percentage (i.e. 0-1 is 0-2*PI)
 		// Open up the audio output, using a sampling rate of 44100hz, 16 bit
 		// samples, mono, and big
