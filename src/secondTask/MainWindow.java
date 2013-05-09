@@ -61,6 +61,9 @@ public class MainWindow implements ActionListener, KeyListener {
 	private ImageIcon iconOff = new ImageIcon("icon/off.png", "off");
 	private Properties waves = new Properties();
 	private RealTimePlayerFacade realTimePlayer = new RealTimePlayerFacade(waves);
+	private JTextField textField;
+	private JTextField textField_1;
+	private JTextField textField_2;
 
 	/**
 	 * Launch the application.
@@ -91,7 +94,7 @@ public class MainWindow implements ActionListener, KeyListener {
 	private void initialize() {
 		frame = new JFrame();
 		frame.getContentPane().setBackground(Color.LIGHT_GRAY);
-		frame.setBounds(100, 100, 611, 378);
+		frame.setBounds(100, 100, 654, 378);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
@@ -216,7 +219,7 @@ public class MainWindow implements ActionListener, KeyListener {
 					WavFileGenerator output = new WavFileGenerator(new File(file), ConsoleUtil.convertText(console.getText()), comboWave.getSelectedIndex());
 					if( chckbxLowpassFilter.isSelected() )
 					{
-						Filter f = new Filter(44100, 1000, 1);
+						Filter f = new Filter(44100, 100, 1);
 						f.setParametersForLPF();
 						output.filter = f;
 						output.setUse_filter(true);
@@ -317,12 +320,6 @@ public class MainWindow implements ActionListener, KeyListener {
 		tf_white_hz.setBounds(512, 186, 54, 20);
 		frame.getContentPane().add(tf_white_hz);
 		
-
-		
-		JSlider slider = new JSlider();
-		slider.setBounds(475, 250, 110, 23);
-		frame.getContentPane().add(slider);
-		
 		JLabel lblSmoothness = new JLabel("Cut-off frequency");
 		lblSmoothness.setBounds(324, 253, 110, 16);
 		frame.getContentPane().add(lblSmoothness);
@@ -330,10 +327,6 @@ public class MainWindow implements ActionListener, KeyListener {
 		JLabel lblResonance = new JLabel("Resonance");
 		lblResonance.setBounds(322, 281, 93, 16);
 		frame.getContentPane().add(lblResonance);
-		
-		JSlider slider_1 = new JSlider();
-		slider_1.setBounds(475, 277, 110, 23);
-		frame.getContentPane().add(slider_1);
 		
 		ImageIcon iconOff = new ImageIcon("icon/off.png", "off");
 		
@@ -367,8 +360,30 @@ public class MainWindow implements ActionListener, KeyListener {
 				realTimePlayer.play();
 			}
 		});
-		btnPlayRealTime.setBounds(390, 309, 98, 26);
+		btnPlayRealTime.setBounds(522, 211, 98, 26);
 		frame.getContentPane().add(btnPlayRealTime);
+		
+		textField = new JTextField();
+		textField.setText("100");
+		textField.setBounds(426, 251, 86, 20);
+		frame.getContentPane().add(textField);
+		textField.setColumns(10);
+		
+		textField_1 = new JTextField();
+		textField_1.setText("1");
+		textField_1.setBounds(426, 278, 86, 20);
+		frame.getContentPane().add(textField_1);
+		textField_1.setColumns(10);
+		
+		JLabel lblAmplifier = new JLabel("Amplifier");
+		lblAmplifier.setBounds(321, 311, 46, 14);
+		frame.getContentPane().add(lblAmplifier);
+		
+		textField_2 = new JTextField();
+		textField_2.setText("1");
+		textField_2.setColumns(10);
+		textField_2.setBounds(426, 309, 86, 20);
+		frame.getContentPane().add(textField_2);
 	}
 	public JButton getBtnSinusoidal() {
 		return btnSinusoidal;
