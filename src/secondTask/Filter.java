@@ -149,6 +149,7 @@ public class Filter {
 			}
 			//this.updateDate(this.fc, this.Q, this.fo);
 			this.updateParameters(tmp_fc,tmp_q);	
+			this.setParametersForLPF();
 			//System.out.println("Q:"+this.Q+ " F: "+this.fc+" A: "+this.amplifiler);
 		}
 		
