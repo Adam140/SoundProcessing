@@ -188,7 +188,7 @@ public class WavFileGenerator {
 			
 		}
 		if(this.use_filter)
-			value = this.filter.calculate(value,0);
+			value = this.filter.calculate(value,x);
 		return value ;
 	}
 	
