@@ -148,9 +148,9 @@ public class Filter {
 				tmp_amplifiler = this.amplifiler * Generator.function(i, fo, 0, this.type, false);
 			}
 			//this.updateDate(this.fc, this.Q, this.fo);
-//			this.updateParameters(tmp_fc,tmp_q);	
+			this.updateParameters(tmp_fc,tmp_q);	
 //			this.setParametersForLPF();
-			System.out.println("Q:"+tmp_q+ " F: "+tmp_fc+" A: "+this.amplifiler);
+//			System.out.println("Q:"+tmp_q+ " F: "+tmp_fc+" A: " + tmp_amplifiler);
 		}
 		
 		x = x * tmp_amplifiler;
