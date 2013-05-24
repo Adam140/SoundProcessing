@@ -2,6 +2,7 @@ package secondTask;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Event;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -83,6 +84,11 @@ public class MainWindow implements ActionListener {
 	private JTextField tfWhiteAmf;
 	public static JTextField tf_fo;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
+	private JButton btnRedNoise;
+	private JButton btnSawtooth;
+	private JRadioButton radio_fc;
+	private JRadioButton radio_amplifer;
+	private JButton btnPlayRealTime;
 
 	/**
 	 * Launch the application.
@@ -137,6 +143,29 @@ public class MainWindow implements ActionListener {
 		JButton btnGenerateOcean = new JButton("Ocean effect");
 		btnGenerateOcean.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+						btnSinusoidal.setActionCommand(WaveType.SINUSOIDAL.toString().toLowerCase() + "_OFF");
+						btnSinusoidal.doClick();
+						btnRectangular.setActionCommand(WaveType.RECTANGULAR.toString().toLowerCase() + "_OFF");
+						btnRectangular.doClick();
+						btnTriangular.setActionCommand(WaveType.TRIANGULAR.toString().toLowerCase() + "_OFF");
+						btnTriangular.doClick();
+						btnSawtooth.setActionCommand(WaveType.SAWTOOTH.toString().toLowerCase() + "_OFF");
+						btnSawtooth.doClick();
+						btnRedNoise.setActionCommand("redNoise" + "_OFF");
+						btnRedNoise.doClick();
+						btnWhiteNoise.setActionCommand("whiteNoise" + "_ON");
+						btnWhiteNoise.doClick();
+						
+						chckbxLowpassFilter.setSelected(true);
+						tf_fc.setText("300.0");
+						tf_fc.postActionEvent();
+						tf_fo.setText("0.15");
+						tf_fo.postActionEvent();
+						comboWave.setSelectedIndex(0);
+						radio_amplifer.setSelected(true);
+						filter.setOscillate_to("A");
+						btnPlayRealTime.doClick();
+						
 			}
 		});
 		btnGenerateOcean.setBounds(174, 91, 121, 23);
@@ -281,13 +310,22 @@ public class MainWindow implements ActionListener {
 					String file = "./output/" + dateFormat.format(date) + ".wav";
 					WavFileGenerator output = new WavFileGenerator(new File(file), ConsoleUtil.convertText(console.getText()), comboWave.getSelectedIndex());
 					if (chckbxLowpassFilter.isSelected()) {
-						Filter f = new Filter(44100, Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()),  Double.valueOf(tf_fo.getText()));
-						f.setParametersForLPF();
-						output.filter = f;
-						f.setAmplifiler(Double.valueOf(tfAmplifier.getText()));
+						Filter f;
+						if(filter == null)
+						{
+							f = new Filter(44100, Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()),  Double.valueOf(tf_fo.getText()));
+							f.updateDate( Double.valueOf(tf_fc.getText()), Double.valueOf(tf_Q.getText()),  Double.valueOf(tf_fo.getText()));
+							f.setParametersForLPF();
+							filter = f;
+						}
+						output.filter = filter;
+						output.filter.setParametersForLPF();
 
+						output.filter.setAmplifiler(Double.valueOf(tfAmplifier.getText()));
 						output.setUse_filter(true);
+						
 					} else {
+						
 						output.setUse_filter(false);
 					}
 
@@ -363,7 +401,7 @@ public class MainWindow implements ActionListener {
 		tf_tri_hz.addActionListener(this);
 		frame.getContentPane().add(tf_tri_hz);
 
-		JButton btnSawtooth = new JButton("Sawtooth");
+		btnSawtooth = new JButton("Sawtooth");
 		btnSawtooth.setName(WaveType.SAWTOOTH.toString());
 		btnSawtooth.setActionCommand("sawtooth_ON");
 		btnSawtooth.setBounds(390, 87, 110, 23);
@@ -391,7 +429,7 @@ public class MainWindow implements ActionListener {
 		tf_rec_hz.addActionListener(this);
 		frame.getContentPane().add(tf_rec_hz);
 
-		JButton btnRedNoise = new JButton("Red noise");
+		btnRedNoise = new JButton("Red noise");
 		btnRedNoise.setActionCommand("redNoise_ON");
 		btnRedNoise.setName(WaveType.RED_NOISE.toString());
 		btnRedNoise.setBounds(390, 147, 110, 23);
@@ -453,7 +491,7 @@ public class MainWindow implements ActionListener {
 		iconWhiteN.setBounds(569, 177, 16, 16);
 		frame.getContentPane().add(iconWhiteN);
 
-		final JButton btnPlayRealTime = new JButton("Play");
+		btnPlayRealTime = new JButton("Play");
 		btnPlayRealTime.setActionCommand("PLAY");
 		btnPlayRealTime.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -548,7 +586,7 @@ public class MainWindow implements ActionListener {
 		tfWhiteAmf.setBounds(324, 177, 50, 20);
 		frame.getContentPane().add(tfWhiteAmf);
 		
-		JRadioButton radio_fc = new JRadioButton("Set oscillator");
+		radio_fc = new JRadioButton("Set oscillator");
 		radio_fc.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -576,7 +614,7 @@ public class MainWindow implements ActionListener {
 		radio_Q.setBounds(511, 277, 109, 23);
 		frame.getContentPane().add(radio_Q);
 		
-		JRadioButton radio_amplifer = new JRadioButton("Set oscillator");
+		radio_amplifer = new JRadioButton("Set oscillator");
 		radio_amplifer.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {

@@ -137,24 +137,32 @@ public class Filter {
 			double tmp_fc = this.fc;
 			if(this.oscillate_to == "Q")
 			{
-				tmp_q = this.Q * Generator.function(i, fo, 0, this.type, false);
+				tmp_q = this.Q * Math.abs(Generator.function(i, fo, 0, this.type, false));
+				this.updateParameters(tmp_fc,tmp_q);	
 			}
 			else if(this.oscillate_to == "F")
 			{
-				tmp_fc = this.fc * Generator.function(i, fo, 0, this.type, false);
+				this.fc = 500 * Generator.function(i,fo, 0, this.type, false) + 800;
+				this.updateDate(this.fc, this.Q, this.fo);
+				//tmp_fc = this.fc * Generator.function(i, fo, 0, this.type, false);
 			}
 			else if(this.oscillate_to == "A")
 			{
 				tmp_amplifiler = this.amplifiler * Generator.function(i, fo, 0, this.type, false);
 			}
 			//this.updateDate(this.fc, this.Q, this.fo);
+<<<<<<< HEAD
 			this.updateParameters(tmp_fc,tmp_q);	
 			this.setParametersForLPF();
 			this.findNan();
 			//System.out.println("Q:"+tmp_q+ " F: "+tmp_fc+" A: "+this.amplifiler);
+=======
+			//this.updateParameters(tmp_fc,tmp_q);	
+			this.setParametersForLPF();
+//			System.out.println("Q:"+tmp_q+ " F: "+tmp_fc+" A: " + tmp_amplifiler);
+>>>>>>> b4e23dcc5137386c78a5d7dc7ca082cf7063f72d
 		}
-		
-		x = x * tmp_amplifiler;
+		//x = x;
 		double y = x;
 		if( this.Y1 == -9999 && this.X1 == -9999)
 		{
@@ -190,7 +198,11 @@ public class Filter {
 			this.updateParameters();
 			this.setParametersForLPF();
 		}
+<<<<<<< HEAD
 		return y;
+=======
+		return y  * tmp_amplifiler;
+>>>>>>> b4e23dcc5137386c78a5d7dc7ca082cf7063f72d
 		
 	}
 	
