@@ -35,14 +35,11 @@ class CaptureThread extends Thread {
 	}
 
 	public void run() {
-		AudioFileFormat.Type fileType = null;
-
-		fileType = AudioFileFormat.Type.WAVE;
 
 		try {
 			targetDataLine.open(audioFormat);
 			targetDataLine.start();
-			AudioSystem.write(new AudioInputStream(targetDataLine), fileType, audioFile);
+			AudioSystem.write(new AudioInputStream(targetDataLine), AudioFileFormat.Type.WAVE, audioFile);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
