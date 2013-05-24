@@ -148,9 +148,10 @@ public class Filter {
 				tmp_amplifiler = this.amplifiler * Generator.function(i, fo, 0, this.type, false);
 			}
 			//this.updateDate(this.fc, this.Q, this.fo);
-//			this.updateParameters(tmp_fc,tmp_q);	
-//			this.setParametersForLPF();
-			System.out.println("Q:"+tmp_q+ " F: "+tmp_fc+" A: "+this.amplifiler);
+			this.updateParameters(tmp_fc,tmp_q);	
+			this.setParametersForLPF();
+			this.findNan();
+			//System.out.println("Q:"+tmp_q+ " F: "+tmp_fc+" A: "+this.amplifiler);
 		}
 		
 		x = x * tmp_amplifiler;
@@ -189,7 +190,7 @@ public class Filter {
 			this.updateParameters();
 			this.setParametersForLPF();
 		}
-		return y ;
+		return y;
 		
 	}
 	
@@ -218,6 +219,38 @@ public class Filter {
 	}
 	public void setAmplifiler(double amplifiler) {
 		this.amplifiler = amplifiler;
+	}
+	
+	public void findNan()
+	{
+		boolean nan = false;
+		if(Double.isNaN(this.a0))
+			System.out.println("NAN");
+		if(Double.isNaN(this.a1))
+			System.out.println("NAN");
+		if(Double.isNaN(this.a2))
+			System.out.println("NAN");
+		if(Double.isNaN(this.alpha))
+			System.out.println("NAN");
+		if(Double.isNaN(this.b1))
+			System.out.println("NAN");
+		if(Double.isNaN(this.b2))
+			System.out.println("NAN");
+		if(Double.isNaN(this.c))
+			System.out.println("NAN");
+		if(Double.isNaN(this.r))
+			System.out.println("NAN");
+		if(Double.isNaN(this.s))
+			System.out.println("NAN");
+		if(Double.isNaN(this.X1))
+			System.out.println("NAN");
+		if(Double.isNaN(this.X2))
+			System.out.println("NAN");
+		if(Double.isNaN(this.Y1))
+			System.out.println("NAN");
+		if(Double.isNaN(this.Y2))
+			System.out.println("NAN");
+		
 	}
 	
 }
