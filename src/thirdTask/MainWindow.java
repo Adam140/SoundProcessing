@@ -1,18 +1,21 @@
 package thirdTask;
 
+import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
 
-import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.TargetDataLine;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
 
 import secondTask.Player;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.io.File;
 
 public class MainWindow {
 
@@ -21,6 +24,8 @@ public class MainWindow {
 	private JButton btnStart;
 	private JButton btnStop;
 	private JButton btnPlay;
+	private final ButtonGroup buttonGroup = new ButtonGroup();
+	private JTextField textFieldThreshold;
 
 	/**
 	 * Launch the application.
@@ -58,7 +63,7 @@ public class MainWindow {
 		btnStart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					captureThread = new CaptureThread("output/temp.wav");
+					captureThread = new CaptureThread("output/temp.wav", 1, 0);
 					captureThread.start();
 					btnStart.setEnabled(false);
 					btnStop.setEnabled(true);
@@ -68,7 +73,7 @@ public class MainWindow {
 				}
 			}
 		});
-		btnStart.setBounds(10, 11, 89, 23);
+		btnStart.setBounds(6, 60, 89, 23);
 		frame.getContentPane().add(btnStart);
 
 		btnStop = new JButton("Stop");
@@ -84,7 +89,7 @@ public class MainWindow {
 			}
 		});
 		btnStop.setEnabled(false);
-		btnStop.setBounds(109, 11, 89, 23);
+		btnStop.setBounds(105, 60, 89, 23);
 		frame.getContentPane().add(btnStop);
 
 		btnPlay = new JButton("Play");
@@ -94,8 +99,68 @@ public class MainWindow {
 			}
 		});
 		btnPlay.setEnabled(false);
-		btnPlay.setBounds(208, 11, 89, 23);
+		btnPlay.setBounds(204, 60, 89, 23);
 		frame.getContentPane().add(btnPlay);
+		
+		JRadioButton radioMode1 = new JRadioButton("Recording on button");
+		radioMode1.setSelected(true);
+		radioMode1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				textFieldThreshold.setEnabled(false);
+				btnStart.setEnabled(true);
+				btnStop.setEnabled(false);
+				btnPlay.setEnabled(false);
+			}
+		});
+		buttonGroup.add(radioMode1);
+		radioMode1.setBounds(6, 7, 172, 23);
+		frame.getContentPane().add(radioMode1);
+		
+		JRadioButton radioMode2 = new JRadioButton("Recording on voice");
+		radioMode2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				textFieldThreshold.setEnabled(true);
+				btnStart.setEnabled(false);
+				btnStop.setEnabled(false);
+				btnPlay.setEnabled(false);
+				
+				
+				double threshold = 0d;
+				try{
+					threshold = Double.parseDouble(textFieldThreshold.getText());
+					textFieldThreshold.setBackground(Color.white);
+				}
+				catch(Exception e1)
+				{
+				threshold = 0.05;
+				textFieldThreshold.setBackground(Color.red);
+				}
+				
+				try {
+					captureThread = new CaptureThread("output/temp.wav", 2, threshold);
+					captureThread.start();
+					
+					captureThread.join();
+					System.out.println("koniec");
+					btnPlay.setEnabled(true);
+				} catch (Exception e1) {
+					JOptionPane.showMessageDialog(frame,"Somethink goes wrong");
+				}
+			}
+		});
+		buttonGroup.add(radioMode2);
+		radioMode2.setBounds(6, 33, 145, 23);
+		frame.getContentPane().add(radioMode2);
+		
+		textFieldThreshold = new JTextField();
+		textFieldThreshold.setEnabled(false);
+		textFieldThreshold.setText("0.05");
+		textFieldThreshold.setBounds(159, 34, 114, 20);
+		frame.getContentPane().add(textFieldThreshold);
+		textFieldThreshold.setColumns(10);
+		
+		JLabel lblAvgAmplitude = new JLabel("avg amplitude");
+		lblAvgAmplitude.setBounds(284, 36, 89, 16);
+		frame.getContentPane().add(lblAvgAmplitude);
 	}
-
 }
