@@ -12,6 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
@@ -162,5 +163,46 @@ public class MainWindow {
 		JLabel lblAvgAmplitude = new JLabel("avg amplitude");
 		lblAvgAmplitude.setBounds(284, 36, 89, 16);
 		frame.getContentPane().add(lblAvgAmplitude);
+		
+		JButton btnShowDistanceGraph = new JButton("Show distance graph");
+		btnShowDistanceGraph.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				JFrame jframe = new JFrame("Graph");
+				 
+//				double[] s = {1d,1d,2d,3d,2d,0d};
+//				double[] t = {0d,1d,1d,2d,3d,2d,1d};
+//				
+				String s = "C:\\Users\\Adam\\Desktop\\FastDTW-1.1.0\\src\\trace0.csv";
+				String t = "C:\\Users\\Adam\\Desktop\\FastDTW-1.1.0\\src\\trace1.csv";
+				
+				DTW dtw = new DTW(t, s);
+				DistanceGraph distanceGraph = new DistanceGraph(dtw.calculateG());
+		        jframe.getContentPane().add(distanceGraph);
+		        
+		        jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		        jframe.pack();
+		        jframe.setVisible(true);
+//		        dtw.printG();
+//		        System.out.println(dtw);
+			}
+		});
+		btnShowDistanceGraph.setBounds(6, 224, 188, 26);
+		frame.getContentPane().add(btnShowDistanceGraph);
+		
+		JButton btnShowPlot = new JButton("Show plot");
+		btnShowPlot.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+//				double[] s = {1d,1d,2d,3d,2d,0d};
+//				double[] t = {0d,1d,1d,2d,3d,2d,1d};
+//				
+				String s = "C:\\Users\\Adam\\Desktop\\FastDTW-1.1.0\\src\\trace0.csv";
+				String t = "C:\\Users\\Adam\\Desktop\\FastDTW-1.1.0\\src\\trace1.csv";
+				
+				DTW dtw = new DTW(t, s);
+				dtw.calculateG();
+			}
+		});
+		btnShowPlot.setBounds(6, 186, 188, 26);
+		frame.getContentPane().add(btnShowPlot);
 	}
 }
