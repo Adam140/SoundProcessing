@@ -17,6 +17,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import secondTask.Player;
+import javax.swing.JCheckBox;
 
 public class MainWindow {
 
@@ -27,6 +28,8 @@ public class MainWindow {
 	private JButton btnPlay;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	private JTextField textFieldThreshold;
+	private JCheckBox checkBoxFile;
+	private JCheckBox checkBoxRange;
 
 	/**
 	 * Launch the application.
@@ -176,14 +179,18 @@ public class MainWindow {
 				String t = "C:\\Users\\Adam\\Desktop\\FastDTW-1.1.0\\src\\trace1.csv";
 				
 				DTW dtw = new DTW(t, s);
-				DistanceGraph distanceGraph = new DistanceGraph(dtw.calculateG());
+				dtw.calculateG();
+				DistanceGraph distanceGraph = new DistanceGraph(dtw,checkBoxRange.isSelected());
+				
 		        jframe.getContentPane().add(distanceGraph);
 		        
-		        jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		        jframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		        jframe.pack();
 		        jframe.setVisible(true);
 //		        dtw.printG();
 //		        System.out.println(dtw);
+		        if(checkBoxFile.isSelected())
+		        	dtw.toFile("matrix.txt");
 			}
 		});
 		btnShowDistanceGraph.setBounds(6, 224, 188, 26);
@@ -200,9 +207,19 @@ public class MainWindow {
 				
 				DTW dtw = new DTW(t, s);
 				dtw.calculateG();
+				dtw.plotGraph();
+				
 			}
 		});
 		btnShowPlot.setBounds(6, 186, 188, 26);
 		frame.getContentPane().add(btnShowPlot);
+		
+		checkBoxFile = new JCheckBox("Save g matrix to file");
+		checkBoxFile.setBounds(6, 91, 145, 24);
+		frame.getContentPane().add(checkBoxFile);
+		
+		checkBoxRange = new JCheckBox("Set range for graph");
+		checkBoxRange.setBounds(6, 119, 143, 24);
+		frame.getContentPane().add(checkBoxRange);
 	}
 }
