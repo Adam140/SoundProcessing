@@ -175,8 +175,8 @@ public class MainWindow {
 //				double[] s = {1d,1d,2d,3d,2d,0d};
 //				double[] t = {0d,1d,1d,2d,3d,2d,1d};
 //				
-				String s = "C:\\Users\\Adam\\Desktop\\FastDTW-1.1.0\\src\\trace0.csv";
-				String t = "C:\\Users\\Adam\\Desktop\\FastDTW-1.1.0\\src\\trace1.csv";
+				String s = "trace0.csv";
+				String t = "trace1.csv";
 				
 				DTW dtw = new DTW(t, s);
 				dtw.calculateG();
@@ -202,8 +202,8 @@ public class MainWindow {
 //				double[] s = {1d,1d,2d,3d,2d,0d};
 //				double[] t = {0d,1d,1d,2d,3d,2d,1d};
 //				
-				String s = "C:\\Users\\Adam\\Desktop\\FastDTW-1.1.0\\src\\trace0.csv";
-				String t = "C:\\Users\\Adam\\Desktop\\FastDTW-1.1.0\\src\\trace1.csv";
+				String s = "trace0.csv";
+				String t = "trace1.csv";
 				
 				DTW dtw = new DTW(t, s);
 				dtw.calculateG();
