@@ -12,10 +12,12 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import secondTask.Player;
+import javax.swing.JCheckBox;
 
 public class MainWindow {
 
@@ -26,6 +28,8 @@ public class MainWindow {
 	private JButton btnPlay;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	private JTextField textFieldThreshold;
+	private JCheckBox checkBoxFile;
+	private JCheckBox checkBoxRange;
 
 	/**
 	 * Launch the application.
@@ -162,5 +166,60 @@ public class MainWindow {
 		JLabel lblAvgAmplitude = new JLabel("avg amplitude");
 		lblAvgAmplitude.setBounds(284, 36, 89, 16);
 		frame.getContentPane().add(lblAvgAmplitude);
+		
+		JButton btnShowDistanceGraph = new JButton("Show distance graph");
+		btnShowDistanceGraph.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				JFrame jframe = new JFrame("Graph");
+				 
+//				double[] s = {1d,1d,2d,3d,2d,0d};
+//				double[] t = {0d,1d,1d,2d,3d,2d,1d};
+//				
+				String s = "trace0.csv";
+				String t = "trace1.csv";
+				
+				DTW dtw = new DTW(t, s);
+				dtw.calculateG();
+				DistanceGraph distanceGraph = new DistanceGraph(dtw,checkBoxRange.isSelected());
+				
+		        jframe.getContentPane().add(distanceGraph);
+		        
+		        jframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		        jframe.pack();
+		        jframe.setVisible(true);
+//		        dtw.printG();
+//		        System.out.println(dtw);
+		        if(checkBoxFile.isSelected())
+		        	dtw.toFile("matrix.txt");
+			}
+		});
+		btnShowDistanceGraph.setBounds(6, 224, 188, 26);
+		frame.getContentPane().add(btnShowDistanceGraph);
+		
+		JButton btnShowPlot = new JButton("Show plot");
+		btnShowPlot.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+//				double[] s = {1d,1d,2d,3d,2d,0d};
+//				double[] t = {0d,1d,1d,2d,3d,2d,1d};
+//				
+				String s = "trace0.csv";
+				String t = "trace1.csv";
+				
+				DTW dtw = new DTW(t, s);
+				dtw.calculateG();
+				dtw.plotGraph();
+				
+			}
+		});
+		btnShowPlot.setBounds(6, 186, 188, 26);
+		frame.getContentPane().add(btnShowPlot);
+		
+		checkBoxFile = new JCheckBox("Save g matrix to file");
+		checkBoxFile.setBounds(6, 91, 145, 24);
+		frame.getContentPane().add(checkBoxFile);
+		
+		checkBoxRange = new JCheckBox("Set range for graph");
+		checkBoxRange.setBounds(6, 119, 143, 24);
+		frame.getContentPane().add(checkBoxRange);
 	}
 }
