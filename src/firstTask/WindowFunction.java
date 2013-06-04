@@ -15,6 +15,20 @@ public class WindowFunction {
 	}
 	
 	
+	public static double[] Triangular(double[] array)
+	{
+		int N = array.length;
+		double[] result = new double[array.length];
+		
+		for(int i = 0; i < result.length; i++)
+		{
+			result[i] = 1 - Math.abs( (i - 0.5*(N-1)) / 0.5*(N+1) );
+
+		}
+		return result;
+	}
+	
+	
 	public static float[] Hamming(float[] array)
 	{
 		float[] result = new float[array.length];
@@ -26,6 +40,8 @@ public class WindowFunction {
 		}
 		return result;
 	}
+	
+	
 	
 	public static double[] Hanning(double[] array)
 	{
