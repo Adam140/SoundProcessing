@@ -31,7 +31,7 @@ public class DistanceGraph extends JPanel {
         int i = g.length;
         int j = g[0].length;
         initImage();
-        putLine(dtw.getY(), dtw.getX());
+        putLine(dtw.getX(), dtw.getY());
         Dimension screen = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
         int xW = (int) (screen.getWidth() / j);
         int xH = (int) (screen.getHeight() / i);
@@ -86,13 +86,29 @@ public class DistanceGraph extends JPanel {
            }
     }
     
-    private void putLine(ArrayList<Integer> x, ArrayList<Integer> y)
+    private void putLine(ArrayList<Integer> listX, ArrayList<Integer> listY)
     {
-    	for(int i = 1; i < x.size(); i++)
+    	for(int i = 1; i < listX.size(); i++)
     	{
-    		System.out.println(x.get(i) + " " + y.get(i));
-    		if(x.get(i) < image.getWidth() && y.get(i) < image.getHeight() && x.get(i) >= 0 && y.get(i) >= 0)
-    			this.image.setRGB(x.get(i), y.get(i), Color.blue.getRGB());
+    		if(listX.get(i) < image.getWidth() && listY.get(i) < image.getHeight() && listX.get(i) >= 0 && listY.get(i) >= 0)
+    			this.image.setRGB(listX.get(i), listY.get(i), Color.blue.getRGB());
+    	}
+    	int I = image.getHeight();
+    	int J = image.getWidth();
+    	for(int i = 0; i < image.getWidth(); i++)
+    	{
+    		int a = 2 * ( i - I) + J;
+    		int b = (int) (0.5 * ( i - 1) + 1);
+    		int c = 2 * ( i - 1) + 1;
+    		int d = (int) (0.5 * ( i - I) + J);
+    		if(a < I && a >= 0 && a >= b)
+    			this.image.setRGB(i, a, Color.RED.getRGB());
+    		if(b < I && b >= 0 && b >= a)
+    			this.image.setRGB(i, b, Color.RED.getRGB());
+    		if(c < I && c >= 0 && c <= d)
+    			this.image.setRGB(i, c, Color.RED.getRGB());
+    		if(d < I && d >= 0 && d <= c)
+    			this.image.setRGB(i,d, Color.RED.getRGB());
     	}
     }
     

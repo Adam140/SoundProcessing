@@ -27,6 +27,7 @@ import org.math.plot.utils.Array;
 public class DTW {
 
 	private ArrayList<Integer> x;
+
 	public ArrayList<Integer> getX() {
 		return x;
 	}
@@ -88,23 +89,29 @@ public class DTW {
 	public double[][] calculateG() {
 		for (int i = 1; i < t.length; i++) {
 			for (int j = 1; j < s.length; j++) {
+//				if(!itakuraConstraint(i, j, t.length, s.length))
+//				{
+//					g[i][j] = Double.POSITIVE_INFINITY;
+//					continue;
+//				}
 				g[i][j] = euclideanDistance(t[i], s[j]) + min(g[i][j - 1], g[i - 1][j - 1], g[i - 1][j]);
 			}
 		}
-		
+
 		setPrecision(2);
+		System.out.println("Minimal path = " + g[t.length - 1][s.length - 1]);
 		return g;
 	}
-	
-	public void setPrecision(int afterDot)
-	{
-		int factor = (int) Math.pow(10d,(double)afterDot);
+
+	public void setPrecision(int afterDot) {
+		int factor = (int) Math.pow(10d, (double) afterDot);
 		for (int i = 1; i < t.length; i++) {
 			for (int j = 1; j < s.length; j++) {
+				if(g[i][j] != Double.POSITIVE_INFINITY)
 				g[i][j] = Math.round(g[i][j] * factor) / (double) factor;
 			}
 		}
-		
+
 	}
 
 	public static String arrayToString(double[][] a) {
@@ -154,11 +161,10 @@ public class DTW {
 		}
 
 	}
-	
-	public void plotGraph()
-	{
+
+	public void plotGraph() {
 		bestPath();
-		plotGraph(arrayToDouble(x),arrayToDouble(y));
+		plotGraph(arrayToDouble(x), arrayToDouble(y));
 	}
 
 	public static void plotGraph(double[] x, double[] y) {
@@ -247,75 +253,81 @@ public class DTW {
 			e.printStackTrace();
 		}
 	}
-	
-	public void bestPath()
-	{
+
+	public void bestPath() {
 		this.x = new ArrayList<>();
 		this.y = new ArrayList<>();
-		
-		
-	      int i = g.length;
-	      int j = g[0].length;
-	      x.add(i);
-	      y.add(j);
-	      i--;
-	      j--;
-	      
-	      while ((i>=0) || (j>=0))
-	      {
-	         final double diagCost;
-	         final double leftCost;
-	         final double downCost;
 
-	         if ((i>0) && (j>0))
-	            diagCost = g[i-1][j-1];
-	         else
-	            diagCost = Double.POSITIVE_INFINITY;
+		int j = g.length;
+		int i = g[0].length;
+		int J = g.length;
+		int I = g[0].length;
+		x.add(i);
+		y.add(j);
+		j--;
+		i--;
 
-	         if (i > 0)
-	            leftCost = g[i-1][j];
-	         else
-	            leftCost = Double.POSITIVE_INFINITY;
+		while ((j >= 0) || (i >= 0)) {
+			final double diagCost;
+			final double leftCost;
+			final double upCost;
 
-	         if (j > 0)
-	            downCost = g[i][j-1];
-	         else
-	            downCost = Double.POSITIVE_INFINITY;
+			if ((j > 0) && (i > 0) && itakuraConstraint(i - 1, j - 1, I, J))
+				diagCost = g[j - 1][i - 1];
+			else
+				diagCost = Double.POSITIVE_INFINITY;
 
-	         if ((diagCost<=leftCost) && (diagCost<=downCost))
-	         {
-	            i--;
-	            j--;
-	         }
-	         else if ((leftCost<diagCost) && (leftCost<downCost))
-	            i--;
-	         else if ((downCost<diagCost) && (downCost<leftCost))
-	            j--;
-	         else if (i <= j)  // leftCost==rightCost > diagCost
-	            j--;
-	         else   // leftCost==rightCost > diagCost
-	            i--;
+			if (j > 0 && itakuraConstraint(i, j - 1, I, J))
+				upCost = g[j - 1][i];
+			else
+				upCost = Double.POSITIVE_INFINITY;
 
-	         x.add(i);
-	         y.add(j);
-	      }  
-	      
-//	      Collections.reverse(x);
-//	      Collections.reverse(y);
+			if (i > 0 && itakuraConstraint(i - 1, j, I, J))
+				leftCost = g[j][i - 1];
+			else
+				leftCost = Double.POSITIVE_INFINITY;
+
+			if ((diagCost <= leftCost) && (diagCost <= upCost)) {
+				j--;
+				i--;
+			} else if ((leftCost < diagCost) && (leftCost < upCost))
+				i--;
+			else if ((upCost < diagCost) && (upCost < leftCost))
+				j--;
+//			 else if (i <= j) // leftCost==rightCost > diagCost
+//			 j--;
+			 else // leftCost==rightCost > diagCost
+			 i--;
+
+			x.add(i);
+			y.add(j);
+		}
+
+		// Collections.reverse(x);
+		// Collections.reverse(y);
 
 	}
-	
-	   public ArrayList<Integer> getY() {
+
+	public ArrayList<Integer> getY() {
 		return y;
 	}
 
-	public static double[] arrayToDouble(ArrayList array)
-	   {
-		   double[] res = new double[array.size()];
-		   
-		   for(int i = 0; i < array.size(); i++)
-			   res[i] = (double) (int)array.get(i);
-		   
-		   return res;
-	   }
+	public static double[] arrayToDouble(ArrayList array) {
+		double[] res = new double[array.size()];
+
+		for (int i = 0; i < array.size(); i++)
+			res[i] = (double) (int) array.get(i);
+
+		return res;
+	}
+	
+	public boolean itakuraConstraint(int i, int j, int I, int J)
+	{
+		final int a = 2 * (i - J) + I;
+		final int b = (int) (0.5 * (i - 1) + 1);
+		final int c = 2 * (i - 1) + 1;
+		final int d = (int) (0.5 * (i - J) + I);
+		
+		return j >= a && j >= b && j <= c && j <= d;
+	}
 }
