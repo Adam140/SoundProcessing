@@ -4,7 +4,12 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import javax.sound.sampled.LineUnavailableException;
 import javax.swing.ButtonGroup;
@@ -19,6 +24,14 @@ import javax.swing.JTextField;
 import secondTask.Player;
 import javax.swing.JCheckBox;
 
+import org.math.plot.utils.Array;
+
+import firstTask.WavFile;
+import firstTask.WindowFunction;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.Font;
+
 public class MainWindow {
 
 	private JFrame frame;
@@ -30,7 +43,24 @@ public class MainWindow {
 	private JTextField textFieldThreshold;
 	private JCheckBox checkBoxFile;
 	private JCheckBox checkBoxRange;
+	private double[] points; // all values of wave
+	private double[][] dividedPoints; // all values of wave after sampling
+	private File input;
+	double[] co = null;
+	
+	public File getInput() {
+		return input;
+	}
 
+	public void setInput(File input) {
+		this.input = input;
+	}
+
+	public int sampleRate;
+	private JTextField tf_pattern;
+	private JButton btnFindBest;
+	JLabel found = new JLabel("");
+	JLabel lblMinPath = new JLabel("Min path");
 	/**
 	 * Launch the application.
 	 */
@@ -221,5 +251,155 @@ public class MainWindow {
 		checkBoxRange = new JCheckBox("Set range for graph");
 		checkBoxRange.setBounds(6, 119, 143, 24);
 		frame.getContentPane().add(checkBoxRange);
+		
+		JButton btnDisplayWavCo = new JButton("Display wav co");
+		btnDisplayWavCo.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				setInput( new File("./output/temp.wav"));
+				convertMusicToPoint();
+				MelCepstrum m = new MelCepstrum();
+
+				try {
+					co = m.getMelCepstrum(dividedPoints, 2048, false, 44100, 2);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			    try {
+			    	//What ever the file path is.
+			    	        File statText = new File("trace1.csv");
+			    	        FileOutputStream is = new FileOutputStream(statText);
+			    	        OutputStreamWriter osw = new OutputStreamWriter(is);    
+			    	        Writer w = new BufferedWriter(osw);
+			    	        for(int i=0;i<co.length;i++)
+			    	        {
+			    	        	w.write(Double.toString(co[i])+'\n');
+			    	        }
+			    	        w.close();
+			    	    } catch (IOException e) {
+			    	        System.err.println("error");
+			    	    }
+				System.out.println(Array.toString(co));
+
+			}
+		});
+		btnDisplayWavCo.setBounds(204, 188, 124, 23);
+		frame.getContentPane().add(btnDisplayWavCo);
+		
+		tf_pattern = new JTextField();
+		tf_pattern.setBounds(338, 227, 86, 20);
+		frame.getContentPane().add(tf_pattern);
+		tf_pattern.setColumns(10);
+		
+		JButton btnSaveAsPattern = new JButton("Save as pattern");
+		btnSaveAsPattern.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				
+			    try {
+			    	//What ever the file path is.
+			    	        File statText = new File("patterns/"+tf_pattern.getText());
+			    	        FileOutputStream is = new FileOutputStream(statText);
+			    	        OutputStreamWriter osw = new OutputStreamWriter(is);    
+			    	        Writer w = new BufferedWriter(osw);
+			    	        for(int i=0;i<co.length;i++)
+			    	        {
+			    	        	w.write(Double.toString(co[i])+'\n');
+			    	        }
+			    	        w.close();
+			    	    } catch (IOException e1) {
+			    	        System.err.println("error");
+			    	    }
+				
+			}
+		});
+		btnSaveAsPattern.setBounds(204, 226, 124, 23);
+		frame.getContentPane().add(btnSaveAsPattern);
+		
+		btnFindBest = new JButton("Find best");
+		btnFindBest.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				File folder = new File("patterns/");
+				File[] listOfFiles = folder.listFiles();
+				String t = "trace1.csv";
+				double minimal = 999999;
+				String best_match = "None";
+				for (File file : listOfFiles) {
+				    if (file.isFile()) {
+				        //System.out.println(file.getName());
+						String s = "patterns/"+file.getName();
+						DTW dtw = new DTW(t, s);
+						dtw.calculateG();
+						if(minimal > dtw.minimalPath)
+						{
+							minimal = dtw.minimalPath;
+							best_match = file.getName();
+						}
+						found.setText(best_match);
+						lblMinPath.setText(Double.toString(minimal));
+				    }
+				}
+
+
+			}
+		});
+		btnFindBest.setBounds(335, 188, 89, 23);
+		frame.getContentPane().add(btnFindBest);
+		
+
+		found.setFont(new Font("Tahoma", Font.PLAIN, 30));
+		found.setBounds(252, 91, 172, 47);
+		frame.getContentPane().add(found);
+		
+
+		lblMinPath.setBounds(378, 149, 46, 14);
+		frame.getContentPane().add(lblMinPath);
+	}
+	
+	public void convertMusicToPoint() {
+		if (input != null && input.exists()) {
+			try {
+				WavFile wavFile = WavFile.openWavFile(input);
+
+				this.sampleRate = (int) wavFile.getSampleRate();
+				wavFile.display();
+				int numChannels = wavFile.getNumChannels();
+				int xLenght = (int) wavFile.getNumFrames();
+				points = new double[xLenght];
+
+				double[] buffer = new double[100 * numChannels];
+
+				int framesRead;
+
+				int i = 0;
+				double max = 0;
+				do {
+
+					framesRead = wavFile.readFrames(buffer, 100);
+					for (int s = 0; s < framesRead * numChannels; s++) {
+						try {
+							if(Math.abs(buffer[s]) > max)
+								max = Math.abs(buffer[s]);
+							points[i] = buffer[s];
+							i++;
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				} while (framesRead != 0);
+
+				wavFile.close();
+				
+				for(i = 0; i < points.length; i++)
+					points[i] = points[i] * ( 1 / max );
+
+			} catch (Exception e) {
+				System.err.println(e);
+			}
+		}
+
+		this.dividedPoints = WindowFunction.sampling(points, 2048 );
 	}
 }

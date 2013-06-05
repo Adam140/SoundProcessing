@@ -38,10 +38,10 @@ public class MelCepstrum {
 		long nframe = signal.length;
 		System.out.println("Framerate:" + framerate);
 		System.out.println("Frames:" + nframe);
-		int K = 8;
-		int D = 50;
+		int K = 30;
+		int D = 100;
 		this.setParameters(K, D);
-		double[] co = new double[blocks];
+		double[] co = new double[(int) nframe];
  
         
         int N = size;

@@ -40,6 +40,7 @@ public class DTW {
 	private double[][] g;
 	private double[] t; // array of model signal
 	private double[] s; // array of analyzed signal
+	public double minimalPath = 0;
 
 	public DTW(String tFile, String sFile) {
 		super();
@@ -99,7 +100,8 @@ public class DTW {
 		}
 
 		setPrecision(2);
-		System.out.println("Minimal path = " + g[t.length - 1][s.length - 1]);
+		//System.out.println("Minimal path = " + g[t.length - 1][s.length - 1]);
+		this.minimalPath = g[t.length - 1][s.length - 1];
 		return g;
 	}
 
