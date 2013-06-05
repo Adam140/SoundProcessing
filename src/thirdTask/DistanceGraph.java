@@ -22,7 +22,7 @@ public class DistanceGraph extends JPanel {
 	/**
 	 * Create the panel.
 	 */
-	public DistanceGraph(DTW dtw, boolean rangeColor) {
+	public DistanceGraph(DTW dtw, boolean rangeColor, boolean resize) {
         super();
         this.rangeColor = rangeColor;
         System.out.println("START: DistanceGraph constructor");
@@ -32,16 +32,19 @@ public class DistanceGraph extends JPanel {
         int j = g[0].length;
         initImage();
         putLine(dtw.getX(), dtw.getY());
-        Dimension screen = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        int xW = (int) (screen.getWidth() / j);
-        int xH = (int) (screen.getHeight() / i);
         
-        if(xW > 1 && xH > 1)
+        if(resize)
         {
-        	System.out.println("Resize image");
-        	image = scaleImage(image, i * Math.min(xW, xH), j * Math.min(xW, xH), Color.red);
+	        Dimension screen = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+	        double xW = (int) (screen.getWidth() / (double) i);
+	        double xH = (int) (screen.getHeight() / (double) j);
+	        
+	        if(xW > 1 && xH > 1)
+	        {
+	        	System.out.println("Resize image");
+	        	image = scaleImage(image, (int) (0.6 * (double) j * Math.min(xW, xH)), (int) ((double) i * Math.min(xW, xH) * 0.6), Color.red);
+	        }
         }
-        
         Dimension dimension = new Dimension(image.getWidth(), image.getHeight());
         setPreferredSize(dimension);
         System.out.println("END: DistanceGraph constructor");
@@ -93,6 +96,7 @@ public class DistanceGraph extends JPanel {
     		if(listX.get(i) < image.getWidth() && listY.get(i) < image.getHeight() && listX.get(i) >= 0 && listY.get(i) >= 0)
     			this.image.setRGB(listX.get(i), listY.get(i), Color.blue.getRGB());
     	}
+    	
     	int I = image.getHeight();
     	int J = image.getWidth();
     	for(int i = 0; i < image.getWidth(); i++)
@@ -101,26 +105,27 @@ public class DistanceGraph extends JPanel {
     		int b = (int) (0.5 * ( i - 1) + 1);
     		int c = 2 * ( i - 1) + 1;
     		int d = (int) (0.5 * ( i - I) + J);
-    		if(a < I && a >= 0 && a >= b)
+    		if(a < I && a >= 0 )
     			this.image.setRGB(i, a, Color.RED.getRGB());
-    		if(b < I && b >= 0 && b >= a)
+    		if(b < I && b >= 0 )
     			this.image.setRGB(i, b, Color.RED.getRGB());
-    		if(c < I && c >= 0 && c <= d)
+    		if(c < I && c >= 0 )
     			this.image.setRGB(i, c, Color.RED.getRGB());
-    		if(d < I && d >= 0 && d <= c)
+    		if(d < I && d >= 0)
     			this.image.setRGB(i,d, Color.RED.getRGB());
+    		System.out.println(i + " " + a);
     	}
     }
     
     public BufferedImage scaleImage(BufferedImage img, int width, int height,
             Color background) {
-        int imgWidth = img.getWidth();
-        int imgHeight = img.getHeight();
-        if (imgWidth*height < imgHeight*width) {
-            width = imgWidth*height/imgHeight;
-        } else {
-            height = imgHeight*width/imgWidth;
-        }
+//        int imgWidth = img.getWidth();
+//        int imgHeight = img.getHeight();
+//        if (imgWidth*height < imgHeight*width) {
+//            width = imgWidth*height/imgHeight;
+//        } else {
+//            height = imgHeight*width/imgWidth;
+//        }
         BufferedImage newImage = new BufferedImage(width, height,
                 BufferedImage.TYPE_INT_RGB);
         Graphics2D g = newImage.createGraphics();
@@ -154,7 +159,7 @@ public class DistanceGraph extends JPanel {
 		}
     	SortedSet<Double> keys = new TreeSet<Double>(map.keySet());
     	
-    	int range = 10;
+    	int range = 20;
     	this.color = new double[range][2];
     	int partSize = (rows - 1) * (columns - 1) / range;
     	int count = 0;

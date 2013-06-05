@@ -27,23 +27,17 @@ import org.math.plot.utils.Array;
 public class DTW {
 
 	private ArrayList<Integer> x;
-
-	public ArrayList<Integer> getX() {
-		return x;
-	}
-
-	public double[][] getG() {
-		return g;
-	}
-
 	private ArrayList<Integer> y;
 	private double[][] g;
 	private double[] t; // array of model signal
 	private double[] s; // array of analyzed signal
+	private boolean itakura;
+	
 	public double minimalPath = 0;
 
-	public DTW(String tFile, String sFile) {
+	public DTW(String tFile, String sFile, boolean itakura) {
 		super();
+		this.itakura = itakura;
 		System.out.println("START: DTW construktor");
 		System.out.println("Read from file");
 		this.t = fromFile(tFile);
@@ -55,8 +49,9 @@ public class DTW {
 		System.out.println("END: DTW construktor");
 	}
 
-	public DTW(double[] t, double[] s) {
+	public DTW(double[] t, double[] s, boolean itakura) {
 		super();
+		this.itakura = itakura;
 		this.t = t;
 		this.s = s;
 		this.g = new double[t.length][s.length];
@@ -100,7 +95,7 @@ public class DTW {
 		}
 
 		setPrecision(2);
-		//System.out.println("Minimal path = " + g[t.length - 1][s.length - 1]);
+		System.out.println("Minimal path = " + g[t.length - 1][s.length - 1]);
 		this.minimalPath = g[t.length - 1][s.length - 1];
 		return g;
 	}
@@ -178,15 +173,6 @@ public class DTW {
 		frame.setContentPane(plot);
 		frame.setSize(new Dimension(800, 600));
 		frame.setVisible(true);
-	}
-
-	public static void main(String[] agr) {
-		double[] s = { 1d, 1d, 2d, 3d, 2d, 0d };
-		double[] t = { 0d, 1d, 1d, 2d, 3d, 2d, 1d };
-
-		DTW dtw = new DTW(t, s);
-		System.out.println(arrayToString(dtw.calculateG()));
-
 	}
 
 	@Override
@@ -310,9 +296,6 @@ public class DTW {
 
 	}
 
-	public ArrayList<Integer> getY() {
-		return y;
-	}
 
 	public static double[] arrayToDouble(ArrayList array) {
 		double[] res = new double[array.size()];
@@ -325,11 +308,24 @@ public class DTW {
 	
 	public boolean itakuraConstraint(int i, int j, int I, int J)
 	{
+		if(!this.itakura)
+			return true;
+		
 		final int a = 2 * (i - J) + I;
 		final int b = (int) (0.5 * (i - 1) + 1);
 		final int c = 2 * (i - 1) + 1;
 		final int d = (int) (0.5 * (i - J) + I);
 		
 		return j >= a && j >= b && j <= c && j <= d;
+	}
+	public ArrayList<Integer> getX() {
+		return x;
+	}
+	public ArrayList<Integer> getY() {
+		return y;
+	}
+	
+	public double[][] getG() {
+		return g;
 	}
 }

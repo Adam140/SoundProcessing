@@ -13,6 +13,7 @@ import java.io.Writer;
 
 import javax.sound.sampled.LineUnavailableException;
 import javax.swing.ButtonGroup;
+import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -31,6 +32,7 @@ import firstTask.WindowFunction;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.Font;
+import javax.swing.JComboBox;
 
 public class MainWindow {
 
@@ -61,6 +63,9 @@ public class MainWindow {
 	private JButton btnFindBest;
 	JLabel found = new JLabel("");
 	JLabel lblMinPath = new JLabel("Min path");
+	private JComboBox<String> comboBox;
+	private JCheckBox checkBoxResize;
+	private JCheckBox checkBoxItakura;
 	/**
 	 * Launch the application.
 	 */
@@ -89,7 +94,7 @@ public class MainWindow {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 450, 300);
+		frame.setBounds(100, 100, 450, 364);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 
@@ -119,6 +124,9 @@ public class MainWindow {
 					btnPlay.setEnabled(true);
 					btnStart.setEnabled(true);
 					btnStop.setEnabled(false);
+
+					findBest();
+					comboBox.setSelectedItem(found.getText());
 				}
 			}
 		});
@@ -201,16 +209,18 @@ public class MainWindow {
 		btnShowDistanceGraph.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				JFrame jframe = new JFrame("Graph");
-				 
-//				double[] s = {1d,1d,2d,3d,2d,0d};
-//				double[] t = {0d,1d,1d,2d,3d,2d,1d};
-//				
-				String s = "trace0.csv";
-				String t = "trace1.csv";
 				
-				DTW dtw = new DTW(t, s);
+//				String s = "trace0.csv";
+//				String t = "trace1.csv";
+				
+				String s = "patterns/" + comboBox.getSelectedItem();
+				String t = "current_trace.csv";
+				
+				System.out.println("Compare between " + s + " and current sound");
+				
+				DTW dtw = new DTW(t, s, checkBoxItakura.isSelected());
 				dtw.calculateG();
-				DistanceGraph distanceGraph = new DistanceGraph(dtw,checkBoxRange.isSelected());
+				DistanceGraph distanceGraph = new DistanceGraph(dtw,checkBoxRange.isSelected(), checkBoxResize.isSelected());
 				
 		        jframe.getContentPane().add(distanceGraph);
 		        
@@ -223,72 +233,20 @@ public class MainWindow {
 		        	dtw.toFile("matrix.txt");
 			}
 		});
-		btnShowDistanceGraph.setBounds(6, 224, 188, 26);
+		btnShowDistanceGraph.setBounds(6, 288, 188, 26);
 		frame.getContentPane().add(btnShowDistanceGraph);
-		
-		JButton btnShowPlot = new JButton("Show plot");
-		btnShowPlot.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-//				double[] s = {1d,1d,2d,3d,2d,0d};
-//				double[] t = {0d,1d,1d,2d,3d,2d,1d};
-//				
-				String s = "trace0.csv";
-				String t = "trace1.csv";
-				
-				DTW dtw = new DTW(t, s);
-				dtw.calculateG();
-				dtw.plotGraph();
-				
-			}
-		});
-		btnShowPlot.setBounds(6, 186, 188, 26);
-		frame.getContentPane().add(btnShowPlot);
 		
 		checkBoxFile = new JCheckBox("Save g matrix to file");
 		checkBoxFile.setBounds(6, 91, 145, 24);
 		frame.getContentPane().add(checkBoxFile);
 		
-		checkBoxRange = new JCheckBox("Set range for graph");
-		checkBoxRange.setBounds(6, 119, 143, 24);
+		checkBoxRange = new JCheckBox("Set level for grey map");
+		checkBoxRange.setSelected(true);
+		checkBoxRange.setBounds(6, 119, 188, 24);
 		frame.getContentPane().add(checkBoxRange);
 		
-		JButton btnDisplayWavCo = new JButton("Display wav co");
-		btnDisplayWavCo.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				setInput( new File("./output/temp.wav"));
-				convertMusicToPoint();
-				MelCepstrum m = new MelCepstrum();
-
-				try {
-					co = m.getMelCepstrum(dividedPoints, 2048, false, 44100, 2);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			    try {
-			    	//What ever the file path is.
-			    	        File statText = new File("trace1.csv");
-			    	        FileOutputStream is = new FileOutputStream(statText);
-			    	        OutputStreamWriter osw = new OutputStreamWriter(is);    
-			    	        Writer w = new BufferedWriter(osw);
-			    	        for(int i=0;i<co.length;i++)
-			    	        {
-			    	        	w.write(Double.toString(co[i])+'\n');
-			    	        }
-			    	        w.close();
-			    	    } catch (IOException e) {
-			    	        System.err.println("error");
-			    	    }
-				System.out.println(Array.toString(co));
-
-			}
-		});
-		btnDisplayWavCo.setBounds(204, 188, 124, 23);
-		frame.getContentPane().add(btnDisplayWavCo);
-		
 		tf_pattern = new JTextField();
-		tf_pattern.setBounds(338, 227, 86, 20);
+		tf_pattern.setBounds(338, 291, 86, 20);
 		frame.getContentPane().add(tf_pattern);
 		tf_pattern.setColumns(10);
 		
@@ -296,7 +254,7 @@ public class MainWindow {
 		btnSaveAsPattern.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				
+				melCepstrum();
 			    try {
 			    	//What ever the file path is.
 			    	        File statText = new File("patterns/"+tf_pattern.getText());
@@ -311,41 +269,22 @@ public class MainWindow {
 			    	    } catch (IOException e1) {
 			    	        System.err.println("error");
 			    	    }
-				
+			    
+			    comboBox.addItem(tf_pattern.getText());
 			}
 		});
-		btnSaveAsPattern.setBounds(204, 226, 124, 23);
+		btnSaveAsPattern.setBounds(204, 290, 124, 23);
 		frame.getContentPane().add(btnSaveAsPattern);
 		
 		btnFindBest = new JButton("Find best");
 		btnFindBest.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				File folder = new File("patterns/");
-				File[] listOfFiles = folder.listFiles();
-				String t = "trace1.csv";
-				double minimal = 999999;
-				String best_match = "None";
-				for (File file : listOfFiles) {
-				    if (file.isFile()) {
-				        //System.out.println(file.getName());
-						String s = "patterns/"+file.getName();
-						DTW dtw = new DTW(t, s);
-						dtw.calculateG();
-						if(minimal > dtw.minimalPath)
-						{
-							minimal = dtw.minimalPath;
-							best_match = file.getName();
-						}
-						found.setText(best_match);
-						lblMinPath.setText(Double.toString(minimal));
-				    }
-				}
-
-
+				findBest();
 			}
 		});
-		btnFindBest.setBounds(335, 188, 89, 23);
+		
+		btnFindBest.setBounds(204, 256, 220, 23);
 		frame.getContentPane().add(btnFindBest);
 		
 
@@ -354,8 +293,29 @@ public class MainWindow {
 		frame.getContentPane().add(found);
 		
 
-		lblMinPath.setBounds(378, 149, 46, 14);
+		lblMinPath.setBounds(338, 149, 86, 14);
 		frame.getContentPane().add(lblMinPath);
+		
+		JLabel lblCompareWith = new JLabel("Compare with:");
+		lblCompareWith.setBounds(6, 223, 130, 16);
+		frame.getContentPane().add(lblCompareWith);
+		
+		
+		File folder = new File("patterns/");
+		String[] listOfFiles = folder.list();
+		
+		comboBox = new JComboBox(listOfFiles);
+		comboBox.setBounds(6, 251, 188, 25);
+		frame.getContentPane().add(comboBox);
+		
+		checkBoxResize = new JCheckBox("Automatic resize");
+		checkBoxResize.setSelected(true);
+		checkBoxResize.setBounds(6, 147, 128, 24);
+		frame.getContentPane().add(checkBoxResize);
+		
+		checkBoxItakura = new JCheckBox("Itakura parallelogram");
+		checkBoxItakura.setBounds(6, 175, 172, 24);
+		frame.getContentPane().add(checkBoxItakura);
 	}
 	
 	public void convertMusicToPoint() {
@@ -393,7 +353,7 @@ public class MainWindow {
 				wavFile.close();
 				
 				for(i = 0; i < points.length; i++)
-					points[i] = points[i] * ( 1 / max );
+					points[i] = points[i] * ( 1 / max ); 
 
 			} catch (Exception e) {
 				System.err.println(e);
@@ -401,5 +361,63 @@ public class MainWindow {
 		}
 
 		this.dividedPoints = WindowFunction.sampling(points, 2048 );
+	}
+	
+	public void melCepstrum() {
+		setInput( new File("./output/temp.wav"));
+		convertMusicToPoint();
+		MelCepstrum m = new MelCepstrum();
+
+		try {
+			co = m.getMelCepstrum(dividedPoints, 2048, false, 44100, 2);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    try {
+	    	//What ever the file path is.
+	    	        File statText = new File("current_trace.csv");
+	    	        FileOutputStream is = new FileOutputStream(statText);
+	    	        OutputStreamWriter osw = new OutputStreamWriter(is);    
+	    	        Writer w = new BufferedWriter(osw);
+	    	        for(int i=0;i<co.length;i++)
+	    	        {
+	    	        	w.write(Double.toString(co[i])+'\n');
+	    	        }
+	    	        w.close();
+	    	    } catch (IOException e) {
+	    	        System.err.println("error");
+	    	    }
+		System.out.println(Array.toString(co));
+
+	}
+	
+	private void findBest()
+	{
+		melCepstrum();
+		
+		File folder = new File("patterns/");
+		File[] listOfFiles = folder.listFiles();
+		String t = "current_trace.csv";
+		double minimal = 999999;
+		String best_match = "None";
+		for (File file : listOfFiles) {
+		    if (file.isFile()) {
+		        //System.out.println(file.getName());
+				String s = "patterns/"+file.getName();
+				DTW dtw = new DTW(t, s, checkBoxItakura.isSelected());
+				dtw.calculateG();
+				if(minimal > dtw.minimalPath)
+				{
+					minimal = dtw.minimalPath;
+					best_match = file.getName();
+				}
+		    }
+		}
+		found.setText(best_match);
+		lblMinPath.setText(Double.toString(minimal));
+	}
+	public JCheckBox getCheckBoxItakura() {
+		return checkBoxItakura;
 	}
 }
