@@ -6,6 +6,10 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Vector;
 
+import javax.swing.JFrame;
+
+import org.math.plot.Plot2DPanel;
+
 import transforms.FFT;
 
 import com.badlogic.audio.analysis.Complex;
@@ -15,6 +19,9 @@ public class Cepstrum {
 	private File f = null;
 	private WavFile wf = null;
 	private String filePath;
+	private double ck;
+	private double lk;
+	private double rk;
 	
 	Cepstrum(File f)
 	{
@@ -43,10 +50,13 @@ public class Cepstrum {
 		long nframe = signal.length;
 		System.out.println("Framerate:" + framerate);
 		System.out.println("Frames:" + nframe);
-
+		int K = 8;
+		int D = 50;
+		this.setParameters(K, D);
  
         
         int N = size;
+		//int N = 256;
         double[] detected_frequency = new double[(int) nframe];
         //float[] samples = new float[N];
   //      FFT fft = new FFT( );
@@ -90,12 +100,25 @@ public class Cepstrum {
                 s = FFT.fft1D(s);
                 //s = FFT.ifft1D(s);
 
-
+                //spectrum = WindowFunction.Triangular(spectrum);
+                double c;
                 for(int i=0;i<N;i++)
                 {
-                	spectrum[i] = Math.log10(Math.abs(s[i].getReal()));
+                	//spectrum[i] = toMels(s[i].getReal());
+                	spectrum[i] = s[i].getReal();
+
+                	//powerSpectrum[i] = (1/N) * Math.pow(Math.abs(spectrum[i]),2);
+                	//s[i] = new Complex(spectrum[i],0);
+                }
+            	c = cosin(spectrum, (int)framerate, K, D, 5);
+            	System.out.println(c);
+                for(int i=0;i<N;i++)
+                {
+                	//spectrum[i] = toMels(s[i].getReal());
+                	//spectrum[i] = toMels(s[i].getReal());
                 	s[i] = new Complex(spectrum[i],0);
                 }
+
                 s = FFT.ifft1D(s);
                 zero_index = 0;
                 //right_max = temp[N-1];
@@ -217,23 +240,25 @@ public class Cepstrum {
 //        System.out.println("Right going down: "+right_going_down_index);
 
         
-       x = TrimTable(15,N/2, x);
-       spectrum =  TrimTable(15,N/2, cepstrum);
+       x = TrimTable(zero_index, N/2, x);
+       spectrum =  TrimTable(zero_index, N/2, spectrum);
        cepstrum =  TrimTable(zero_index,N/2, cepstrum);
 
-//		Plot2DPanel plot = new Plot2DPanel();
-//		plot.addLegend("SOUTH");
-//
-//		// add a line plot to the PlotPanel
-//		//plot.addLinePlot("Normal", x, y);
-//		plot.addLinePlot("Spectrum", x, spectrum);
-//		//plot.addLinePlot("Cepstrum", x, cepstrum);
-//		//plot.addScatterPlot("Point", (double[]])max_index);
-//		//plot.addLinePlot("Point",Color.RED, new double[] { max_index,max_index }, new double[] { getMaxValue(end),getMinValue(end) });
-//		JFrame frame = new JFrame("a plot panel");
-//		frame.setSize(600, 600);
-//		frame.setContentPane(plot);
-//		frame.setVisible(true);
+		Plot2DPanel plot = new Plot2DPanel();
+		plot.addLegend("SOUTH");
+
+		// add a line plot to the PlotPanel
+		//plot.addLinePlot("Normal", x, y);
+//		for(int i =0;i<x.length;i++)
+//			x[i] = ComputeFrequency(i, N, (int) framerate);
+		plot.addLinePlot("Spectrum", x, spectrum);
+		//plot.addLinePlot("Cepstrum", x, cepstrum);
+		//plot.addScatterPlot("Point", (double[]])max_index);
+		//plot.addLinePlot("Point",Color.RED, new double[] { max_index,max_index }, new double[] { getMaxValue(end),getMinValue(end) });
+		JFrame frame = new JFrame("a plot panel");
+		frame.setSize(600, 600);
+		frame.setContentPane(plot);
+		frame.setVisible(true);
 //		
 //		DateFormat dateFormat = new SimpleDateFormat("HH_mm");
 //		Date date = new Date();
@@ -310,6 +335,74 @@ public class Cepstrum {
 		double samplePeerMs = sampleRate / 1000;
 
 		return (int)( N/ samplePeerMs);
+	}
+	
+	public double u(double in)
+	{
+		return 700 * ( Math.pow(10, (in/2595.00)) -1);
+	}
+	
+	public void setParameters(double k, double d)
+	{
+		this.ck = u(k*d);
+		this.lk = u((k-1)*d);
+		this.rk = u((k+1)*d);
+	}
+	
+	public double h(double f)
+	{
+		if(f >= this.lk && f <= this.ck )
+			return (f - this.lk)/(this.ck - this.lk);
+		else if(f > this.ck && f <= this.lk )
+			return (this.rk - f)/(this.rk - this.ck);
+		else
+			return 0.0;
+	}
+	
+	public double s(double[] signal, int fs, int k, int d )
+	{
+		this.setParameters(k, d);
+		double result = 0;
+		for(int i=0;i<signal.length/2;i++)
+		{
+			result += signal[i]*h( (fs/signal.length)*i);
+		}
+		return result;
+		
+		
+	}
+	
+	public double s_prim(double[] signal, int fs, int k, int d )
+	{
+		double s1 = this.s(signal, fs,  k, d );
+		double s2 = Math.log( Math.abs(s1) );
+		return Math.pow( s2 ,2);
+	}
+	
+	public double cosin(double[] signal, int fs, int K, int d,int F )
+	{
+		double[] c = new double[F];
+		for(int f =0;f<1;f++)
+		{
+			double result = 0;
+			for(int k=0;k<K-1;k++)
+			{
+				double s_prim_value = s_prim(signal,fs,k,d);
+				result += s_prim_value * Math.cos( 2 * Math.PI * ( ( (2*k+1)*f )/4*K) );
+			}
+			return result;
+		}
+		return 0;
+	}
+	
+	public double toMels(double f)
+	{
+		return 1125 * Math.log( 1 + f/700 );
+	}
+	
+	public double fromMels(double m)
+	{
+		return 700 * (Math.exp(m/1125) -1);
 	}
 
 }
