@@ -22,6 +22,7 @@ class CaptureThread extends Thread {
 	private File audioFile;
 	private int recordingMode;
 	private double threshold;
+	public ArrayList<double[]> sound = new ArrayList<>();
 	final static double AMPLIFIER_RATE = 1.5;
 
 	// 1 - start on button
@@ -99,7 +100,10 @@ class CaptureThread extends Thread {
 				}
 				
 				if(recording)
+				{
 					list.add(buffer);
+					sound.add(bytesToDouble(buffer));
+				}
 				
 				if(recording && maxAmp < threshold)
 				{
