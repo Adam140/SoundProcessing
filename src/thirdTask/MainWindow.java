@@ -303,7 +303,11 @@ public class MainWindow {
 		
 		File folder = new File("patterns/");
 		String[] listOfFiles = folder.list();
-		
+		if(listOfFiles.length == 0 )
+		{
+			listOfFiles = new String[1];
+			listOfFiles[0] = "empty patterns folder";
+		}
 		comboBox = new JComboBox(listOfFiles);
 		comboBox.setBounds(6, 251, 188, 25);
 		frame.getContentPane().add(comboBox);
