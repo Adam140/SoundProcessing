@@ -143,7 +143,6 @@ public class MainWindow {
 					btnStop.setEnabled(false);
 
 					findBest();
-					comboBox.setSelectedItem(foundFile);
 				}
 			}
 		});
@@ -495,6 +494,7 @@ public class MainWindow {
 		found.setText(best_match.split("\\(")[0]);
 		foundFile = best_match;
 		lblMinPath.setText(Double.toString(minimal));
+		comboBox.setSelectedItem(foundFile);
 	}
 
 	public JCheckBox getCheckBoxItakura() {
