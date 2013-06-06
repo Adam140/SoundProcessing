@@ -2,11 +2,8 @@ package thirdTask;
 
 import java.awt.Color;
 import java.awt.EventQueue;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,25 +13,26 @@ import java.io.Writer;
 
 import javax.sound.sampled.LineUnavailableException;
 import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
+import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.JTextPane;
-import javax.swing.ScrollPaneConstants;
+
+import secondTask.Player;
+import javax.swing.JCheckBox;
 
 import org.math.plot.utils.Array;
 
-import secondTask.Player;
 import firstTask.WavFile;
 import firstTask.WindowFunction;
-import javax.swing.SwingConstants;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.Font;
+import javax.swing.JComboBox;
 
 public class MainWindow {
 
@@ -51,9 +49,6 @@ public class MainWindow {
 	private double[][] dividedPoints; // all values of wave after sampling
 	private File input;
 	double[] co = null;
-	private final ImageIcon iconReady = new ImageIcon("icon/on.png", "on");
-	private final ImageIcon iconRec = new ImageIcon("icon/off.png", "off");
-	private final ImageIcon iconStop = new ImageIcon("icon/stop.png", "stop");
 
 	public File getInput() {
 		return input;
@@ -67,13 +62,10 @@ public class MainWindow {
 	private JTextField tf_pattern;
 	private JButton btnFindBest;
 	JLabel found = new JLabel("");
-	private String foundFile;
-	JLabel lblMinPath = new JLabel("");
+	JLabel lblMinPath = new JLabel("Min path");
 	private JComboBox<String> comboBox;
 	private JCheckBox checkBoxResize;
 	private JCheckBox checkBoxItakura;
-	private JTextPane textPane;
-	private JLabel icon;
 
 	/**
 	 * Launch the application.
@@ -111,7 +103,7 @@ public class MainWindow {
 		btnStart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					captureThread = new CaptureThread("output/temp.wav", 1, 0, null);
+					captureThread = new CaptureThread("output/temp.wav", 1, 0);
 					captureThread.start();
 					btnStart.setEnabled(false);
 					btnStop.setEnabled(true);
@@ -134,7 +126,7 @@ public class MainWindow {
 					btnStop.setEnabled(false);
 
 					findBest();
-					comboBox.setSelectedItem(foundFile);
+					comboBox.setSelectedItem(found.getText());
 				}
 			}
 		});
@@ -156,13 +148,10 @@ public class MainWindow {
 		radioMode1.setSelected(true);
 		radioMode1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				if (captureThread != null)
-					captureThread.exit();
 				textFieldThreshold.setEnabled(false);
 				btnStart.setEnabled(true);
 				btnStop.setEnabled(false);
 				btnPlay.setEnabled(false);
-				setIconStop();
 			}
 		});
 		buttonGroup.add(radioMode1);
@@ -170,7 +159,6 @@ public class MainWindow {
 		frame.getContentPane().add(radioMode1);
 
 		JRadioButton radioMode2 = new JRadioButton("Recording on voice");
-//		final MainWindow tmp = this;
 		radioMode2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				textFieldThreshold.setEnabled(true);
@@ -188,14 +176,17 @@ public class MainWindow {
 				}
 
 				try {
-					captureThread = new CaptureThread("output/temp.wav", 2,	threshold, MainWindow.this);
+					captureThread = new CaptureThread("output/temp.wav", 2,
+							threshold);
 					captureThread.start();
+
+					captureThread.join();
+					System.out.println("koniec");
 					btnPlay.setEnabled(true);
 				} catch (Exception e1) {
 					JOptionPane
 							.showMessageDialog(frame, "Somethink goes wrong");
 				}
-//				findBest();
 			}
 		});
 		buttonGroup.add(radioMode2);
@@ -203,31 +194,14 @@ public class MainWindow {
 		frame.getContentPane().add(radioMode2);
 
 		textFieldThreshold = new JTextField();
-		textFieldThreshold.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				if(captureThread != null)
-				{
-					double threshold = 0.05;
-					try {
-						threshold = Double.parseDouble(textFieldThreshold.getText());
-						textFieldThreshold.setBackground(Color.white);
-					} catch (Exception e1) {
-						threshold = 0.05;
-						textFieldThreshold.setBackground(Color.red);
-					}
-					
-					captureThread.setThreshold(threshold);
-				}
-			}
-		});
 		textFieldThreshold.setEnabled(false);
-		textFieldThreshold.setText("0.03");
-		textFieldThreshold.setBounds(159, 34, 46, 20);
+		textFieldThreshold.setText("0.05");
+		textFieldThreshold.setBounds(159, 34, 114, 20);
 		frame.getContentPane().add(textFieldThreshold);
 		textFieldThreshold.setColumns(10);
 
 		JLabel lblAvgAmplitude = new JLabel("avg amplitude");
-		lblAvgAmplitude.setBounds(215, 33, 89, 16);
+		lblAvgAmplitude.setBounds(284, 36, 89, 16);
 		frame.getContentPane().add(lblAvgAmplitude);
 
 		JButton btnShowDistanceGraph = new JButton("Show distance graph");
@@ -235,11 +209,11 @@ public class MainWindow {
 			public void actionPerformed(ActionEvent arg0) {
 				JFrame jframe = new JFrame("Graph");
 
-//				 String s = "trace0.csv";
-//				 String t = "trace1.csv";
+				// String s = "trace0.csv";
+				// String t = "trace1.csv";
 
-				String t = "patterns/" + comboBox.getSelectedItem();
-				String s = "current_trace.csv";
+				String s = "patterns/" + comboBox.getSelectedItem();
+				String t = "current_trace.csv";
 
 				System.out.println("Compare between " + s
 						+ " and current sound");
@@ -320,11 +294,9 @@ public class MainWindow {
 
 		btnFindBest.setBounds(204, 256, 220, 23);
 		frame.getContentPane().add(btnFindBest);
-		found.setHorizontalTextPosition(SwingConstants.CENTER);
-		found.setHorizontalAlignment(SwingConstants.CENTER);
 
 		found.setFont(new Font("Tahoma", Font.PLAIN, 30));
-		found.setBounds(252, 112, 172, 26);
+		found.setBounds(252, 91, 172, 47);
 		frame.getContentPane().add(found);
 
 		lblMinPath.setBounds(338, 149, 86, 14);
@@ -352,29 +324,6 @@ public class MainWindow {
 		checkBoxItakura = new JCheckBox("Itakura parallelogram");
 		checkBoxItakura.setBounds(6, 175, 172, 24);
 		frame.getContentPane().add(checkBoxItakura);
-		
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPane.setBounds(252, 175, 172, 69);
-		frame.getContentPane().add(scrollPane);
-		
-		textPane = new JTextPane();
-		textPane.setEnabled(false);
-		textPane.setEditable(false);
-		scrollPane.setViewportView(textPane);
-		
-		JLabel lblGij = new JLabel("g(i,j) = ");
-		lblGij.setBounds(252, 149, 46, 14);
-		frame.getContentPane().add(lblGij);
-		
-		JLabel lblBestAnswer = new JLabel("Best match:");
-		lblBestAnswer.setBounds(252, 94, 76, 14);
-		frame.getContentPane().add(lblBestAnswer);
-		
-		icon = new JLabel("");
-		icon.setBounds(309, 29, 31, 23);
-		setIconStop();
-		frame.getContentPane().add(icon);
 	}
 
 	public void convertMusicToPoint() {
@@ -453,50 +402,32 @@ public class MainWindow {
 
 	}
 
-	public void findBest() {
+	private void findBest() {
 		melCepstrum();
 
 		File folder = new File("patterns/");
 		File[] listOfFiles = folder.listFiles();
-		String s = "current_trace.csv";
+		String t = "current_trace.csv";
 		double minimal = 999999;
 		String best_match = "None(";
-		String pane = "";
 		for (File file : listOfFiles) {
 			if (file.isFile()) {
 				// System.out.println(file.getName());
-				String t = "patterns/" + file.getName();
+				String s = "patterns/" + file.getName();
 				DTW dtw = new DTW(t, s, checkBoxItakura.isSelected());
 				dtw.calculateG();
-				pane+=file.getName() + " - " + dtw.minimalPath + "\n";
 				if (minimal > dtw.minimalPath) {
 					minimal = dtw.minimalPath;
 					best_match = file.getName();
 				}
 			}
 		}
-		textPane.setText(pane);
+		
 		found.setText(best_match.split("\\(")[0]);
-		foundFile = best_match;
 		lblMinPath.setText(Double.toString(minimal));
 	}
 
 	public JCheckBox getCheckBoxItakura() {
 		return checkBoxItakura;
-	}
-	
-	public void setIconRec()
-	{
-		icon.setIcon(iconRec);
-	}
-	
-	public void setIconReady()
-	{
-		icon.setIcon(iconReady);
-	}
-	
-	public void setIconStop()
-	{
-		icon.setIcon(iconStop);
 	}
 }
