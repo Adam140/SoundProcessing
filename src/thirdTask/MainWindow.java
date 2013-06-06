@@ -103,7 +103,7 @@ public class MainWindow {
 		btnStart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					captureThread = new CaptureThread("output/temp.wav", 1, 0);
+					captureThread = new CaptureThread("output/temp.wav", 1, 0, null);
 					captureThread.start();
 					btnStart.setEnabled(false);
 					btnStop.setEnabled(true);
@@ -148,6 +148,8 @@ public class MainWindow {
 		radioMode1.setSelected(true);
 		radioMode1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				if (captureThread != null)
+					captureThread.exit();
 				textFieldThreshold.setEnabled(false);
 				btnStart.setEnabled(true);
 				btnStop.setEnabled(false);
@@ -159,6 +161,7 @@ public class MainWindow {
 		frame.getContentPane().add(radioMode1);
 
 		JRadioButton radioMode2 = new JRadioButton("Recording on voice");
+//		final MainWindow tmp = this;
 		radioMode2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				textFieldThreshold.setEnabled(true);
@@ -176,17 +179,14 @@ public class MainWindow {
 				}
 
 				try {
-					captureThread = new CaptureThread("output/temp.wav", 2,
-							threshold);
+					captureThread = new CaptureThread("output/temp.wav", 2,	threshold, MainWindow.this);
 					captureThread.start();
-
-					captureThread.join();
-					System.out.println("koniec");
 					btnPlay.setEnabled(true);
 				} catch (Exception e1) {
 					JOptionPane
 							.showMessageDialog(frame, "Somethink goes wrong");
 				}
+//				findBest();
 			}
 		});
 		buttonGroup.add(radioMode2);
@@ -195,7 +195,7 @@ public class MainWindow {
 
 		textFieldThreshold = new JTextField();
 		textFieldThreshold.setEnabled(false);
-		textFieldThreshold.setText("0.05");
+		textFieldThreshold.setText("0.03");
 		textFieldThreshold.setBounds(159, 34, 114, 20);
 		frame.getContentPane().add(textFieldThreshold);
 		textFieldThreshold.setColumns(10);
@@ -209,8 +209,8 @@ public class MainWindow {
 			public void actionPerformed(ActionEvent arg0) {
 				JFrame jframe = new JFrame("Graph");
 
-				// String s = "trace0.csv";
-				// String t = "trace1.csv";
+//				 String s = "trace0.csv";
+//				 String t = "trace1.csv";
 
 				String s = "patterns/" + comboBox.getSelectedItem();
 				String t = "current_trace.csv";
@@ -399,7 +399,7 @@ public class MainWindow {
 
 	}
 
-	private void findBest() {
+	public void findBest() {
 		melCepstrum();
 
 		File folder = new File("patterns/");

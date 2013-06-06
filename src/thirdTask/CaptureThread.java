@@ -22,13 +22,13 @@ class CaptureThread extends Thread {
 	private File audioFile;
 	private int recordingMode;
 	private double threshold;
-	public ArrayList<double[]> sound = new ArrayList<>();
+	public MainWindow cheat;
 	final static double AMPLIFIER_RATE = 1.5;
 
 	// 1 - start on button
 	// 2 - start on speak
 
-	public CaptureThread(File file, int mode, double threshold) throws LineUnavailableException {
+	public CaptureThread(File file, int mode, double threshold, MainWindow mainWindow) throws LineUnavailableException {
 		super();
 		this.audioFile = file;
 		this.recordingMode = mode;
@@ -41,10 +41,11 @@ class CaptureThread extends Thread {
 		this.audioFormat = new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
 		DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, audioFormat);
 		this.targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
+		this.cheat = mainWindow;
 	}
 
-	public CaptureThread(String fileName,int mode, double threshold) throws LineUnavailableException {
-		this(new File(fileName), mode, threshold);
+	public CaptureThread(String fileName,int mode, double threshold, MainWindow mainWindow) throws LineUnavailableException {
+		this(new File(fileName), mode, threshold, mainWindow);
 	}
 
 	public void run() {
@@ -82,7 +83,8 @@ class CaptureThread extends Thread {
 			int bufferSize = (int)( audioFormat.getSampleRate() * audioFormat.getFrameSize() * ( bufferInMS / 1000.0));
 			ArrayList<byte[]> list = new ArrayList<>();
 			boolean recording = false;
-
+			boolean prevValue = true;
+			
 			while (true) {
 				byte buffer[] = new byte[bufferSize];
 				int count = targetDataLine.read(buffer, 0, buffer.length);
@@ -102,7 +104,11 @@ class CaptureThread extends Thread {
 				if(recording)
 				{
 					list.add(buffer);
-					sound.add(bytesToDouble(buffer));
+				}
+				else{
+					list.add(buffer);
+					if(list.size() == 2)
+						list.remove(0);
 				}
 				
 				if(recording && maxAmp < threshold)
@@ -113,7 +119,8 @@ class CaptureThread extends Thread {
 					for(int i = 0; i < list.size(); i++)
 						outputStream.write(list.get(i));
 					InputStream input = new ByteArrayInputStream(outputStream.toByteArray());
-					AudioSystem.write(new AudioInputStream(input, audioFormat, outputStream.size()), AudioFileFormat.Type.WAVE, audioFile);
+					AudioSystem.write(new AudioInputStream(input, audioFormat, outputStream.size() / audioFormat.getFrameSize()), AudioFileFormat.Type.WAVE, audioFile);
+					cheat.findBest();
 					break;
 				}
 
