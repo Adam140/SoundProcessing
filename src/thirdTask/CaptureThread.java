@@ -84,7 +84,7 @@ class CaptureThread extends Thread {
 			ArrayList<byte[]> list = new ArrayList<>();
 			boolean recording = false;
 			boolean prevValue = true;
-			
+			cheat.setIconReady();
 			while (true) {
 				byte buffer[] = new byte[bufferSize];
 				int count = targetDataLine.read(buffer, 0, buffer.length);
@@ -99,6 +99,7 @@ class CaptureThread extends Thread {
 				{
 					recording = true;
 					System.out.println("VOICE DETECTED - START RECORDING");
+					cheat.setIconRec();
 				}
 				
 				if(recording)
@@ -121,6 +122,7 @@ class CaptureThread extends Thread {
 					InputStream input = new ByteArrayInputStream(outputStream.toByteArray());
 					AudioSystem.write(new AudioInputStream(input, audioFormat, outputStream.size() / audioFormat.getFrameSize()), AudioFileFormat.Type.WAVE, audioFile);
 					cheat.findBest();
+					cheat.setIconStop();
 					break;
 				}
 
@@ -213,5 +215,9 @@ class CaptureThread extends Thread {
 		max = Math.abs(max);
 		
 		return Math.max(min,max);
+	}
+
+	public synchronized void setThreshold(double threshold) {
+		this.threshold = threshold;
 	}
 }

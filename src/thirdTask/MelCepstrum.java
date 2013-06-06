@@ -1,15 +1,8 @@
 package thirdTask;
 
 
-import java.io.File;
-import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Vector;
-
-import javax.swing.JFrame;
-
-import org.math.plot.Plot2DPanel;
 
 import transforms.FFT;
 
@@ -190,7 +183,7 @@ public class MelCepstrum {
 		double result = 0;
 		for(int i=0;i<signal.length/2;i++)
 		{
-			result += signal[i]*h( (fs/signal.length)*i);
+			result += Math.abs(signal[i])*h( (fs/signal.length)*i);
 		}
 		return result;
 		
@@ -200,7 +193,7 @@ public class MelCepstrum {
 	public double s_prim(double[] signal, int fs, int k, int d )
 	{
 		double s1 = this.s(signal, fs,  k, d );
-		double s2 = Math.log( Math.abs(s1) );
+		double s2 = Math.log( s1 );
 		return Math.pow( s2 ,2);
 	}
 	

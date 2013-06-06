@@ -28,8 +28,8 @@ public class DistanceGraph extends JPanel {
         System.out.println("START: DistanceGraph constructor");
         dtw.bestPath();
         this.g = dtw.getG();
-        int i = g.length;
-        int j = g[0].length;
+        int i = g[0].length;
+        int j = g.length;
         initImage();
         putLine(dtw.getX(), dtw.getY());
         
@@ -42,7 +42,7 @@ public class DistanceGraph extends JPanel {
 	        if(xW > 1 && xH > 1)
 	        {
 	        	System.out.println("Resize image");
-	        	image = scaleImage(image, (int) (0.6 * (double) j * Math.min(xW, xH)), (int) ((double) i * Math.min(xW, xH) * 0.6), Color.red);
+	        	image = scaleImage(image, (int) (0.6 * (double) i * Math.min(xW, xH)), (int) ((double) j * Math.min(xW, xH) * 0.6), Color.red);
 	        }
         }
         Dimension dimension = new Dimension(image.getWidth(), image.getHeight());
@@ -97,21 +97,23 @@ public class DistanceGraph extends JPanel {
     			this.image.setRGB(listX.get(i), listY.get(i), Color.blue.getRGB());
     	}
     	
-    	int I = image.getHeight();
-    	int J = image.getWidth();
+    	int I = image.getWidth();
+    	int J = image.getHeight();
+    	
+    	System.out.println(" I: " + I + " J: " + J);
     	for(int i = 0; i < image.getWidth(); i++)
     	{
     		int a = 2 * ( i - I) + J;
     		int b = (int) (0.5 * ( i - 1) + 1);
     		int c = 2 * ( i - 1) + 1;
     		int d = (int) (0.5 * ( i - I) + J);
-    		if(a < I && a >= 0 )
+    		if(a < J && a >= 0 && a > b)
     			this.image.setRGB(i, a, Color.RED.getRGB());
-    		if(b < I && b >= 0 )
+    		if(b < J && b >= 0 && b > a)
     			this.image.setRGB(i, b, Color.RED.getRGB());
-    		if(c < I && c >= 0 )
+    		if(c < J && c >= 0 && c <= d)
     			this.image.setRGB(i, c, Color.RED.getRGB());
-    		if(d < I && d >= 0)
+    		if(d < J && d >= 0 && d <= c)
     			this.image.setRGB(i,d, Color.RED.getRGB());
     		System.out.println(i + " " + a);
     	}
@@ -167,7 +169,7 @@ public class DistanceGraph extends JPanel {
     	for (Double key : keys) { 
     		   count += map.get(key);
     		   
-    		   if( count >= partSize)
+    		   if( count >= partSize && index < color.length)
     		   {
     			   color[index][0] = key;	// range
     			   color[index][1] = (255d / (double) range) * index; // color
