@@ -426,27 +426,30 @@ public class MainWindow {
 		setInput(new File("./output/temp.wav"));
 		convertMusicToPoint();
 		MelCepstrum m = new MelCepstrum();
-
 		try {
-			co = m.getMelCepstrum(dividedPoints, 2048, false, 44100, 2);
+			double[][] tmp = m.getMelCepstrum(dividedPoints, 2048, false, 44100, 2);
+			for(int i=0;i<tmp.length;i++)
+			{
+				System.out.println(Array.toString(tmp[i]));
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		try {
-			// What ever the file path is.
-			File statText = new File("current_trace.csv");
-			FileOutputStream is = new FileOutputStream(statText);
-			OutputStreamWriter osw = new OutputStreamWriter(is);
-			Writer w = new BufferedWriter(osw);
-			for (int i = 0; i < co.length; i++) {
-				w.write(Double.toString(co[i]) + '\n');
-			}
-			w.close();
-		} catch (IOException e) {
-			System.err.println("error");
-		}
-		System.out.println(Array.toString(co));
+//		try {
+//			// What ever the file path is.
+//			File statText = new File("current_trace.csv");
+//			FileOutputStream is = new FileOutputStream(statText);
+//			OutputStreamWriter osw = new OutputStreamWriter(is);
+//			Writer w = new BufferedWriter(osw);
+//			for (int i = 0; i < co.length; i++) {
+//				w.write(Double.toString(co[i]) + '\n');
+//			}
+//			w.close();
+//		} catch (IOException e) {
+//			System.err.println("error");
+//		}
+//		System.out.println(Array.toString(co));
 
 	}
 
