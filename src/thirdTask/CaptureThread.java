@@ -23,6 +23,7 @@ class CaptureThread extends Thread {
 	private int recordingMode;
 	private double threshold;
 	public MainWindow cheat;
+	private boolean exit = false;
 	final static double AMPLIFIER_RATE = 1.5;
 
 	// 1 - start on button
@@ -69,7 +70,8 @@ class CaptureThread extends Thread {
 		}
 	}
 
-	public void exit() {
+	public synchronized void exit() {
+		exit = true;
 		targetDataLine.stop();
 		targetDataLine.close();
 	}
@@ -79,11 +81,12 @@ class CaptureThread extends Thread {
 	{
 
 		try {
+			while(!exit)
+			{
 			final int bufferInMS = 250; 
 			int bufferSize = (int)( audioFormat.getSampleRate() * audioFormat.getFrameSize() * ( bufferInMS / 1000.0));
 			ArrayList<byte[]> list = new ArrayList<>();
 			boolean recording = false;
-			boolean prevValue = true;
 			cheat.setIconReady();
 			while (true) {
 				byte buffer[] = new byte[bufferSize];
@@ -127,6 +130,8 @@ class CaptureThread extends Thread {
 				}
 
 			}
+			}
+			
 			exit();
 
 		} catch (Exception e) {

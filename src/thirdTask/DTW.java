@@ -161,18 +161,38 @@ public class DTW {
 
 	public void plotGraph() {
 		bestPath();
-		plotGraph(arrayToDouble(x), arrayToDouble(y));
-	}
-
-	public static void plotGraph(double[] x, double[] y) {
 		Plot2DPanel plot = new Plot2DPanel();
-		plot.addLinePlot("my plot", x, y);
+		plot.addLinePlot("The warping function", arrayToDouble(x), arrayToDouble(y));
+		
+		double[] xt = new double[t.length];
+		double[] xs = new double[s.length];
+		
+		for(int i = 0; i < s.length; i++)
+			xs[i] = i;
+		
+		for(int i = 0; i < t.length; i++)
+			xt[i] = i;
+		
+		Plot2DPanel plotS = new Plot2DPanel();
+		plotS.addLinePlot("Model signal", xt, t);
+		Plot2DPanel plotT = new Plot2DPanel();
+		plotT.addLinePlot("analyzed signal", xs, s);
 
 		// put the PlotPanel in a JFrame, as a JPanel
-		JFrame frame = new JFrame("a plot panel");
+		JFrame frame = new JFrame("The warping function plot");
 		frame.setContentPane(plot);
 		frame.setSize(new Dimension(800, 600));
 		frame.setVisible(true);
+		
+		JFrame frameS = new JFrame("Analyzed signal plot");
+		frameS.setContentPane(plotS);
+		frameS.setBounds(400, 400, 800, 600);
+		frameS.setVisible(true);
+		
+		JFrame frameT = new JFrame("Model signal plpot");
+		frameT.setContentPane(plotT);
+		frameT.setBounds(800, 0, 800, 600);
+		frameT.setVisible(true);
 	}
 
 	@Override
@@ -311,10 +331,10 @@ public class DTW {
 		if(!this.itakura)
 			return true;
 		
-		final int a = 2 * (i - J) + I;
+		final int a = 2 * (i - I) + J;
 		final int b = (int) (0.5 * (i - 1) + 1);
 		final int c = 2 * (i - 1) + 1;
-		final int d = (int) (0.5 * (i - J) + I);
+		final int d = (int) (0.5 * (i - I) + J);
 		
 		return j >= a && j >= b && j <= c && j <= d;
 	}

@@ -91,12 +91,6 @@ public class DistanceGraph extends JPanel {
     
     private void putLine(ArrayList<Integer> listX, ArrayList<Integer> listY)
     {
-    	for(int i = 1; i < listX.size(); i++)
-    	{
-    		if(listX.get(i) < image.getWidth() && listY.get(i) < image.getHeight() && listX.get(i) >= 0 && listY.get(i) >= 0)
-    			this.image.setRGB(listX.get(i), listY.get(i), Color.blue.getRGB());
-    	}
-    	
     	int I = image.getWidth();
     	int J = image.getHeight();
     	
@@ -107,15 +101,21 @@ public class DistanceGraph extends JPanel {
     		int b = (int) (0.5 * ( i - 1) + 1);
     		int c = 2 * ( i - 1) + 1;
     		int d = (int) (0.5 * ( i - I) + J);
-    		if(a < J && a >= 0 && a > b)
+    		if(a < J && a >= 0 && a >= b)
     			this.image.setRGB(i, a, Color.RED.getRGB());
-    		if(b < J && b >= 0 && b > a)
+    		if(b < J && b >= 0 && b >= a)
     			this.image.setRGB(i, b, Color.RED.getRGB());
     		if(c < J && c >= 0 && c <= d)
     			this.image.setRGB(i, c, Color.RED.getRGB());
     		if(d < J && d >= 0 && d <= c)
     			this.image.setRGB(i,d, Color.RED.getRGB());
-    		System.out.println(i + " " + a);
+//    		System.out.println(i + " " + a);
+    	}
+    	
+    	for(int i = 1; i < listX.size(); i++)
+    	{
+    		if(listX.get(i) < image.getWidth() && listY.get(i) < image.getHeight() && listX.get(i) >= 0 && listY.get(i) >= 0)
+    			this.image.setRGB(listX.get(i), listY.get(i), Color.blue.getRGB());
     	}
     }
     
