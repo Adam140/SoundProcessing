@@ -30,7 +30,7 @@ public class MelCepstrum {
 	}
 	
 
-	public double[] getMelCepstrum(double[][] signal,int size,boolean sequence, int fs, int blocks) throws Exception
+	public double[][] getMelCepstrum(double[][] signal,int size,boolean sequence, int fs, int blocks) throws Exception
 	{
 
         //WaveDecoder decoder = new WaveDecoder( new FileInputStream( this.filePath ) );
@@ -41,7 +41,7 @@ public class MelCepstrum {
 		int K = 30;
 		int D = 100;
 		this.setParameters(K, D);
-		double[] co = new double[(int) nframe];
+		double[][] co = new double[(int) nframe][];
  
         
         int N = size;
@@ -87,8 +87,8 @@ public class MelCepstrum {
                 	//powerSpectrum[i] = (1/N) * Math.pow(Math.abs(spectrum[i]),2);
                 	//s[i] = new Complex(spectrum[i],0);
                 }
-            	c = cosin(spectrum, (int)framerate, K, D, 5);
-            	co[f] = c;
+                co[f] = cosin(spectrum, (int)framerate, K, D, 5);
+            	//co[f] = c;
   
         }
 
@@ -164,7 +164,7 @@ public class MelCepstrum {
 	
 	public double u(double in)
 	{
-		return 700 * ( Math.pow(10, (in/2595.00)) -1);
+		return 700.00 * ( Math.pow(10.00, (in/2595.00)) -1.00);
 	}
 	
 	public void setParameters(double k, double d)
@@ -178,7 +178,7 @@ public class MelCepstrum {
 	{
 		if(f >= this.lk && f <= this.ck )
 			return (f - this.lk)/(this.ck - this.lk);
-		else if(f > this.ck && f <= this.lk )
+		else if(f >= this.ck && f <= this.lk )
 			return (this.rk - f)/(this.rk - this.ck);
 		else
 			return 0.0;
@@ -204,20 +204,21 @@ public class MelCepstrum {
 		return Math.pow( s2 ,2);
 	}
 	
-	public double cosin(double[] signal, int fs, int K, int d,int F )
+	public double[] cosin(double[] signal, int fs, int K, int d,int F )
 	{
 		double[] c = new double[F];
-		for(int f =0;f<1;f++)
+		for(int f =0;f<F;f++)
 		{
 			double result = 0;
 			for(int k=0;k<K-1;k++)
 			{
 				double s_prim_value = s_prim(signal,fs,k,d);
-				result += s_prim_value * Math.cos( 2 * Math.PI * ( ( (2*k+1)*f )/4*K) );
+				double cos_value =  Math.cos( Math.toRadians(2.0 * Math.PI * ( ( (2.0*k+1.0)*f )/4.0*K) ));
+				result += s_prim_value * cos_value;
 			}
-			return result;
+			c[f] = result;
 		}
-		return 0;
+		return c;
 	}
 	
 	public double toMels(double f)
