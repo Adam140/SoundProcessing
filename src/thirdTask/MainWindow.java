@@ -13,6 +13,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import javax.sound.sampled.LineUnavailableException;
 import javax.swing.ButtonGroup;
@@ -28,13 +37,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 
 import org.math.plot.utils.Array;
 
 import secondTask.Player;
 import firstTask.WavFile;
 import firstTask.WindowFunction;
-import javax.swing.SwingConstants;
 
 public class MainWindow {
 
@@ -170,9 +179,10 @@ public class MainWindow {
 		frame.getContentPane().add(radioMode1);
 
 		JRadioButton radioMode2 = new JRadioButton("Recording on voice");
-//		final MainWindow tmp = this;
 		radioMode2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				if (captureThread != null)
+					captureThread.exit();
 				textFieldThreshold.setEnabled(true);
 				btnStart.setEnabled(false);
 				btnStop.setEnabled(false);
@@ -246,6 +256,7 @@ public class MainWindow {
 
 				DTW dtw = new DTW(t, s, checkBoxItakura.isSelected());
 				dtw.calculateG();
+				dtw.plotGraph();
 				DistanceGraph distanceGraph = new DistanceGraph(dtw,
 						checkBoxRange.isSelected(), checkBoxResize.isSelected());
 
@@ -327,7 +338,7 @@ public class MainWindow {
 		found.setBounds(252, 112, 172, 26);
 		frame.getContentPane().add(found);
 
-		lblMinPath.setBounds(338, 149, 86, 14);
+		lblMinPath.setBounds(252, 149, 170, 14);
 		frame.getContentPane().add(lblMinPath);
 
 		JLabel lblCompareWith = new JLabel("Compare with:");
@@ -355,7 +366,7 @@ public class MainWindow {
 		
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPane.setBounds(252, 175, 172, 69);
+		scrollPane.setBounds(204, 175, 220, 69);
 		frame.getContentPane().add(scrollPane);
 		
 		textPane = new JTextPane();
@@ -363,12 +374,12 @@ public class MainWindow {
 		textPane.setEditable(false);
 		scrollPane.setViewportView(textPane);
 		
-		JLabel lblGij = new JLabel("g(i,j) = ");
-		lblGij.setBounds(252, 149, 46, 14);
+		JLabel lblGij = new JLabel("g(I,J) = ");
+		lblGij.setBounds(204, 149, 46, 14);
 		frame.getContentPane().add(lblGij);
 		
 		JLabel lblBestAnswer = new JLabel("Best match:");
-		lblBestAnswer.setBounds(252, 94, 76, 14);
+		lblBestAnswer.setBounds(204, 96, 76, 14);
 		frame.getContentPane().add(lblBestAnswer);
 		
 		icon = new JLabel("");
@@ -458,21 +469,29 @@ public class MainWindow {
 		String s = "current_trace.csv";
 		double minimal = 999999;
 		String best_match = "None(";
-		String pane = "";
+		HashMap<String, Double> map = new HashMap<>();
 		for (File file : listOfFiles) {
 			if (file.isFile()) {
 				// System.out.println(file.getName());
 				String t = "patterns/" + file.getName();
 				DTW dtw = new DTW(t, s, checkBoxItakura.isSelected());
 				dtw.calculateG();
-				pane+=file.getName() + " - " + dtw.minimalPath + "\n";
-				if (minimal > dtw.minimalPath) {
-					minimal = dtw.minimalPath;
+				if (minimal > dtw.minimalPath2) {
+					minimal = dtw.minimalPath2;
 					best_match = file.getName();
 				}
+//				if (minimal > dtw.minimalPath) {
+//					minimal = dtw.minimalPath;
+//					best_match = file.getName();
+//				}
+				
+				map.put(file.getName(), dtw.minimalPath2);
+//				map.put(file.getName(), dtw.minimalPath);
 			}
 		}
-		textPane.setText(pane);
+		Map<String, Double> sorted_map = sortByValues(map);
+		String tmp = sorted_map.toString();
+		textPane.setText(tmp.substring(1, tmp.length() - 1));
 		found.setText(best_match.split("\\(")[0]);
 		foundFile = best_match;
 		lblMinPath.setText(Double.toString(minimal));
@@ -496,4 +515,29 @@ public class MainWindow {
 	{
 		icon.setIcon(iconStop);
 	}
+	
+	public static <K extends Comparable,V extends Comparable> Map<K,V> sortByValues(Map<K,V> map){
+        List<Map.Entry<K,V>> entries = new LinkedList<Map.Entry<K,V>>(map.entrySet());
+      
+        Collections.sort(entries, new Comparator<Map.Entry<K,V>>() {
+
+            @Override
+            public int compare(Entry<K, V> o1, Entry<K, V> o2) {
+                return o1.getValue().compareTo(o2.getValue());
+            }
+        });
+      
+        //LinkedHashMap will keep the keys in the order they are inserted
+        //which is currently sorted on natural ordering
+        Map<K,V> sortedMap = new LinkedHashMap<K,V>();
+      
+        for(Map.Entry<K,V> entry: entries){
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }
+      
+        return sortedMap;
+    }
+
 }
+
+

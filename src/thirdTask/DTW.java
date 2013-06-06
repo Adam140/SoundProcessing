@@ -34,6 +34,7 @@ public class DTW {
 	private boolean itakura;
 	
 	public double minimalPath = 0;
+	public double minimalPath2 = 0;
 
 	public DTW(String tFile, String sFile, boolean itakura) {
 		super();
@@ -59,13 +60,17 @@ public class DTW {
 	}
 
 	private void intialG() {
+//		g[0][0] = euclideanDistance(t[0], s[0]);
+		g[0][0] = 0;
+		
 		for (int i = 1; i < t.length; i++)
 			g[i][0] = Double.POSITIVE_INFINITY;
-
+//		g[i][0] = g[i - 1][0] + euclideanDistance(t[i], s[0]);
+		
 		for (int j = 1; j < s.length; j++)
 			g[0][j] = Double.POSITIVE_INFINITY;
+//			g[0][j] = g[0][j - 1] + euclideanDistance(t[0], s[j]);
 
-		g[0][0] = 1;
 	}
 
 	private double euclideanDistance(double a, double b) {
@@ -83,20 +88,23 @@ public class DTW {
 	}
 
 	public double[][] calculateG() {
-		for (int i = 1; i < t.length; i++) {
-			for (int j = 1; j < s.length; j++) {
-//				if(!itakuraConstraint(i, j, t.length, s.length))
+		for (int j = 1; j < t.length; j++) {
+			for (int i = 1; i < s.length; i++) {
+				// PRZY GENEROWANIU TABLICY TEZ???
+//				if(!itakuraConstraint(i, j, s.length, t.length))
 //				{
-//					g[i][j] = Double.POSITIVE_INFINITY;
+//					g[j][i] = Double.POSITIVE_INFINITY;
 //					continue;
 //				}
-				g[i][j] = euclideanDistance(t[i], s[j]) + min(g[i][j - 1], g[i - 1][j - 1], g[i - 1][j]);
+				g[j][i] = euclideanDistance(t[j], s[i]) + min(g[j][i - 1], g[j - 1][i - 1], g[j - 1][i]);
 			}
 		}
 
 		setPrecision(2);
 		System.out.println("Minimal path = " + g[t.length - 1][s.length - 1]);
 		this.minimalPath = g[t.length - 1][s.length - 1];
+		this.minimalPath = minimalPath * (t.length + s.length);
+		bestPath();
 		return g;
 	}
 
@@ -275,6 +283,7 @@ public class DTW {
 		j--;
 		i--;
 
+		double sum = 0d;
 		while ((j >= 0) || (i >= 0)) {
 			final double diagCost;
 			final double leftCost;
@@ -309,8 +318,13 @@ public class DTW {
 
 			x.add(i);
 			y.add(j);
+			
+			if(i >= 0 && j >= 0)
+				sum += g[j][i];
 		}
-
+		
+		System.out.println(sum);
+		minimalPath2 = sum /(t.length + s.length);
 		// Collections.reverse(x);
 		// Collections.reverse(y);
 
