@@ -187,6 +187,9 @@ public class DistanceGraph extends JPanel {
     {
     	int col = 0;
     	
+    	if( value == Double.POSITIVE_INFINITY)
+    		return Color.WHITE.getRGB();
+    	
     	for(int i = 0; i < this.color.length; i++){
     		if(value <= color[i][0])
     		{

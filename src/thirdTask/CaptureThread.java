@@ -29,7 +29,8 @@ class CaptureThread extends Thread {
 	// 1 - start on button
 	// 2 - start on speak
 
-	public CaptureThread(File file, int mode, double threshold, MainWindow mainWindow) throws LineUnavailableException {
+	public CaptureThread(File file, int mode, double threshold,
+			MainWindow mainWindow) throws LineUnavailableException {
 		super();
 		this.audioFile = file;
 		this.recordingMode = mode;
@@ -39,13 +40,17 @@ class CaptureThread extends Thread {
 		int channels = 1; // 1,2
 		boolean signed = true; // true,false
 		boolean bigEndian = false; // true,false
-		this.audioFormat = new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
-		DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, audioFormat);
-		this.targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
+		this.audioFormat = new AudioFormat(sampleRate, sampleSizeInBits,
+				channels, signed, bigEndian);
+		DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class,
+				audioFormat);
+		this.targetDataLine = (TargetDataLine) AudioSystem
+				.getLine(dataLineInfo);
 		this.cheat = mainWindow;
 	}
 
-	public CaptureThread(String fileName,int mode, double threshold, MainWindow mainWindow) throws LineUnavailableException {
+	public CaptureThread(String fileName, int mode, double threshold,
+			MainWindow mainWindow) throws LineUnavailableException {
 		this(new File(fileName), mode, threshold, mainWindow);
 	}
 
@@ -55,12 +60,12 @@ class CaptureThread extends Thread {
 			targetDataLine.start();
 		} catch (LineUnavailableException e) {
 		}
-		
-		switch(recordingMode)
-		{
+
+		switch (recordingMode) {
 		case 1:
 			try {
-				AudioSystem.write(new AudioInputStream(targetDataLine), AudioFileFormat.Type.WAVE, audioFile);
+				AudioSystem.write(new AudioInputStream(targetDataLine),
+						AudioFileFormat.Type.WAVE, audioFile);
 			} catch (IOException e) {
 			}
 			break;
@@ -76,62 +81,60 @@ class CaptureThread extends Thread {
 		targetDataLine.close();
 	}
 
-
-	private void onVoiceRecording()
-	{
+	private void onVoiceRecording() {
 
 		try {
-			while(!exit)
-			{
-			final int bufferInMS = 250; 
-			int bufferSize = (int)( audioFormat.getSampleRate() * audioFormat.getFrameSize() * ( bufferInMS / 1000.0));
-			ArrayList<byte[]> list = new ArrayList<>();
-			boolean recording = false;
-			cheat.setIconReady();
-			while (true) {
-				byte buffer[] = new byte[bufferSize];
-				int count = targetDataLine.read(buffer, 0, buffer.length);
-				if(count == 0)
-					continue;
-//				double maxAmp = maxAmplitude(buffer);
-//				System.out.println("Max A = " + maxAmp);
-				double maxAmp = volumeRMS(bytesToDouble(buffer));
-				System.out.println("Volumne rms = " + maxAmp);
-				
-				if(!recording && maxAmp > threshold)
-				{
-					recording = true;
-					System.out.println("VOICE DETECTED - START RECORDING");
-					cheat.setIconRec();
-				}
-				
-				if(recording)
-				{
-					list.add(buffer);
-				}
-				else{
-					list.add(buffer);
-					if(list.size() == 2)
-						list.remove(0);
-				}
-				
-				if(recording && maxAmp < threshold)
-				{
-					System.out.println("STOP RECORDING");
-					
-					ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-					for(int i = 0; i < list.size(); i++)
-						outputStream.write(list.get(i));
-					InputStream input = new ByteArrayInputStream(outputStream.toByteArray());
-					AudioSystem.write(new AudioInputStream(input, audioFormat, outputStream.size() / audioFormat.getFrameSize()), AudioFileFormat.Type.WAVE, audioFile);
-					cheat.findBest();
-					cheat.setIconStop();
-					break;
-				}
+			while (!exit) {
+				final int bufferInMS = 250;
+				int bufferSize = (int) (audioFormat.getSampleRate()
+						* audioFormat.getFrameSize() * (bufferInMS / 1000.0));
+				ArrayList<byte[]> list = new ArrayList<>();
+				boolean recording = false;
+				cheat.setIconReady();
+				while (true) {
+					byte buffer[] = new byte[bufferSize];
+					int count = targetDataLine.read(buffer, 0, buffer.length);
+					if (count == 0)
+						continue;
+					// double maxAmp = maxAmplitude(buffer);
+					// System.out.println("Max A = " + maxAmp);
+					double maxAmp = volumeRMS(bytesToDouble(buffer));
+					System.out.println("Volumne rms = " + maxAmp);
 
+					if (!recording && maxAmp > threshold) {
+						recording = true;
+						System.out.println("VOICE DETECTED - START RECORDING");
+						cheat.setIconRec();
+					}
+
+					if (recording && maxAmp < threshold) {
+						System.out.println("STOP RECORDING");
+
+						ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+						for (int i = 0; i < list.size(); i++)
+							outputStream.write(list.get(i));
+						InputStream input = new ByteArrayInputStream(
+								outputStream.toByteArray());
+						AudioSystem.write(
+								new AudioInputStream(input, audioFormat,
+										outputStream.size()
+												/ audioFormat.getFrameSize()),
+								AudioFileFormat.Type.WAVE, audioFile);
+						cheat.findBest();
+						cheat.setIconStop();
+						break;
+					}
+
+					if (recording) {
+						list.add(buffer);
+					} else {
+						if (list.size() == 1)
+							list.remove(0);
+						list.add(buffer);
+					}
+				}
 			}
-			}
-			
+
 			exit();
 
 		} catch (Exception e) {
@@ -139,7 +142,10 @@ class CaptureThread extends Thread {
 		}
 	}
 
-	/** Computes the RMS (Root mean square) volume of a group of signal sizes ranging from -1 to 1. */
+	/**
+	 * Computes the RMS (Root mean square) volume of a group of signal sizes
+	 * ranging from -1 to 1.
+	 */
 	public double volumeRMS(double[] raw) {
 		double sum = 0d;
 		if (raw.length == 0) {
@@ -160,7 +166,6 @@ class CaptureThread extends Thread {
 
 		return rootMeanSquare;
 	}
-
 
 	/**
 	 * Only for 16 bit peer sample convert array of bytes to array of double
@@ -187,39 +192,36 @@ class CaptureThread extends Thread {
 		// convert to range from -1 to (just below) 1
 		return s / 32768.0;
 	}
-	
+
 	@SuppressWarnings("unused")
-	private byte[] toArray(ArrayList<byte[]> list)
-	{
+	private byte[] toArray(ArrayList<byte[]> list) {
 		int lenght = list.get(0).length;
 		byte[] result = new byte[lenght * list.size()];
-		for(int i = 0; i < list.size(); i++)
-		{
+		for (int i = 0; i < list.size(); i++) {
 			byte[] temp = list.get(i);
-			for(int j = 0; j < temp.length; j++)
-				result[i*lenght + j] = temp[j];
+			for (int j = 0; j < temp.length; j++)
+				result[i * lenght + j] = temp[j];
 		}
-		
+
 		return result;
 	}
 
 	@SuppressWarnings("unused")
 	private double maxAmplitude(byte[] bytes) {
 		double min = 1d, max = -1d;
-		
-		for (int i = 0; i < bytes.length; i = i + 2) 
-		{
+
+		for (int i = 0; i < bytes.length; i = i + 2) {
 			double temp = bytesToDouble(bytes[i], bytes[i + 1]);
 			if (temp > max)
 				max = temp;
 			if (temp < min)
 				min = temp;
 		}
-		
+
 		min = Math.abs(min);
 		max = Math.abs(max);
-		
-		return Math.max(min,max);
+
+		return Math.max(min, max);
 	}
 
 	public synchronized void setThreshold(double threshold) {

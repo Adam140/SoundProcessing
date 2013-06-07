@@ -91,11 +91,11 @@ public class DTW {
 		for (int j = 1; j < t.length; j++) {
 			for (int i = 1; i < s.length; i++) {
 				// PRZY GENEROWANIU TABLICY TEZ???
-//				if(!itakuraConstraint(i, j, s.length, t.length))
-//				{
-//					g[j][i] = Double.POSITIVE_INFINITY;
-//					continue;
-//				}
+				if(!itakuraConstraint(i, j, s.length, t.length))
+				{
+					g[j][i] = Double.POSITIVE_INFINITY;
+					continue;
+				}
 				g[j][i] = euclideanDistance(t[j], s[i]) + min(g[j][i - 1], g[j - 1][i - 1], g[j - 1][i]);
 			}
 		}
@@ -103,7 +103,7 @@ public class DTW {
 		setPrecision(2);
 		System.out.println("Minimal path = " + g[t.length - 1][s.length - 1]);
 		this.minimalPath = g[t.length - 1][s.length - 1];
-		this.minimalPath = minimalPath * (t.length + s.length);
+		this.minimalPath = minimalPath / (t.length + s.length);
 		bestPath();
 		return g;
 	}
@@ -289,7 +289,7 @@ public class DTW {
 			final double leftCost;
 			final double upCost;
 
-			if ((j > 0) && (i > 0))// && itakuraConstraint(i - 1, j - 1, I, J))
+			if ((j > 0) && (i > 0) && itakuraConstraint(i - 1, j - 1, I, J))
 				diagCost = g[j - 1][i - 1];
 			else
 				diagCost = Double.POSITIVE_INFINITY;

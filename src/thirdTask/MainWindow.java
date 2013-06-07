@@ -83,6 +83,7 @@ public class MainWindow {
 	private JCheckBox checkBoxItakura;
 	private JTextPane textPane;
 	private JLabel icon;
+	private JLabel ok;
 
 	/**
 	 * Launch the application.
@@ -112,7 +113,7 @@ public class MainWindow {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 450, 364);
+		frame.setBounds(100, 100, 450, 402);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 
@@ -283,7 +284,7 @@ public class MainWindow {
 		frame.getContentPane().add(checkBoxRange);
 
 		tf_pattern = new JTextField();
-		tf_pattern.setBounds(338, 291, 86, 20);
+		tf_pattern.setBounds(338, 291, 61, 20);
 		frame.getContentPane().add(tf_pattern);
 		tf_pattern.setColumns(10);
 
@@ -315,6 +316,17 @@ public class MainWindow {
 				}
 
 				comboBox.addItem(tf_pattern.getText() + surfix);
+				ok.setText("OK");
+				(new Thread() {
+					  public void run() {
+						  try {
+							sleep(1000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						  ok.setText("");
+					  }
+					 }).start();
 			}
 		});
 		btnSaveAsPattern.setBounds(204, 290, 124, 23);
@@ -385,6 +397,30 @@ public class MainWindow {
 		icon.setBounds(309, 29, 31, 23);
 		setIconStop();
 		frame.getContentPane().add(icon);
+		
+		ok = new JLabel("");
+		ok.setForeground(Color.GREEN);
+		ok.setHorizontalAlignment(SwingConstants.CENTER);
+		ok.setBounds(400, 293, 24, 16);
+		frame.getContentPane().add(ok);
+		
+		JButton btnNewButton = new JButton("Delete all patterns");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int dialogResult = JOptionPane.showConfirmDialog (null, "Are You sure?","Warning",JOptionPane.YES_NO_OPTION);
+				if(dialogResult == JOptionPane.YES_OPTION){
+					File folder = new File("patterns/");
+					File[] listOfFiles = folder.listFiles();
+					for (File file : listOfFiles) {
+						file.delete();
+						comboBox.removeAllItems();
+					}
+				}
+			}
+		});
+		btnNewButton.setBackground(Color.LIGHT_GRAY);
+		btnNewButton.setBounds(204, 323, 218, 26);
+		frame.getContentPane().add(btnNewButton);
 	}
 
 	public void convertMusicToPoint() {
@@ -429,7 +465,7 @@ public class MainWindow {
 			}
 		}
 
-		this.dividedPoints = WindowFunction.sampling(points, 2048);
+		this.dividedPoints = WindowFunction.sampling(points, 512);
 		// dividedPoints[number of window][number of sample in current window]
 	}
 
@@ -439,7 +475,7 @@ public class MainWindow {
 		MelCepstrum m = new MelCepstrum();
 
 		try {
-			co = m.getMelCepstrum(dividedPoints, 2048, false, 44100, 2);
+			co = m.getMelCepstrum(dividedPoints, 512, false, 44100, 2);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -450,7 +486,7 @@ public class MainWindow {
 			FileOutputStream is = new FileOutputStream(statText);
 			OutputStreamWriter osw = new OutputStreamWriter(is);
 			Writer w = new BufferedWriter(osw);
-			for (int i = 0; i < co.length; i++) {
+			for (int i = 0; i < co.length - 1; i++) {
 				w.write(Double.toString(co[i]) + '\n');
 			}
 			w.close();
@@ -476,17 +512,17 @@ public class MainWindow {
 				String t = "patterns/" + file.getName();
 				DTW dtw = new DTW(t, s, checkBoxItakura.isSelected());
 				dtw.calculateG();
-				if (minimal > dtw.minimalPath2) {
-					minimal = dtw.minimalPath2;
-					best_match = file.getName();
-				}
-//				if (minimal > dtw.minimalPath) {
-//					minimal = dtw.minimalPath;
+//				if (minimal > dtw.minimalPath2) {
+//					minimal = dtw.minimalPath2;
 //					best_match = file.getName();
 //				}
+				if (minimal > dtw.minimalPath) {
+					minimal = dtw.minimalPath;
+					best_match = file.getName();
+				}
 				
-				map.put(file.getName(), dtw.minimalPath2);
-//				map.put(file.getName(), dtw.minimalPath);
+//				map.put(file.getName(), dtw.minimalPath2);
+				map.put(file.getName(), dtw.minimalPath);
 			}
 		}
 		Map<String, Double> sorted_map = sortByValues(map);
@@ -538,7 +574,9 @@ public class MainWindow {
       
         return sortedMap;
     }
-
+	public JLabel getOk() {
+		return ok;
+	}
 }
 
 
