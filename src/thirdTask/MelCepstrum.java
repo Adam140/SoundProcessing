@@ -23,6 +23,15 @@ public class MelCepstrum {
 	}
 	
 
+	/**
+	 * @param signal
+	 * @param size of window
+	 * @param sequence - ? 
+	 * @param fs - framerate (44 100 Hz)
+	 * @param blocks - ?
+	 * @return
+	 * @throws Exception
+	 */
 	public double[] getMelCepstrum(double[][] signal,int size,boolean sequence, int fs, int blocks) throws Exception
 	{
 
@@ -171,7 +180,7 @@ public class MelCepstrum {
 	{
 		if(f >= this.lk && f <= this.ck )
 			return (f - this.lk)/(this.ck - this.lk);
-		else if(f > this.ck && f <= this.lk )
+		else if(f > this.ck && f <= this.rk )
 			return (this.rk - f)/(this.rk - this.ck);
 		else
 			return 0.0;
@@ -181,9 +190,9 @@ public class MelCepstrum {
 	{
 		this.setParameters(k, d);
 		double result = 0;
-		for(int i=0;i<signal.length/2;i++)
+		for(int i = 0; i < signal.length / 2; i++)
 		{
-			result += Math.abs(signal[i])*h( (fs/signal.length)*i);
+			result += Math.abs(signal[i]) * h( (fs / signal.length) * i);
 		}
 		return result;
 		
@@ -200,13 +209,13 @@ public class MelCepstrum {
 	public double cosin(double[] signal, int fs, int K, int d,int F )
 	{
 		double[] c = new double[F];
-		for(int f =0;f<1;f++)
+		for(int n = 0; n < 1; n++)
 		{
 			double result = 0;
-			for(int k=0;k<K-1;k++)
+			for(int k = 0; k < K - 1; k++)
 			{
 				double s_prim_value = s_prim(signal,fs,k,d);
-				result += s_prim_value * Math.cos(Math.toRadians( 2 * Math.PI * ( ( (2*k+1)*f )/4*K) ));
+				result += s_prim_value * Math.cos(Math.toRadians( 2 * Math.PI * ( ( ( 2 * k + 1 ) * n ) / 4 * K) ));
 			}
 			return result;
 		}

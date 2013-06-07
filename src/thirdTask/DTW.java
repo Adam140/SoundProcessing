@@ -289,7 +289,7 @@ public class DTW {
 			final double leftCost;
 			final double upCost;
 
-			if ((j > 0) && (i > 0) && itakuraConstraint(i - 1, j - 1, I, J))
+			if ((j > 0) && (i > 0))// && itakuraConstraint(i - 1, j - 1, I, J))
 				diagCost = g[j - 1][i - 1];
 			else
 				diagCost = Double.POSITIVE_INFINITY;
@@ -319,12 +319,20 @@ public class DTW {
 			x.add(i);
 			y.add(j);
 			
+			
 			if(i >= 0 && j >= 0)
+			{
+//				if(!itakuraConstraint(i, j, I, J))
+//				{
+//					sum = Double.POSITIVE_INFINITY;
+//					break;
+//				}
 				sum += g[j][i];
+			}
 		}
 		
-		System.out.println(sum);
 		minimalPath2 = sum /(t.length + s.length);
+		System.out.println(sum);
 		// Collections.reverse(x);
 		// Collections.reverse(y);
 

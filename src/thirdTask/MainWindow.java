@@ -403,14 +403,14 @@ public class MainWindow {
 				int framesRead;
 
 				int i = 0;
-				double max = 0;
+//				double max = 0;
 				do {
 
 					framesRead = wavFile.readFrames(buffer, 100);
 					for (int s = 0; s < framesRead * numChannels; s++) {
 						try {
-							if (Math.abs(buffer[s]) > max)
-								max = Math.abs(buffer[s]);
+//							if (Math.abs(buffer[s]) > max)
+//								max = Math.abs(buffer[s]);
 							points[i] = buffer[s];
 							i++;
 						} catch (Exception e) {
@@ -420,9 +420,9 @@ public class MainWindow {
 				} while (framesRead != 0);
 
 				wavFile.close();
-
-				for (i = 0; i < points.length; i++)
-					points[i] = points[i] * (1 / max);
+//				System.out.println("MAX: " + max);
+//				for (i = 0; i < points.length; i++)
+//					points[i] = points[i] * (1 / max);
 
 			} catch (Exception e) {
 				System.err.println(e);
@@ -430,6 +430,7 @@ public class MainWindow {
 		}
 
 		this.dividedPoints = WindowFunction.sampling(points, 2048);
+		// dividedPoints[number of window][number of sample in current window]
 	}
 
 	public void melCepstrum() {
