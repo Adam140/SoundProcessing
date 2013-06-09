@@ -44,6 +44,7 @@ import org.math.plot.utils.Array;
 import secondTask.Player;
 import firstTask.WavFile;
 import firstTask.WindowFunction;
+import javax.swing.JProgressBar;
 
 public class MainWindow {
 
@@ -59,7 +60,7 @@ public class MainWindow {
 	private double[] points; // all values of wave
 	private double[][] dividedPoints; // all values of wave after sampling
 	private File input;
-	double[] co = null;
+	double[][] co = null;
 	private final ImageIcon iconReady = new ImageIcon("icon/on.png", "on");
 	private final ImageIcon iconRec = new ImageIcon("icon/off.png", "off");
 	private final ImageIcon iconStop = new ImageIcon("icon/stop.png", "stop");
@@ -84,6 +85,7 @@ public class MainWindow {
 	private JTextPane textPane;
 	private JLabel icon;
 	private JLabel ok;
+	private JProgressBar progressBar;
 
 	/**
 	 * Launch the application.
@@ -172,6 +174,7 @@ public class MainWindow {
 				btnStop.setEnabled(false);
 				btnPlay.setEnabled(false);
 				setIconStop();
+				progressBar.setValue(0);
 			}
 		});
 		buttonGroup.add(radioMode1);
@@ -231,13 +234,13 @@ public class MainWindow {
 			}
 		});
 		textFieldThreshold.setEnabled(false);
-		textFieldThreshold.setText("0.03");
-		textFieldThreshold.setBounds(159, 34, 46, 20);
+		textFieldThreshold.setText("0.02");
+		textFieldThreshold.setBounds(159, 34, 31, 20);
 		frame.getContentPane().add(textFieldThreshold);
 		textFieldThreshold.setColumns(10);
 
 		JLabel lblAvgAmplitude = new JLabel("avg amplitude");
-		lblAvgAmplitude.setBounds(215, 33, 89, 16);
+		lblAvgAmplitude.setBounds(204, 36, 89, 16);
 		frame.getContentPane().add(lblAvgAmplitude);
 
 		JButton btnShowDistanceGraph = new JButton("Show distance graph");
@@ -307,8 +310,15 @@ public class MainWindow {
 					FileOutputStream is = new FileOutputStream(statText);
 					OutputStreamWriter osw = new OutputStreamWriter(is);
 					Writer w = new BufferedWriter(osw);
-					for (int i = 0; i < co.length; i++) {
-						w.write(Double.toString(co[i]) + '\n');
+					for (int i = 0; i < co.length - 1; i++) {
+						String temp = "";
+						for(int j = 0; j < co[i].length; j++)
+						{
+							temp+= co[i][j];
+							if(j != co[i].length - 1)
+								temp += ',';
+						}
+						w.write(temp + '\n');
 					}
 					w.close();
 				} catch (IOException e1) {
@@ -372,6 +382,7 @@ public class MainWindow {
 		frame.getContentPane().add(checkBoxResize);
 
 		checkBoxItakura = new JCheckBox("Itakura parallelogram");
+		checkBoxItakura.setSelected(true);
 		checkBoxItakura.setBounds(6, 175, 172, 24);
 		frame.getContentPane().add(checkBoxItakura);
 		
@@ -393,9 +404,18 @@ public class MainWindow {
 		lblBestAnswer.setBounds(204, 96, 76, 14);
 		frame.getContentPane().add(lblBestAnswer);
 		
+		progressBar = new JProgressBar();
+		progressBar.setBorderPainted(false);
+		progressBar.setBorder(null);
+		progressBar.setForeground(Color.GREEN);
+		progressBar.setBounds(297, 33, 102, 23);
+		frame.getContentPane().add(progressBar);
+		
 		icon = new JLabel("");
-		icon.setBounds(309, 29, 31, 23);
+		icon.setVisible(false);
+		icon.setBounds(403, 33, 31, 23);
 		setIconStop();
+		progressBar.setValue(0);
 		frame.getContentPane().add(icon);
 		
 		ok = new JLabel("");
@@ -421,6 +441,7 @@ public class MainWindow {
 		btnNewButton.setBackground(Color.LIGHT_GRAY);
 		btnNewButton.setBounds(204, 323, 218, 26);
 		frame.getContentPane().add(btnNewButton);
+		
 	}
 
 	public void convertMusicToPoint() {
@@ -439,14 +460,11 @@ public class MainWindow {
 				int framesRead;
 
 				int i = 0;
-//				double max = 0;
 				do {
 
 					framesRead = wavFile.readFrames(buffer, 100);
 					for (int s = 0; s < framesRead * numChannels; s++) {
 						try {
-//							if (Math.abs(buffer[s]) > max)
-//								max = Math.abs(buffer[s]);
 							points[i] = buffer[s];
 							i++;
 						} catch (Exception e) {
@@ -456,16 +474,13 @@ public class MainWindow {
 				} while (framesRead != 0);
 
 				wavFile.close();
-//				System.out.println("MAX: " + max);
-//				for (i = 0; i < points.length; i++)
-//					points[i] = points[i] * (1 / max);
 
 			} catch (Exception e) {
 				System.err.println(e);
 			}
 		}
 
-		this.dividedPoints = WindowFunction.sampling(points, 512);
+		this.dividedPoints = WindowFunction.sampling(points, 1024);
 		// dividedPoints[number of window][number of sample in current window]
 	}
 
@@ -475,7 +490,7 @@ public class MainWindow {
 		MelCepstrum m = new MelCepstrum();
 
 		try {
-			co = m.getMelCepstrum(dividedPoints, 512, false, 44100, 2);
+			co = m.getMelCepstrum(dividedPoints, 1024, false, 44100, 2);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -487,7 +502,14 @@ public class MainWindow {
 			OutputStreamWriter osw = new OutputStreamWriter(is);
 			Writer w = new BufferedWriter(osw);
 			for (int i = 0; i < co.length - 1; i++) {
-				w.write(Double.toString(co[i]) + '\n');
+				String temp = "";
+				for(int j = 0; j < co[i].length; j++)
+				{
+					temp+= co[i][j];
+					if(j != co[i].length - 1)
+						temp += ',';
+				}
+				w.write(temp + '\n');
 			}
 			w.close();
 		} catch (IOException e) {
@@ -508,7 +530,6 @@ public class MainWindow {
 		HashMap<String, Double> map = new HashMap<>();
 		for (File file : listOfFiles) {
 			if (file.isFile()) {
-				// System.out.println(file.getName());
 				String t = "patterns/" + file.getName();
 				DTW dtw = new DTW(t, s, checkBoxItakura.isSelected());
 				dtw.calculateG();
@@ -576,6 +597,9 @@ public class MainWindow {
     }
 	public JLabel getOk() {
 		return ok;
+	}
+	public JProgressBar getProgressBar() {
+		return progressBar;
 	}
 }
 

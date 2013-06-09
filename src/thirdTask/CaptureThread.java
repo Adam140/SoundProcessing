@@ -1,5 +1,6 @@
 package thirdTask;
 
+import java.awt.Color;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -85,12 +86,13 @@ class CaptureThread extends Thread {
 
 		try {
 			while (!exit) {
-				final int bufferInMS = 250;
+				final int bufferInMS = 100;
 				int bufferSize = (int) (audioFormat.getSampleRate()
 						* audioFormat.getFrameSize() * (bufferInMS / 1000.0));
 				ArrayList<byte[]> list = new ArrayList<>();
 				boolean recording = false;
 				cheat.setIconReady();
+				cheat.getProgressBar().setForeground(Color.GREEN);
 				while (true) {
 					byte buffer[] = new byte[bufferSize];
 					int count = targetDataLine.read(buffer, 0, buffer.length);
@@ -99,17 +101,20 @@ class CaptureThread extends Thread {
 					// double maxAmp = maxAmplitude(buffer);
 					// System.out.println("Max A = " + maxAmp);
 					double maxAmp = volumeRMS(bytesToDouble(buffer));
-					System.out.println("Volumne rms = " + maxAmp);
+					int progress = (int) (maxAmp * 1000);
+					cheat.getProgressBar().setValue( progress);
+//					System.out.println("Volumne rms = " + maxAmp);
 
 					if (!recording && maxAmp > threshold) {
 						recording = true;
 						System.out.println("VOICE DETECTED - START RECORDING");
 						cheat.setIconRec();
+						cheat.getProgressBar().setForeground(Color.RED);
 					}
 
 					if (recording && maxAmp < threshold) {
+						list.add(buffer);
 						System.out.println("STOP RECORDING");
-
 						ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 						for (int i = 0; i < list.size(); i++)
 							outputStream.write(list.get(i));
@@ -122,16 +127,19 @@ class CaptureThread extends Thread {
 								AudioFileFormat.Type.WAVE, audioFile);
 						cheat.findBest();
 						cheat.setIconStop();
+						cheat.getProgressBar().setForeground(Color.GREEN);
+						cheat.getProgressBar().setValue(0);
 						break;
 					}
 
 					if (recording) {
 						list.add(buffer);
-					} else {
-						if (list.size() == 1)
-							list.remove(0);
-						list.add(buffer);
-					}
+					} 
+//					else {
+//						if (list.size() == 1)
+//							list.remove(0);
+//						list.add(buffer);
+//					}
 				}
 			}
 

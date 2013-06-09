@@ -29,10 +29,10 @@ public class DTW {
 	private ArrayList<Integer> x;
 	private ArrayList<Integer> y;
 	private double[][] g;
-	private double[] t; // array of model signal
-	private double[] s; // array of analyzed signal
+	private double[][] t; // array of model signal
+	private double[][] s; // array of analyzed signal
 	private boolean itakura;
-	
+
 	public double minimalPath = 0;
 	public double minimalPath2 = 0;
 
@@ -42,15 +42,15 @@ public class DTW {
 		System.out.println("START: DTW construktor");
 		System.out.println("Read from file");
 		this.t = fromFile(tFile);
-		System.out.println("T = " + Array.toString(t));
+//		System.out.println("T = " + Array.toString(t));
 		this.s = fromFile(sFile);
-		System.out.println("S = " + Array.toString(s));
+//		System.out.println("S = " + Array.toString(s));
 		this.g = new double[t.length][s.length];
 		intialG();
 		System.out.println("END: DTW construktor");
 	}
 
-	public DTW(double[] t, double[] s, boolean itakura) {
+	public DTW(double[][] t, double[][] s, boolean itakura) {
 		super();
 		this.itakura = itakura;
 		this.t = t;
@@ -60,21 +60,30 @@ public class DTW {
 	}
 
 	private void intialG() {
-//		g[0][0] = euclideanDistance(t[0], s[0]);
+		// g[0][0] = euclideanDistance(t[0], s[0]);
 		g[0][0] = 0;
-		
+
 		for (int i = 1; i < t.length; i++)
 			g[i][0] = Double.POSITIVE_INFINITY;
-//		g[i][0] = g[i - 1][0] + euclideanDistance(t[i], s[0]);
-		
+		// g[i][0] = g[i - 1][0] + euclideanDistance(t[i], s[0]);
+
 		for (int j = 1; j < s.length; j++)
 			g[0][j] = Double.POSITIVE_INFINITY;
-//			g[0][j] = g[0][j - 1] + euclideanDistance(t[0], s[j]);
+		// g[0][j] = g[0][j - 1] + euclideanDistance(t[0], s[j]);
 
 	}
 
 	private double euclideanDistance(double a, double b) {
 		return Math.sqrt(Math.pow(Math.abs(a - b), 2));
+	}
+	
+	private double euclideanDistance(double[] a, double[] b) {
+		double sum = 0d;
+		for(int i = 0; i < a.length; i++)
+		{
+			sum += Math.pow(Math.abs(a[i] - b[i]), 2);
+		}
+		return Math.sqrt(sum);
 	}
 
 	private double min(double... values) {
@@ -90,9 +99,8 @@ public class DTW {
 	public double[][] calculateG() {
 		for (int j = 1; j < t.length; j++) {
 			for (int i = 1; i < s.length; i++) {
-				// PRZY GENEROWANIU TABLICY TEZ???
-				if(!itakuraConstraint(i, j, s.length, t.length))
-				{
+				// PRZY GENEROWANIU TABLICY
+				if (!itakuraConstraint(i, j, s.length, t.length)) {
 					g[j][i] = Double.POSITIVE_INFINITY;
 					continue;
 				}
@@ -101,8 +109,9 @@ public class DTW {
 		}
 
 		setPrecision(2);
-		System.out.println("Minimal path = " + g[t.length - 1][s.length - 1]);
+//		System.out.println("Minimal path = " + g[t.length - 1][s.length - 1]);
 		this.minimalPath = g[t.length - 1][s.length - 1];
+		// normalizacja
 		this.minimalPath = minimalPath / (t.length + s.length);
 		bestPath();
 		return g;
@@ -112,8 +121,8 @@ public class DTW {
 		int factor = (int) Math.pow(10d, (double) afterDot);
 		for (int i = 1; i < t.length; i++) {
 			for (int j = 1; j < s.length; j++) {
-				if(g[i][j] != Double.POSITIVE_INFINITY)
-				g[i][j] = Math.round(g[i][j] * factor) / (double) factor;
+				if (g[i][j] != Double.POSITIVE_INFINITY)
+					g[i][j] = Math.round(g[i][j] * factor) / (double) factor;
 			}
 		}
 
@@ -170,33 +179,35 @@ public class DTW {
 	public void plotGraph() {
 		bestPath();
 		Plot2DPanel plot = new Plot2DPanel();
-		plot.addLinePlot("The warping function", arrayToDouble(x), arrayToDouble(y));
-		
-		double[] xt = new double[t.length];
-		double[] xs = new double[s.length];
-		
-		for(int i = 0; i < s.length; i++)
-			xs[i] = i;
-		
-		for(int i = 0; i < t.length; i++)
-			xt[i] = i;
-		
+		plot.addLinePlot("The warping function", arrayListToDouble2(x), arrayListToDouble2(y));
+
+		double[] xt = new double[t.length * t[0].length];
+		double[] xs = new double[s.length * s[0].length];
+
+		for (int i = 0; i < s.length; i++)
+			for(int j = 0; j < s[i].length; j++)
+				xs[i * s[i].length + j] = i * s[i].length + j;
+
+		for (int i = 0; i < t.length; i++)
+			for(int j = 0; j < t[i].length; j++)
+				xt[i * t[i].length + j] = i * t[i].length + j;
+
 		Plot2DPanel plotS = new Plot2DPanel();
-		plotS.addLinePlot("Model signal", xt, t);
+		plotS.addLinePlot("Model signal", xt, twoDtoOneD(t));
 		Plot2DPanel plotT = new Plot2DPanel();
-		plotT.addLinePlot("analyzed signal", xs, s);
+		plotT.addLinePlot("analyzed signal", xs, twoDtoOneD(s));
 
 		// put the PlotPanel in a JFrame, as a JPanel
 		JFrame frame = new JFrame("The warping function plot");
 		frame.setContentPane(plot);
 		frame.setSize(new Dimension(800, 600));
 		frame.setVisible(true);
-		
+
 		JFrame frameS = new JFrame("Analyzed signal plot");
 		frameS.setContentPane(plotS);
 		frameS.setBounds(400, 400, 800, 600);
 		frameS.setVisible(true);
-		
+
 		JFrame frameT = new JFrame("Model signal plpot");
 		frameT.setContentPane(plotT);
 		frameT.setBounds(800, 0, 800, 600);
@@ -208,8 +219,8 @@ public class DTW {
 		return "DTW:\n t=" + Arrays.toString(t) + "\n s=" + Arrays.toString(s) + "\n" + arrayToString(g);
 	}
 
-	private double[] fromFile(String file) {
-		ArrayList<Double> array = new ArrayList<>();
+	private double[][] fromFile(String file) {
+		ArrayList<Double[]> array = new ArrayList<>();
 
 		FileInputStream fstream;
 		try {
@@ -222,19 +233,20 @@ public class DTW {
 
 			// Read File Line By Line
 			while ((strLine = br.readLine()) != null) {
-				array.add(Double.parseDouble(strLine));
+				String [] row = strLine.split(",");
+				
+				if(row.length > 1)
+					array.add(arrayToDouble(row));
+				else
+					array.add(new Double[]{Double.parseDouble(strLine)});
 			}
 
 			in.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		double[] res = new double[array.size()];
 
-		for (int i = 0; i < array.size(); i++)
-			res[i] = (double) array.get(i);
-
-		return res;
+		return arrayListToDouble(array);
 	}
 
 	public void toFile(String fileS) {
@@ -278,95 +290,146 @@ public class DTW {
 		int i = g[0].length;
 		int J = g.length;
 		int I = g[0].length;
-		x.add(i);
-		y.add(j);
-		j--;
-		i--;
 
 		double sum = 0d;
-		while ((j >= 0) || (i >= 0)) {
-			final double diagCost;
-			final double leftCost;
-			final double upCost;
-
-			if ((j > 0) && (i > 0) && itakuraConstraint(i - 1, j - 1, I, J))
-				diagCost = g[j - 1][i - 1];
-			else
-				diagCost = Double.POSITIVE_INFINITY;
-
-			if (j > 0 && itakuraConstraint(i, j - 1, I, J))
-				upCost = g[j - 1][i];
-			else
-				upCost = Double.POSITIVE_INFINITY;
-
-			if (i > 0 && itakuraConstraint(i - 1, j, I, J))
-				leftCost = g[j][i - 1];
-			else
-				leftCost = Double.POSITIVE_INFINITY;
-
-			if ((diagCost <= leftCost) && (diagCost <= upCost)) {
-				j--;
-				i--;
-			} else if ((leftCost < diagCost) && (leftCost < upCost))
-				i--;
-			else if ((upCost < diagCost) && (upCost < leftCost))
-				j--;
-//			 else if (i <= j) // leftCost==rightCost > diagCost
-//			 j--;
-			 else // leftCost==rightCost > diagCost
-			 i--;
-
+		try {
 			x.add(i);
 			y.add(j);
-			
-			
-			if(i >= 0 && j >= 0)
-			{
-//				if(!itakuraConstraint(i, j, I, J))
-//				{
-//					sum = Double.POSITIVE_INFINITY;
-//					break;
-//				}
-				sum += g[j][i];
-			}
-		}
-		
-		minimalPath2 = sum /(t.length + s.length);
-		System.out.println(sum);
-		// Collections.reverse(x);
-		// Collections.reverse(y);
+			j--;
+			i--;
 
+			while ((j >= 0) && (i >= 0)) {
+				final double diagCost;
+				final double leftCost;
+				final double upCost;
+
+				if ((j > 0) && (i > 0))// && itakuraConstraint(i - 1, j - 1, I,
+										// J))
+					diagCost = g[j - 1][i - 1];
+				else
+					diagCost = Double.POSITIVE_INFINITY;
+
+				if (j > 0)// && itakuraConstraint(i, j - 1, I, J))
+					upCost = g[j - 1][i];
+				else
+					upCost = Double.POSITIVE_INFINITY;
+
+				if (i > 0)// && itakuraConstraint(i - 1, j, I, J))
+					leftCost = g[j][i - 1];
+				else
+					leftCost = Double.POSITIVE_INFINITY;
+
+				if ((diagCost <= leftCost) && (diagCost <= upCost)) {
+					j--;
+					i--;
+				} else if ((leftCost < diagCost) && (leftCost < upCost))
+					i--;
+				else if ((upCost < diagCost) && (upCost < leftCost))
+					j--;
+				// else if (i <= j) // leftCost==rightCost > diagCost
+				// j--;
+				else
+					// leftCost==rightCost > diagCost
+					i--;
+
+				x.add(i);
+				y.add(j);
+
+				if (i >= 0 && j >= 0) {
+					sum += g[j][i];
+				}
+			}
+		} catch (ArrayIndexOutOfBoundsException a) {
+			System.out.println("j: " + j + " i: " + i);
+			a.printStackTrace();
+		}
+		minimalPath2 = sum / (t.length + s.length);
 	}
 
-
-	public static double[] arrayToDouble(ArrayList array) {
-		double[] res = new double[array.size()];
+	public static double[][] arrayListToDouble(ArrayList<Double[]> array) {
+		double[][] res = new double[array.size()][array.get(0).length];
 
 		for (int i = 0; i < array.size(); i++)
-			res[i] = (double) (int) array.get(i);
+			res[i] = arrayToDouble(array.get(i));
 
 		return res;
 	}
 	
-	public boolean itakuraConstraint(int i, int j, int I, int J)
+	public static double[] arrayListToDouble2(ArrayList<Integer> array) {
+		double[] res = new double[array.size()];
+
+		for (int i = 0; i < array.size(); i++)
+			res[i] = array.get(i);
+
+		return res;
+	}
+	
+	public static Double[] arrayToDouble(String[] array)
 	{
-		if(!this.itakura)
-			return true;
+		Double[] res = new Double[array.length];
+
+		for (int i = 0; i < array.length; i++)
+			res[i] = Double.parseDouble(array[i]);
+
+		return res;
+	}
+	
+	public static double[] arrayToDouble(Double[] array)
+	{
+		double[] res = new double[array.length];
 		
+		for (int i = 0; i < array.length; i++)
+			res[i] = array[i];
+		
+		return res;
+	}
+	
+	public static double[] twoDtoOneD(ArrayList<Double[]> array)
+	{
+		double[] res = new double[array.size() * array.get(0).length];
+		
+		for (int i = 0; i < array.size(); i++)
+			for( int j = 0; j < array.get(i).length; j++)
+			{
+				res[i * array.get(i).length + j] = array.get(i)[j];
+			}
+		
+		return res;
+	}
+	
+	public static double[] twoDtoOneD(double[][] array)
+	{
+		double[] res = new double[array.length * array[0].length];
+		
+		for (int i = 0; i < array.length; i++)
+			for( int j = 0; j < array[i].length; j++)
+			{
+				res[i * array[i].length + j] = array[i][j];
+			}
+		
+		return res;
+	}
+
+	public boolean itakuraConstraint(int i, int j, int I, int J) {
+		if (!this.itakura)
+			return true;
+
 		final int a = 2 * (i - I) + J;
 		final int b = (int) (0.5 * (i - 1) + 1);
 		final int c = 2 * (i - 1) + 1;
 		final int d = (int) (0.5 * (i - I) + J);
-		
+
 		return j >= a && j >= b && j <= c && j <= d;
 	}
+
 	public ArrayList<Integer> getX() {
 		return x;
 	}
+
 	public ArrayList<Integer> getY() {
 		return y;
 	}
-	
+
 	public double[][] getG() {
 		return g;
 	}

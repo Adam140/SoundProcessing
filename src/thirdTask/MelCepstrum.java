@@ -12,7 +12,6 @@ import firstTask.WindowFunction;
 
 public class MelCepstrum {
 	
-	private String filePath;
 	private double ck;
 	private double lk;
 	private double rk;
@@ -32,18 +31,22 @@ public class MelCepstrum {
 	 * @return
 	 * @throws Exception
 	 */
-	public double[] getMelCepstrum(double[][] signal,int size,boolean sequence, int fs, int blocks) throws Exception
+	public double[][] getMelCepstrum(double[][] signal,int size,boolean sequence, int fs, int blocks) throws Exception
 	{
 
         //WaveDecoder decoder = new WaveDecoder( new FileInputStream( this.filePath ) );
 		int framerate = fs;
-		long nframe = signal.length;
+		int nframe = signal.length;
+		if(signal[nframe - 1].length != size)
+			nframe--;
 		System.out.println("Framerate:" + framerate);
 		System.out.println("Frames:" + nframe);
-		int K = 30;
-		int D = 100;
+		final int K = 30;
+		final int D = 100;
+		final int F = 12;
 		this.setParameters(K, D);
-		double[] co = new double[(int) nframe];
+		
+		double[][] co = new double[(int) nframe][F];
  
         
         int N = size;
@@ -53,21 +56,15 @@ public class MelCepstrum {
         double[] spectrum = new double[N];
 
         double[] temp = new double[N];
-        double[] cepstrum = new double[N];
-        
-        
         Complex[] s = new Complex[N];
-        Vector< double[] > vec = new Vector< double[]>();
         // 0 - freq , 1- position
-        int zero_index = 0;
-        double right_max = 99999;
-        
         //while( decoder.readSamples( samples ) > 0 )
         for(int f=0;f<nframe;f++)
         {
         		double[] samples = signal[f];
         		if(samples.length != N)
         			break;
+        		
         		samples = WindowFunction.Hamming(samples);
                 for(int i=0;i<N;i++)
                 {
@@ -80,7 +77,7 @@ public class MelCepstrum {
                 //s = FFT.ifft1D(s);
 
                 //spectrum = WindowFunction.Triangular(spectrum);
-                double c;
+                double[] c;
                 for(int i=0;i<N;i++)
                 {
                 	//spectrum[i] = toMels(s[i].getReal());
@@ -89,7 +86,7 @@ public class MelCepstrum {
                 	//powerSpectrum[i] = (1/N) * Math.pow(Math.abs(spectrum[i]),2);
                 	//s[i] = new Complex(spectrum[i],0);
                 }
-            	c = cosin(spectrum, (int)framerate, K, D, 5);
+            	c = functionC(spectrum, (int)framerate, K, D, F);
             	co[f] = c;
   
         }
@@ -206,20 +203,29 @@ public class MelCepstrum {
 		return Math.pow( s2 ,2);
 	}
 	
-	public double cosin(double[] signal, int fs, int K, int d,int F )
+	/**
+	 * @param signal
+	 * @param fs
+	 * @param K - const
+	 * @param d - const
+	 * @param F - const -the number of the MFCC coefficients
+	 * @return
+	 */
+	public double[] functionC(double[] signal, int fs, int K, int d,int F )
 	{
 		double[] c = new double[F];
-		for(int n = 0; n < 1; n++)
+		for(int n = 1; n <= c.length; n++)
 		{
 			double result = 0;
 			for(int k = 0; k < K - 1; k++)
 			{
 				double s_prim_value = s_prim(signal,fs,k,d);
-				result += s_prim_value * Math.cos(Math.toRadians( 2 * Math.PI * ( ( ( 2 * k + 1 ) * n ) / 4 * K) ));
+				result += s_prim_value * Math.cos(Math.toRadians( 2 * Math.PI * ( ( 2 * k + 1 ) * n ) / 4 * K ));
 			}
-			return result;
+			c[n - 1] = result;
 		}
-		return 0;
+//		System.out.println(Arrays.toString(c));
+		return c;
 	}
 	
 	public double toMels(double f)
