@@ -1,5 +1,11 @@
 package secondTask;
-
+// Copyright 2013 Christian d'Heureuse, Inventec Informatik AG, Zurich, Switzerland
+// www.source-code.biz, www.inventec.ch/chdh
+//
+// License: EPL, Eclipse Public License, V1.0 or later, http://www.eclipse.org/legal
+//
+// Please contact the author if you need another license.
+// This module is provided "as is", without warranties of any kind.
 import java.util.Random;
 
 /**
